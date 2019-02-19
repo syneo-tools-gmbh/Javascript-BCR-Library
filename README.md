@@ -10,14 +10,59 @@ The library can be used offline, no dependencies online are required.
 # Installation
 Copy the content of the repository and reference bcr via `script` tag in your HTML project
   
-  `<script type="text/javascript" src="bcr.js"></script>`
+  `<script type="text/javascript" src="src/bcr.js"></script>`
 
-## JS Libraries used ##
+# Sample
+The sample application in the respository must be executed on a web server.
+
+# Docs
+
+## Methods
+### Init method
+bcr.initialize();
+
+### Recognize business card 
+bcr.recognizeBcr(base64image, displayResultCallback, displayProgressCallback);
+
+## Returned value
+
+The displayProgressCallback(data) returns a json:
+
+{
+  Company: "",
+  Email: "",
+  Address: {
+      StreetAddress: "",
+      ZipCode: "",
+      Country: "",
+      Text: "",
+      City: ""
+  },
+  Web: "",
+  Phone: "",
+  Text: "",
+  Fax: "",
+  Job: "",
+  Mobile: "",
+  Name: {
+      Text: "",
+      Surname: "",
+      Name: {
+          FirstName: "",
+          Text: "",
+          MiddleName: "",
+          ExtraName: ""
+      }
+  }
+}
+
+
+## JS Libraries used 
 
 * [Tesseract.JS](https://github.com/naptha/tesseract.js) - 1.0.14<br/>
 Tesseract.js wraps an emscripten port of the Tesseract OCR Engine.
 
-## Required Cordova Plugins (in case of cordova project) ##
+## Required Cordova Plugins (in case of cordova project) 
 
 * [cordova-plugin-ionic-webview](https://github.com/ionic-team/cordova-plugin-ionic-webview/) - 3.1.2<br/>
 A Web View plugin for Cordova, focused on providing the highest performance experience for Ionic apps (but can be used with any Cordova app).
