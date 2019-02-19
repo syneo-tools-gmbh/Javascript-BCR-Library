@@ -13,7 +13,7 @@ Copy the content of the repository and reference bcr via `script` tag in your HT
   Local copy: <script type="text/javascript" src="bcr.js"></script>
 
 
-## JS Libraries ##
+## JS Libraries used ##
 
 * [Tesseract.JS](https://github.com/naptha/tesseract.js) - 1.0.14<br/>
 Tesseract.js wraps an emscripten port of the Tesseract OCR Engine.
