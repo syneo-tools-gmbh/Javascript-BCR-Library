@@ -8,7 +8,7 @@ The library is written in Javascript and can be used in any Javascript project (
 The library can be used offline, no online dependencies are required.
 
 # Installation
-Copy the content of the repository and reference bcr via `script` tag in your HTML project
+Copy the content of the repository and reference bcr via `script` tag in your HTML project:
   
   `<script type="text/javascript" src="src/bcr.js"></script>`
 
@@ -19,10 +19,10 @@ The sample application in the repository must be executed on a web server.
 
 ## Methods
 ### Init method
-bcr.initialize();
+``bcr.initialize();``
 
 ### Recognize business card 
-bcr.recognizeBcr(base64image, displayResultCallback, displayProgressCallback);
+``bcr.recognizeBcr(base64image, displayResultCallback, displayProgressCallback);``
 
 ## Returned values
 
