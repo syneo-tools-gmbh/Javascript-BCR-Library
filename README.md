@@ -1,10 +1,10 @@
-# Cordova BCR Library 1.0.2
+# Javascript BCR Library 0.0.4
 # Authors: Gaspare Ferraro, Renzo Sala, Simone Ponte, Paolo Macco
 
 ## Librerie JS ##
 
 * [Tesseract.JS](https://github.com/naptha/tesseract.js) - 1.0.14<br/>
-Emscripten porting of OCR Library Tesseract and browserified version of web worker to make it working
+Emscripten porting of OCR Library Tesseract 
 
 ### Required Cordova Plugins (in case of cordova distribution) ###
 
