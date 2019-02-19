@@ -1,7 +1,7 @@
 # Javascript BCR Library 0.0.4
 # Authors: Gaspare Ferraro, Renzo Sala, Simone Ponte, Paolo Macco
 
-## Librerie JS ##
+## Libraries JS ##
 
 * [Tesseract.JS](https://github.com/naptha/tesseract.js) - 1.0.14<br/>
 Emscripten porting of OCR Library Tesseract 
