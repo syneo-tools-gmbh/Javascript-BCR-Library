@@ -10,8 +10,7 @@ The library can be used offline, no dependencies online are required.
 # Installation
 Copy the content of the repository and reference bcr via `script` tag in your HTML project
   
-  Local copy: <script type="text/javascript" src="bcr.js"></script>
-
+  `<script type="text/javascript" src="bcr.js"></script>`
 
 ## JS Libraries used ##
 
