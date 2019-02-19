@@ -23,6 +23,6 @@ Tesseract.js wraps an emscripten port of the Tesseract OCR Engine.
 * [cordova-plugin-ionic-webview](https://github.com/ionic-team/cordova-plugin-ionic-webview/) - 3.1.2<br/>
 A Web View plugin for Cordova, focused on providing the highest performance experience for Ionic apps (but can be used with any Cordova app).
 
-###Contribute!###
+### Contribution ###
 
 The current status of the library is alpha. Looking forward for your contribution to make the first release.
