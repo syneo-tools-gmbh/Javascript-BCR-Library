@@ -15,7 +15,7 @@ Copy the content of the repository and reference bcr via `script` tag in your HT
 # Sample
 The sample application in the respository must be executed on a web server.
 
-# Docs
+# Reference
 
 ## Methods
 ### Init method
@@ -26,7 +26,7 @@ bcr.recognizeBcr(base64image, displayResultCallback, displayProgressCallback);
 
 ## Returned value
 
-The displayProgressCallback(data) returns a json:
+The displayProgressCallback(data) returns a json structured as following:
 
 {
   Company: "",
