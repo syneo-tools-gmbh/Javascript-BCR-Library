@@ -1,14 +1,14 @@
 # [Javascript BCR Library](https://github.com/syneo-tools-gmbh/Javascript-BCR-Library) 0.0.4
 ## Authors: Gaspare Ferraro, Renzo Sala, Simone Ponte, Paolo Macco
 
-BCR Library is a javascript library, using the OCR engine Tesseract.JS, that extract name, company name, job, address, phone numbers, email and web address out of a picture of a business card.
+BCR Library is a javascript library, using the OCR engine Tesseract.JS, that extracts name, company name, job, address, phone numbers, email and web address out of a business card picture.
 
-The library is written in Javascript and can be used in any Javascript project (included in projects using frameworks for hybrid mobile applications, like Apache Cordova or Ionic).
+The library is written in Javascript and can be used in any Javascript project (included in projects using frameworks for hybrid mobile applications, like Apache Cordova, Phonegap or Ionic).
 
 The library can be used offline, no online dependencies are required.
 
 # Installation
-Copy the content of the repository and reference bcr via the `script` tag in your HTML project:
+Copy the content of the repository and reference bcr via `script` tag in your HTML project:
   
   `<script type="text/javascript" src="src/bcr.js"></script>`
 
