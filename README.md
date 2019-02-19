@@ -5,7 +5,7 @@ BCR Library is a javascript library, using the OCR engine Tesseract.JS, that ext
 
 The library is written in Javascript and can be used in any Javascript project (included in projects using frameworks for hybrid mobile applications, like Apache Cordova or Ionic).
 
-The library can be used offline, no dependencies online are required.
+The library can be used offline, no online dependencies are required.
 
 # Installation
 Copy the content of the repository and reference bcr via `script` tag in your HTML project
@@ -27,7 +27,7 @@ bcr.recognizeBcr(base64image, displayResultCallback, displayProgressCallback);
 ## Returned value
 
 The displayProgressCallback(data) returns a json structured as following:
-
+```
 {
   Company: "",
   Email: "",
@@ -55,12 +55,12 @@ The displayProgressCallback(data) returns a json structured as following:
       }
   }
 }
-
+```
 
 ## JS Libraries used 
 
 * [Tesseract.JS](https://github.com/naptha/tesseract.js) - 1.0.14<br/>
-Tesseract.js wraps an emscripten port of the Tesseract OCR Engine.
+Tesseract.js wraps an emascript port of the Tesseract OCR Engine.
 
 ## Required Cordova Plugins (in case of cordova project) 
 
