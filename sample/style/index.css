@@ -1,0 +1,108 @@
+﻿html, div {
+    padding: 0;
+    margin: 0;
+}
+body {
+    background: #eee;
+    font-family: Arial, serif;
+    font-size: 18px;
+    max-width: 926px;
+    margin: auto;
+    margin-top: 0;
+    padding: 0;
+}
+
+#header {
+    background: #222;
+    width: calc(100% - 16px);
+    color: #fff;
+    font-size: 32px;
+    font-weight: bold;
+    padding: 8px;
+    border-radius: 0 0 3px 3px;
+    margin: 0;
+}
+
+.section {
+    width: calc(100% - 18px);
+    max-width: 926px;
+    min-width: 128px;
+    border: 1px black solid;
+    padding: 8px;
+    background: #ccc;
+    border-radius: 3px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.title {
+    border-bottom: 1px black solid;
+    font-size: 24px;
+    margin-bottom: 16px;
+}
+
+#tresult {
+    max-width: 640px;
+    width: 80%;
+    margin: auto;
+    
+}
+#steps, #result {
+    display: none;
+}
+
+
+#tresult td {
+    border-bottom: 1px black solid;
+}
+
+.move {
+    width: 86px;
+    height: 16px;
+    background: #eee;
+    border: 1px black solid;
+    border-radius: 3px;
+    padding: 6px 6px 8px;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.center {
+    width: 100%;
+    text-align: center;
+}
+
+.field {
+    font-weight: bold;
+    width: 128px !important;
+    margin-right: 8px;
+}
+
+.field .fas {
+    width: 16px !important;
+    text-align: right;
+}
+
+.value {
+    max-width: 512px;
+}
+
+.img {
+    display: inline-block;
+    padding: 0;
+    margin: 1px;
+    width: calc(100% / 3);
+}
+.img-original {
+    padding: 0;
+    margin-bottom: 10px;
+    width: 100%;
+}
+.big-button {
+    width: 100%;
+    background-color: red;
+    border: 1px solid black;
+}
+#inp {
+    display: none;
+}
