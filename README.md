@@ -1,9 +1,9 @@
 # [Javascript BCR Library](https://github.com/syneo-tools-gmbh/Javascript-BCR-Library) 0.0.4
 ## Authors: Gaspare Ferraro, Renzo Sala, Simone Ponte, Paolo Macco
 
-BCR Library is a javascript library, using the OCR engine Tesseract.JS, that extract name, company name, job, address, phone numbers, email and web address out of a picture of a business card.
+BCR Library is a javascript library, using the OCR engine Tesseract.JS, that extracts name, company name, job, address, phone numbers, email and web address out of a business card picture.
 
-The library is written in Javascript and can be used in any Javascript project (included in projects using frameworks for hybrid mobile applications, like Apache Cordova or Ionic).
+The library is written in Javascript and can be used in any Javascript project (included in projects using frameworks for hybrid mobile applications, like Apache Cordova, Phonegap or Ionic).
 
 The library can be used offline, no online dependencies are required.
 
@@ -13,7 +13,7 @@ Copy the content of the repository and reference bcr via `script` tag in your HT
   `<script type="text/javascript" src="src/bcr.js"></script>`
 
 # Sample
-The sample application in the respository must be executed on a web server.
+The sample application in the repository must be executed on a web server.
 
 # Reference
 
@@ -24,9 +24,9 @@ bcr.initialize();
 ### Recognize business card 
 bcr.recognizeBcr(base64image, displayResultCallback, displayProgressCallback);
 
-## Returned value
+## Returned values
 
-The displayProgressCallback(data) returns a json structured as following:
+The `displayResultCallback(data)` returns a json structured as following:
 ```
 {
   Company: "",
@@ -56,6 +56,8 @@ The displayProgressCallback(data) returns a json structured as following:
   }
 }
 ```
+The `displayProgressCallback(data)` returns a json which can be used to track the library progress.
+
 
 ## JS Libraries used 
 
