@@ -86,7 +86,7 @@ JSON object in the format:
 ## JS Libraries used 
 
 * [Tesseract.JS](https://github.com/naptha/tesseract.js) - 1.0.14<br/>
-Tesseract.js wraps an ecmascript port of the Tesseract OCR Engine.
+Tesseract.js wraps an [emscripten](https://github.com/kripken/emscripten) [port](https://github.com/naptha/tesseract.js-core) of the [Tesseract](https://github.com/tesseract-ocr/tesseract) [OCR](https://en.wikipedia.org/wiki/Optical_character_recognition) Engine.
 
 ## Required Cordova Plugins (in case of cordova project) 
 
