@@ -16,6 +16,7 @@ Copy the content of the repository and reference bcr via the `script` tag in you
 The sample application in the repository must be executed on a web server.
 
 If you have python it's enough to run `python -m http.server 8000` in the project folder.
+If you use cordova, you can add the `browser` platform and run it (it works on other platforms like Android or iOS too).
 
 # Reference
 
