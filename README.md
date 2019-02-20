@@ -90,7 +90,7 @@ Tesseract.js wraps an [emscripten](https://github.com/kripken/emscripten) [port]
 
 ## Required Cordova Plugins (in case of cordova project) 
 
-* [cordova-plugin-ionic-webview](https://github.com/ionic-team/cordova-plugin-ionic-webview/) - 3.1.2<br/>
+* [cordova-plugin-ionic-webview](https://github.com/ionic-team/cordova-plugin-ionic-webview/) - 4.0.0<br/>
 A Web View plugin for Cordova, focused on providing the highest performance experience for Ionic apps (but can be used with any Cordova app).
 
 ### Contribution ###
