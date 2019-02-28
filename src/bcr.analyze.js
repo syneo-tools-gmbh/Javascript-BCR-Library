@@ -27,6 +27,8 @@ const MIN_LINE_LENGHT = 4;
 const THRESHOLD_HIGH = 0.8;
 const THRESHOLD_LOW = 0.2;
 const TEL_MIN_LENGTH = 6;
+const DISTANCE_TOLERANCE = 4;
+const MIN_SCORE = 0.05;
 
 // define result template
 var result = {};
@@ -212,12 +214,15 @@ function breakLines(ocr) {
             len += w[j].text.length;
         }
         dist /= len;
-        dist *= 5;   // tollerance
+        dist *= DISTANCE_TOLERANCE;   // tolerance
 
         // Break lines
         var curLines = [];
         for (j = 0; j <= w.length; j++) {
-            if (j !== w.length && (curLines.length === 0 || (w[j].bbox.x0 - curLines[curLines.length - 1].bbox.x1) < dist)) {
+
+            let skipCondition = j !== w.length && w[j].text.length > 0 && w[j].text.trim().endsWith(":");
+
+            if (j !== w.length && (skipCondition || curLines.length === 0 || (w[j].bbox.x0 - curLines[curLines.length - 1].bbox.x1) < dist)) {
                 // Add word to current line
                 curLines.push(w[j]);
             }
@@ -769,14 +774,14 @@ function scoreJob(ocr) {
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.name > 0) {
             if (i + 1 < ocr.BCR.blocks.length)
-                ocr.BCR.blocks[i + 1].fields.job = 0.4;
+                ocr.BCR.blocks[i + 1].fields.job = 0.25;
         }
     }
 
     // regex + font (max contribute: 0.3)
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         let matches = checkRE(regex_job, ocr.BCR.blocks[i].text);
-        if (matches.length > 0) ocr.BCR.blocks[i].fields.job += 0.4;
+        if (matches.length > 0) ocr.BCR.blocks[i].fields.job += 0.55;
 
         // contribute max 0.2, assigned by font criteria
         ocr.BCR.blocks[i].fields.job += getFontBiggerRatio(ocr.BCR.averageFontSize, ocr.BCR.blocks[i].fontSize) * 0.2;
@@ -930,14 +935,16 @@ function assignResults(ocr) {
     // sort arrays and assign result
     if (web.length > 0) {
         var web_found = web.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
-        result.fields.Web = web_found.text;
-        ocr.BCR.blocks[web_found.block].used = true;
+        if (web_found.confidence > MIN_SCORE) {
+            result.fields.Web = web_found.text;
+            ocr.BCR.blocks[web_found.block].used = true;
+        }
     }
     var k;
     if (email.length > 0) {
         email.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1);
         for (k = 0; k < email.length; k++) {
-            if (!ocr.BCR.blocks[email[k].block].used) {
+            if (!ocr.BCR.blocks[email[k].block].used && email[k].confidence > MIN_SCORE) {
                 result.fields.Email = email[k].text;
                 ocr.BCR.blocks[email[k].block].used = true;
                 break;
@@ -947,7 +954,7 @@ function assignResults(ocr) {
     if (phone.length > 0) {
         phone.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1);
         for (k = 0; k < phone.length; k++) {
-            if (!ocr.BCR.blocks[phone[k].block].used) {
+            if (!ocr.BCR.blocks[phone[k].block].used && phone[k].confidence > MIN_SCORE) {
                 result.fields.Phone = phone[k].text;
                 ocr.BCR.blocks[phone[k].block].used = true;
                 break;
@@ -957,7 +964,7 @@ function assignResults(ocr) {
     if (fax.length > 0) {
         fax.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < fax.length; k++) {
-            if (!ocr.BCR.blocks[fax[k].block].used) {
+            if (!ocr.BCR.blocks[fax[k].block].used && fax[k].confidence > MIN_SCORE) {
                 result.fields.Fax = fax[k].text;
                 ocr.BCR.blocks[fax[k].block].used = true;
                 break;
@@ -967,7 +974,7 @@ function assignResults(ocr) {
     if (mobile.length > 0) {
         mobile.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < mobile.length; k++) {
-            if (!ocr.BCR.blocks[mobile[k].block].used) {
+            if (!ocr.BCR.blocks[mobile[k].block].used && mobile[k].confidence > MIN_SCORE) {
                 result.fields.Mobile = mobile[k].text;
                 ocr.BCR.blocks[mobile[k].block].used = true;
                 break;
@@ -977,7 +984,7 @@ function assignResults(ocr) {
     if (company.length > 0) {
         company.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < company.length; k++) {
-            if (!ocr.BCR.blocks[company[k].block].used) {
+            if (!ocr.BCR.blocks[company[k].block].used && company[k].confidence > MIN_SCORE) {
                 result.fields.Company = company[k].text;
                 ocr.BCR.blocks[company[k].block].used = true;
                 break;
@@ -987,7 +994,7 @@ function assignResults(ocr) {
     if (name.length > 0) {
         name.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < name.length; k++) {
-            if (!ocr.BCR.blocks[name[k].block].used) {
+            if (!ocr.BCR.blocks[name[k].block].used && name[k].confidence > MIN_SCORE) {
                 result.fields.Name.Text = name[k].text;
                 ocr.BCR.blocks[name[k].block].used = true;
                 break;
@@ -997,7 +1004,7 @@ function assignResults(ocr) {
     if (job.length > 0) {
         job.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < job.length; k++) {
-            if (!ocr.BCR.blocks[job[k].block].used) {
+            if (!ocr.BCR.blocks[job[k].block].used && job[k].confidence > MIN_SCORE) {
                 result.fields.Job = job[k].text;
                 ocr.BCR.blocks[job[k].block].used = true;
                 break;
@@ -1007,7 +1014,7 @@ function assignResults(ocr) {
     if (address.length > 0) {
         address.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < address.length; k++) {
-            if (!ocr.BCR.blocks[address[k].block].used) {
+            if (!ocr.BCR.blocks[address[k].block].used && address[k].confidence > MIN_SCORE) {
 
                 // assign first found not empty
                 if (address[k].street.length > 0 && result.fields.Address.StreetAddress.length === 0) {
