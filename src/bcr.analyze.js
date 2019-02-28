@@ -1,11 +1,25 @@
-/*
- 
-Cordova BCR Library 0.0.4
-Authors: Gaspare Ferraro, Renzo Sala
-Contributors: Simone Ponte, Paolo Macco
-Filename: bcr.analyzee.js
-Description: core module
-
+/**
+* Cordova BCR Library 0.0.4, build 74
+* Authors: Gaspare Ferraro, Renzo Sala
+* Contributors: Simone Ponte, Paolo Macco
+* Filename: bcr.analyze.js
+* Description: core module
+*
+* @license
+* Copyright 2019 Syneo Tools GmbH. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
 */
 
 // CONSTS
@@ -25,8 +39,8 @@ var typos = [
     { regex: /[A-Za-z]\|[A-Za-z]/g, find: "|", replace: "l" }, // pipe for l
     { regex: /[A-Za-z]\|0[A-Za-z]/g, find: "|0", replace: "lo" }, // 0 instead of o + pipe and words
     { regex: /[A-Za-z]0\|[A-Za-z]/g, find: "0|", replace: "ol" }, // 0 instead of o + pipe and words
-    { regex: /[A-Za-z]\u00A9[A-Za-z]/g, find: /\u00A9/g, replace: "@" }, // @ instead of ï¿½
-    { regex: /[A-Za-z]\u00AE[A-Za-z]/g, find: /\u00AE/g, replace: "@" }, // @ instead of ï¿½
+    { regex: /[A-Za-z]\u00A9[A-Za-z]/g, find: /\u00A9/g, replace: "@" }, // @ instead of ©
+    { regex: /[A-Za-z]\u00AE[A-Za-z]/g, find: /\u00AE/g, replace: "@" }, // @ instead of ©
     { regex: /.eh/g, find: ".eh", replace: ".ch" }, // .ch in domains, usually got wrong
     { regex: /\s\|\s/g, find: "\s|\s", replace: "" }, // pipes on the fly (got from graphic elements)
     { regex: /\u2014/g, find: /\u2014/g, replace: "-" }, // never use long -
@@ -159,7 +173,7 @@ function analyzePipeline(ocr) {
     ocr = scoreAddress(ocr);
 
     // Step 10: Assign result
-    assignResults(ocr);
+    assignResults(ocr)
 
     // return result
     return result;
@@ -365,12 +379,12 @@ function bcrBuildBlocks(ocr) {
 // clean text
 function cleanText(ocr) {
     // foreach word, make correction (and propagate to text and to lines)
-    for (let i = 0; i < ocr.words.length; i++) {
-        for (let it = 0; it < typos.length; it++) {
+    for (i = 0; i < ocr.words.length; i++) {
+        for (it = 0; it < typos.length; it++) {
             // replaces all the typos
             var backupWord = ocr.words[i].text;
 
-            let matches = checkRE(typos[it].regex, ocr.words[i].text);
+            matches = checkRE(typos[it].regex, ocr.words[i].text);
             if (matches.length > 0) {
 
                 // fix word
@@ -428,7 +442,11 @@ function bcrGetWordsBold(words) {
     for (let i = 0; i < words.length; i++) {
         if (words[i].is_bold) fontBold++;
     }
-    return words.length/2<fontBold;
+    if (words.length / 2 < fontBold ) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 // check regexp
@@ -490,8 +508,8 @@ function extractCity(text) {
 
     // extract city or empty
     let txt = text.toLowerCase().split(" ");
-    for (let j = 0; j < cities.length; j++) {
-        for (let k = 0; k < txt.length; k++) {
+    for (j = 0; j < cities.length; j++) {
+        for (k = 0; k < txt.length; k++) {
             if (txt[k] === cities[j][0]) {
                 if (cities[j][0] / txt[k] < THRESHOLD_HIGH) continue;
                 return txt[k];
@@ -506,8 +524,8 @@ function extractCity(text) {
 function extractCountry(text) {
 
     let txt = text.toLowerCase().split(" ");
-    for (let j = 0; j < countryDS.length; j++) {
-        for (let k = 0; k < txt.length; k++) {
+    for (j = 0; j < countryDS.length; j++) {
+        for (k = 0; k < txt.length; k++) {
             if (txt[k].indexOf(countryDS[j]) !== -1) {
                 if (countryDS[j] / txt[k] < THRESHOLD_HIGH) continue;
                 return txt[k];
@@ -546,7 +564,7 @@ function extractZip(text) {
 function extractStreet(text) {
 
     let txt = text.toLowerCase();
-    for (let j = 0; j < streetsDS.length; j++) {
+    for (j = 0; j < streetsDS.length; j++) {
         let re = streetsDS[j];
 
         if (checkRE(re, txt).length > 0) {
@@ -663,6 +681,7 @@ function scoreCompany(ocr) {
                     keywords[email] = email;
             }
         }
+
     }
 
     // cycle on blocks
@@ -732,9 +751,9 @@ function scoreName(ocr) {
     // contribute max 0.3, assigned by dataset
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.email === 0) {
-            let line = ocr.BCR.blocks[i].text.toLowerCase();
-            let splitted = line.toLowerCase().split(" ");
-            for (let j = 0; j < splitted.length; j++) {
+            line = ocr.BCR.blocks[i].text.toLowerCase();
+            splitted = line.toLowerCase().split(" ");
+            for (j = 0; j < splitted.length; j++) {
                 if (namesDS.indexOf(splitted[j]) !== -1) {
                     ocr.BCR.blocks[i].fields.name += 0.3;
                     break;
@@ -742,7 +761,8 @@ function scoreName(ocr) {
             }
         }
     }
-    
+
+
     return ocr;
 }
 
@@ -774,10 +794,10 @@ function scoreAddress(ocr) {
 
     // score 0.2 for country
     // find country in dataset
-    for (let i = 0; i < ocr.BCR.blocks.length; i++) {
+    for (i = 0; i < ocr.BCR.blocks.length; i++) {
         let txt = ocr.BCR.blocks[i].text.toLowerCase().split(" ");
-        for (let j = 0; j < countryDS.length; j++) {
-            for (let k = 0; k < txt.length; k++) {
+        for (j = 0; j < countryDS.length; j++) {
+            for (k = 0; k < txt.length; k++) {
                 if (txt[k].indexOf(countryDS[j]) !== -1) {
                     if (countryDS[j] / txt[k] < THRESHOLD_HIGH) continue;
                     ocr.BCR.blocks[i].fields.address += 0.2;
@@ -790,8 +810,8 @@ function scoreAddress(ocr) {
     // find city in dataset 
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         let txt = ocr.BCR.blocks[i].text.toLowerCase().split(" ");
-        for (let j = 0; j < cities.length; j++) {
-            for (let k = 0; k < txt.length; k++) {
+        for (j = 0; j < cities.length; j++) {
+            for (k = 0; k < txt.length; k++) {
                 if (txt[k] === cities[j][0]) {
                     if (cities[j][0] / txt[k] < THRESHOLD_HIGH) continue;
                     ocr.BCR.blocks[i].fields.address += 0.2;
@@ -802,9 +822,9 @@ function scoreAddress(ocr) {
 
     // score 0.2 for address pattern
     // Street address matching typical names
-    for (let i = 0; i < ocr.BCR.blocks.length; i++) {
+    for (i = 0; i < ocr.BCR.blocks.length; i++) {
         let txt = ocr.BCR.blocks[i].text.toLowerCase();
-        for (let j = 0; j < streetsDS.length; j++) {
+        for (j = 0; j < streetsDS.length; j++) {
             let re = streetsDS[j];
 
             // regex evaluation
@@ -816,7 +836,7 @@ function scoreAddress(ocr) {
 
     // score 0.2 for zip
     // Find zip code (in already used address scored)
-    for (let i = 0; i < ocr.BCR.blocks.length; i++) {
+    for (i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.address > 0) {
             var numbers = ocr.BCR.blocks[i].text.replace(/[^0-9]/g, " ").trim().split(" ");
 
@@ -840,7 +860,7 @@ function scoreAddress(ocr) {
     }
 
     // score 0.1 for multiple assignment
-    for (let i = 0; i < ocr.BCR.blocks.length; i++) {
+    for (i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.address > 2) ocr.BCR.blocks[i].fields.address += 0.1;
     }
 
@@ -917,7 +937,6 @@ function assignResults(ocr) {
         result.fields.Web = web_found.text;
         ocr.BCR.blocks[web_found.block].used = true;
     }
-    var k;
     if (email.length > 0) {
         email.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1);
         for (k = 0; k < email.length; k++) {
@@ -1012,7 +1031,7 @@ function assignResults(ocr) {
             }
         }
 
-        if (result.fields.Address.StreetAddress !== "") result.fields.Address.Text += ", " + titleCase(result.fields.Address.StreetAddress);
+        if (result.fields.Address.StreetAddress!=="") result.fields.Address.Text += ", " + titleCase(result.fields.Address.StreetAddress);
         if (result.fields.Address.City !== "") result.fields.Address.Text += ", " + titleCase(result.fields.Address.City);
         if (result.fields.Address.ZipCode !== "") result.fields.Address.Text += ", " + result.fields.Address.ZipCode;
         if (result.fields.Address.Country !== "") result.fields.Address.Text += ", " + titleCase(result.fields.Address.Country);

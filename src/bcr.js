@@ -1,91 +1,106 @@
-/*
- 
- Cordova BCR Library 0.0.4
- Authors: Gaspare Ferraro, Renzo Sala
- Contributors: Simone Ponte, Paolo Macco
- Filename: bcr.js
- Description: main library
- 
- */
+/**
+* Cordova BCR Library 0.0.4, build 74
+* Authors: Gaspare Ferraro, Renzo Sala
+* Contributors: Simone Ponte, Paolo Macco
+* Filename: bcr.js
+* Description: main library
+*
+* @license
+* Copyright 2019 Syneo Tools GmbH. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 
-// bcr class
-var bcr = (function () {
-	
-	// ************************************************************
-	// private methods
-	// ************************************************************
-	var maxwidth = 2160;
-	var maxheight = 1440;
-	
-	// get current script path
-	var currentScriptPath = function () {
-		
-		var scripts = document.querySelectorAll('script[src]');
-		var currentScript = scripts[scripts.length-1].src;
-		var currentScriptChunks = currentScript.split('/');
-		var currentScriptFile = currentScriptChunks[currentScriptChunks.length-1];
-		
-		return currentScript.replace(currentScriptFile, '');
-	};
-	
-	// load files
-	var loadJs = function (filename, callback) {
-		var scriptTag = document.createElement('script');
-		scriptTag.src = filename;
-		
-		scriptTag.onload = callback;
-		scriptTag.onreadystatechange = callback;
-		
-		document.body.appendChild(scriptTag);
-	};
-	
-	var executionPath = currentScriptPath();
-	var WORKER_PATH = executionPath+'tesseract/worker.js';
-	var TESSERACT_PATH = executionPath+'tesseract/tesseract-core.js';
-	var LANG_PATH = executionPath+'data/';
-	
-	// ************************************************************
-	// public methods and properties
-	// ************************************************************
-	return {
-		
-		// init function
-		initialize: function () {
-			
-			// include js
-			loadJs(executionPath+"bcr.cleaning.js", function () {
-				loadJs(executionPath+"bcr.analyze.js", function () {
-					loadJs(executionPath+"bcr.names.js", function () {
-						loadJs(executionPath+"bcr.cities.js", function () {
-							loadJs(executionPath+"bcr.streets.js", function () {
-								loadJs(executionPath+"bcr.utility.js", function () {
-									loadJs(executionPath+"tesseract/tesseract.js", function () {
-										window.Tesseract = Tesseract.create({
-											workerPath: WORKER_PATH,
-											langPath: LANG_PATH,
-											corePath: TESSERACT_PATH
-										});
-									});
-								});
-							});
-						});
-					});
-				});
-			});
-		},
-		
-		// main method for recognizing
-		recognizeBcr: function (b64image, callback, progress) {
-			loadAndProcess(b64image, callback, progress);
-		},
-		
-		MAXWIDTH: function () {
-			return maxwidth;
-		},
-		
-		MAXHEIGHT: function () {
-			return maxheight;
-		}
-		
-	};
+// bcr main class
+var bcr = (function() {
+
+    // ************************************************************
+    // private methods
+    // ************************************************************
+    var maxwidth = 2160;
+    var maxheight = 1440;
+
+    // get current script path
+    var currentScriptPath = function () {
+
+        var scripts = document.querySelectorAll('script[src]');
+        var currentScript = scripts[scripts.length - 1].src;
+        var currentScriptChunks = currentScript.split('/');
+        var currentScriptFile = currentScriptChunks[currentScriptChunks.length - 1];
+
+        return currentScript.replace(currentScriptFile, '');
+    };
+
+    // load files
+    var loadJs = function (filename, callback) {
+        var scriptTag = document.createElement('script');
+        scriptTag.src = filename;
+
+        scriptTag.onload = callback;
+        scriptTag.onreadystatechange = callback;
+
+        document.body.appendChild(scriptTag);
+    };
+
+    var executionPath = currentScriptPath();
+    var WORKER_PATH = executionPath + 'tesseract/worker.js';
+    var TESSERACT_PATH = executionPath + 'tesseract/tesseract-core.js';
+    var LANG_PATH = executionPath + 'data/';
+
+    // ************************************************************
+    // public methods and properties
+    // ************************************************************
+    return {
+
+        // init function
+        initialize: function () {
+
+
+            // include js
+            loadJs(executionPath + "bcr.cleaning.js", function () {
+                loadJs(executionPath + "bcr.analyze.js", function () {
+                    loadJs(executionPath + "bcr.names.js", function () {
+                        loadJs(executionPath + "bcr.cities.js", function () {
+                            loadJs(executionPath + "bcr.streets.js", function () {
+                                loadJs(executionPath + "bcr.utility.js", function () {
+                                    loadJs(executionPath + "tesseract/tesseract.js", function (){
+                                        window.Tesseract = Tesseract.create({
+                                            workerPath: WORKER_PATH,
+                                            langPath: LANG_PATH,
+                                            corePath: TESSERACT_PATH
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        },
+
+        // main method for recognizing
+        recognizeBcr: function (b64image, callback, progress) {
+            loadAndProcess(b64image, callback, progress);
+        },
+
+        MAXWIDTH: function () {
+            return maxwidth;
+        },
+
+        MAXHEIGHT: function () {
+            return maxheight;
+        }
+
+    };
 })();
