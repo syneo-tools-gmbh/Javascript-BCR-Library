@@ -937,7 +937,7 @@ function assignResults(ocr) {
     if (email.length > 0) {
         email.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1);
         for (k = 0; k < email.length; k++) {
-            if (!ocr.BCR.blocks[email[k].block].found) {
+            if (!ocr.BCR.blocks[email[k].block].used) {
                 result.fields.Email = email[k].text;
                 ocr.BCR.blocks[email[k].block].used = true;
                 break;
@@ -947,7 +947,7 @@ function assignResults(ocr) {
     if (phone.length > 0) {
         phone.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1);
         for (k = 0; k < phone.length; k++) {
-            if (!ocr.BCR.blocks[phone[k].block].found) {
+            if (!ocr.BCR.blocks[phone[k].block].used) {
                 result.fields.Phone = phone[k].text;
                 ocr.BCR.blocks[phone[k].block].used = true;
                 break;
@@ -957,7 +957,7 @@ function assignResults(ocr) {
     if (fax.length > 0) {
         fax.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < fax.length; k++) {
-            if (!ocr.BCR.blocks[fax[k].block].found) {
+            if (!ocr.BCR.blocks[fax[k].block].used) {
                 result.fields.Fax = fax[k].text;
                 ocr.BCR.blocks[fax[k].block].used = true;
                 break;
@@ -967,7 +967,7 @@ function assignResults(ocr) {
     if (mobile.length > 0) {
         mobile.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < mobile.length; k++) {
-            if (!ocr.BCR.blocks[mobile[k].block].found) {
+            if (!ocr.BCR.blocks[mobile[k].block].used) {
                 result.fields.Mobile = mobile[k].text;
                 ocr.BCR.blocks[mobile[k].block].used = true;
                 break;
@@ -977,7 +977,7 @@ function assignResults(ocr) {
     if (company.length > 0) {
         company.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < company.length; k++) {
-            if (!ocr.BCR.blocks[company[k].block].found) {
+            if (!ocr.BCR.blocks[company[k].block].used) {
                 result.fields.Company = company[k].text;
                 ocr.BCR.blocks[company[k].block].used = true;
                 break;
@@ -987,7 +987,7 @@ function assignResults(ocr) {
     if (name.length > 0) {
         name.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < name.length; k++) {
-            if (!ocr.BCR.blocks[name[k].block].found) {
+            if (!ocr.BCR.blocks[name[k].block].used) {
                 result.fields.Name.Text = name[k].text;
                 ocr.BCR.blocks[name[k].block].used = true;
                 break;
@@ -997,7 +997,7 @@ function assignResults(ocr) {
     if (job.length > 0) {
         job.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < job.length; k++) {
-            if (!ocr.BCR.blocks[job[k].block].found) {
+            if (!ocr.BCR.blocks[job[k].block].used) {
                 result.fields.Job = job[k].text;
                 ocr.BCR.blocks[job[k].block].used = true;
                 break;
@@ -1007,7 +1007,7 @@ function assignResults(ocr) {
     if (address.length > 0) {
         address.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < address.length; k++) {
-            if (!ocr.BCR.blocks[address[k].block].found) {
+            if (!ocr.BCR.blocks[address[k].block].used) {
 
                 // assign first found not empty
                 if (address[k].street.length > 0 && result.fields.Address.StreetAddress.length === 0) {
