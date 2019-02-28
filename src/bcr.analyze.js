@@ -1,5 +1,5 @@
 /**
-* Cordova BCR Library 0.0.4, build 74
+* Cordova BCR Library 0.0.5
 * Authors: Gaspare Ferraro, Renzo Sala
 * Contributors: Simone Ponte, Paolo Macco
 * Filename: bcr.analyze.js
@@ -73,7 +73,7 @@ var regex_mobile = [
 ];
 
 // job type (english, add languages)
-var regex_job = /(head|chief|director|senior|vice|president|manager|supervisor|assistant|intern)/g;
+var regex_job = /(lead|analyst|customer|administrative|head|chief|director|senior|vice|president|manager|supervisor|assistant|intern|specialist|artist|worker|junior|cfo|cto|ceo|coo|cmo|chro)/g;
 
 // perform ocr and analyze text
 function analyze(canvas, callback, progress) {
@@ -612,7 +612,7 @@ function scoreNumbers(ocr) {
 
     // tel
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
-        if (ocr.BCR.blocks[i].text.length > TEL_MIN_LENGTH) {
+        if (extractNumber(ocr.BCR.blocks[i].text).length > TEL_MIN_LENGTH) {
             for (let k = 0; k < regex_tel.length; k++) {
                 let matches = checkRE(regex_tel[k].regex, ocr.BCR.blocks[i].text);
                 if (matches.length > 0) ocr.BCR.blocks[i].fields.phone += regex_tel[k].confidence;
@@ -622,7 +622,7 @@ function scoreNumbers(ocr) {
 
     // fax
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
-        if (ocr.BCR.blocks[i].text.length > TEL_MIN_LENGTH) {
+        if (extractNumber(ocr.BCR.blocks[i].text).length > TEL_MIN_LENGTH) {
             for (let k = 0; k < regex_fax.length; k++) {
                 let matches = checkRE(regex_fax[k].regex, ocr.BCR.blocks[i].text);
                 if (matches.length > 0) ocr.BCR.blocks[i].fields.fax += regex_fax[k].confidence;
@@ -632,7 +632,7 @@ function scoreNumbers(ocr) {
 
     // mobile
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
-        if (ocr.BCR.blocks[i].text.length > TEL_MIN_LENGTH) {
+        if (extractNumber(ocr.BCR.blocks[i].text).length > TEL_MIN_LENGTH) {
             for (let k = 0; k < regex_mobile.length; k++) {
                 let matches = checkRE(regex_mobile[k].regex, ocr.BCR.blocks[i].text);
                 if (matches.length > 0) ocr.BCR.blocks[i].fields.mobile += regex_mobile[k].confidence;

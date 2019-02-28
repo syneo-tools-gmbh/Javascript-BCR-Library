@@ -1,5 +1,5 @@
 /**
-* Cordova BCR Library 0.0.4, build 74
+* Cordova BCR Library 0.0.5
 * Authors: Gaspare Ferraro, Renzo Sala
 * Contributors: Simone Ponte, Paolo Macco
 * Filename: bcr.cleaning.js
