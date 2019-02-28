@@ -173,7 +173,7 @@ function analyzePipeline(ocr) {
     ocr = scoreAddress(ocr);
 
     // Step 10: Assign result
-    assignResults(ocr)
+    assignResults(ocr);
 
     // return result
     return result;
@@ -379,12 +379,12 @@ function bcrBuildBlocks(ocr) {
 // clean text
 function cleanText(ocr) {
     // foreach word, make correction (and propagate to text and to lines)
-    for (i = 0; i < ocr.words.length; i++) {
-        for (it = 0; it < typos.length; it++) {
+    for (let i = 0; i < ocr.words.length; i++) {
+        for (let it = 0; it < typos.length; it++) {
             // replaces all the typos
             var backupWord = ocr.words[i].text;
 
-            matches = checkRE(typos[it].regex, ocr.words[i].text);
+            let matches = checkRE(typos[it].regex, ocr.words[i].text);
             if (matches.length > 0) {
 
                 // fix word
@@ -442,11 +442,7 @@ function bcrGetWordsBold(words) {
     for (let i = 0; i < words.length; i++) {
         if (words[i].is_bold) fontBold++;
     }
-    if (words.length / 2 < fontBold ) {
-        return true;
-    } else {
-        return false;
-    }
+    return words.length / 2 < fontBold;
 }
 
 // check regexp
@@ -508,8 +504,8 @@ function extractCity(text) {
 
     // extract city or empty
     let txt = text.toLowerCase().split(" ");
-    for (j = 0; j < cities.length; j++) {
-        for (k = 0; k < txt.length; k++) {
+    for (let j = 0; j < cities.length; j++) {
+        for (let k = 0; k < txt.length; k++) {
             if (txt[k] === cities[j][0]) {
                 if (cities[j][0] / txt[k] < THRESHOLD_HIGH) continue;
                 return txt[k];
@@ -564,7 +560,7 @@ function extractZip(text) {
 function extractStreet(text) {
 
     let txt = text.toLowerCase();
-    for (j = 0; j < streetsDS.length; j++) {
+    for (let j = 0; j < streetsDS.length; j++) {
         let re = streetsDS[j];
 
         if (checkRE(re, txt).length > 0) {
@@ -751,9 +747,9 @@ function scoreName(ocr) {
     // contribute max 0.3, assigned by dataset
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.email === 0) {
-            line = ocr.BCR.blocks[i].text.toLowerCase();
-            splitted = line.toLowerCase().split(" ");
-            for (j = 0; j < splitted.length; j++) {
+            let line = ocr.BCR.blocks[i].text.toLowerCase();
+            let splitted = line.toLowerCase().split(" ");
+            for (let j = 0; j < splitted.length; j++) {
                 if (namesDS.indexOf(splitted[j]) !== -1) {
                     ocr.BCR.blocks[i].fields.name += 0.3;
                     break;
@@ -794,10 +790,10 @@ function scoreAddress(ocr) {
 
     // score 0.2 for country
     // find country in dataset
-    for (i = 0; i < ocr.BCR.blocks.length; i++) {
+    for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         let txt = ocr.BCR.blocks[i].text.toLowerCase().split(" ");
-        for (j = 0; j < countryDS.length; j++) {
-            for (k = 0; k < txt.length; k++) {
+        for (let j = 0; j < countryDS.length; j++) {
+            for (let k = 0; k < txt.length; k++) {
                 if (txt[k].indexOf(countryDS[j]) !== -1) {
                     if (countryDS[j] / txt[k] < THRESHOLD_HIGH) continue;
                     ocr.BCR.blocks[i].fields.address += 0.2;
@@ -810,8 +806,8 @@ function scoreAddress(ocr) {
     // find city in dataset 
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         let txt = ocr.BCR.blocks[i].text.toLowerCase().split(" ");
-        for (j = 0; j < cities.length; j++) {
-            for (k = 0; k < txt.length; k++) {
+        for (let j = 0; j < cities.length; j++) {
+            for (let k = 0; k < txt.length; k++) {
                 if (txt[k] === cities[j][0]) {
                     if (cities[j][0] / txt[k] < THRESHOLD_HIGH) continue;
                     ocr.BCR.blocks[i].fields.address += 0.2;
@@ -836,7 +832,7 @@ function scoreAddress(ocr) {
 
     // score 0.2 for zip
     // Find zip code (in already used address scored)
-    for (i = 0; i < ocr.BCR.blocks.length; i++) {
+    for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.address > 0) {
             var numbers = ocr.BCR.blocks[i].text.replace(/[^0-9]/g, " ").trim().split(" ");
 
@@ -937,6 +933,7 @@ function assignResults(ocr) {
         result.fields.Web = web_found.text;
         ocr.BCR.blocks[web_found.block].used = true;
     }
+    var k;
     if (email.length > 0) {
         email.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1);
         for (k = 0; k < email.length; k++) {
