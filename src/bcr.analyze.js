@@ -41,8 +41,8 @@ var typos = [
     { regex: /[A-Za-z]\|[A-Za-z]/g, find: "|", replace: "l" }, // pipe for l
     { regex: /[A-Za-z]\|0[A-Za-z]/g, find: "|0", replace: "lo" }, // 0 instead of o + pipe and words
     { regex: /[A-Za-z]0\|[A-Za-z]/g, find: "0|", replace: "ol" }, // 0 instead of o + pipe and words
-    { regex: /[A-Za-z]\u00A9[A-Za-z]/g, find: /\u00A9/g, replace: "@" }, // @ instead of ©
-    { regex: /[A-Za-z]\u00AE[A-Za-z]/g, find: /\u00AE/g, replace: "@" }, // @ instead of ©
+    { regex: /[A-Za-z]\u00A9[A-Za-z]/g, find: /\u00A9/g, replace: "@" }, // @ instead of Â©
+    { regex: /[A-Za-z]\u00AE[A-Za-z]/g, find: /\u00AE/g, replace: "@" }, // @ instead of Â©
     { regex: /.eh/g, find: ".eh", replace: ".ch" }, // .ch in domains, usually got wrong
     { regex: /\s\|\s/g, find: "\s|\s", replace: "" }, // pipes on the fly (got from graphic elements)
     { regex: /\u2014/g, find: /\u2014/g, replace: "-" }, // never use long -
@@ -576,6 +576,45 @@ function extractStreet(text) {
     return "";
 }
 
+// split name in sub parts and assign it
+function splitName(text) {
+
+    let result = {
+        Text: text,
+        Surname: "",
+        Name: {
+            FirstName: "",
+            Text: "",
+            MiddleName: "",
+            ExtraName: ""
+        }
+    };
+
+    let name_parts = text.split(' ');
+
+    // assign surname, last chunk
+    result.Surname = name_parts[name_parts.length - 1];
+
+    // assign name
+    for (let iCounter = 0; iCounter < name_parts.length - 1; iCounter++) {
+        result.Name.Text += " " + name_parts[iCounter].trim();
+
+        // first name
+        if (iCounter === 0) {
+            result.Name.FirstName = name_parts[iCounter].trim();
+        } else if (iCounter === 1) {
+            result.Name.MiddleName = name_parts[iCounter].trim();
+        } else if (iCounter === 1) {
+            result.Name.ExtraName = name_parts[iCounter].trim();
+        }
+
+        // trim the name text
+        result.Name.Text = result.Name.Text.trim();
+    }
+
+    return result;
+}
+
 // *********************************************************************
 // SCORES BLOCKS
 // *********************************************************************
@@ -995,7 +1034,7 @@ function assignResults(ocr) {
         name.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < name.length; k++) {
             if (!ocr.BCR.blocks[name[k].block].used && name[k].confidence > MIN_SCORE) {
-                result.fields.Name.Text = name[k].text;
+                result.fields.Name = splitName(name[k].text);
                 ocr.BCR.blocks[name[k].block].used = true;
                 break;
             }
