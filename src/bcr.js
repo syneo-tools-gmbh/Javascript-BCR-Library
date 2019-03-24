@@ -66,27 +66,34 @@ var bcr = (function() {
         // init function
         initialize: function () {
 
-
-            // include js
-            loadJs(executionPath + "bcr.cleaning.js", function () {
-                loadJs(executionPath + "bcr.analyze.js", function () {
-                    loadJs(executionPath + "bcr.names.js", function () {
-                        loadJs(executionPath + "bcr.cities.js", function () {
-                            loadJs(executionPath + "bcr.streets.js", function () {
-                                loadJs(executionPath + "bcr.utility.js", function () {
-                                    loadJs(executionPath + "tesseract/tesseract.js", function (){
-                                        window.Tesseract = Tesseract.create({
-                                            workerPath: WORKER_PATH,
-                                            langPath: LANG_PATH,
-                                            corePath: TESSERACT_PATH
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    });
+            // scripts to include
+            var scripts = [];
+            scripts.push("bcr.cleaning.js");
+            scripts.push("bcr.analyze.js");
+            scripts.push("bcr.names.js");
+            scripts.push("bcr.cities.js");
+            scripts.push("bcr.streets.js");
+            scripts.push("bcr.job.js");
+            scripts.push("bcr.utility.js");
+            scripts.push("tesseract/tesseract.js");
+         
+            // final callback function
+            var callback = function () {
+                window.Tesseract = Tesseract.create({
+                    workerPath: WORKER_PATH,
+                    langPath: LANG_PATH,
+                    corePath: TESSERACT_PATH
                 });
-            });
+            };
+
+            // load next available script of callback if none
+            var nextLoad = function () {
+                if(scripts.length == 0) return callback();
+                return loadJs(executionPath + scripts.shift(), nextLoad);
+            }; 
+
+            nextLoad();
+
         },
 
         // main method for recognizing

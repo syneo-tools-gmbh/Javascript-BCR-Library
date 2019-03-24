@@ -88,12 +88,14 @@ var streetsDS = [
     /\bregione\b/g,
     /\brampe\b/g,
     /\bvoltone\b/g,
+
     // French
     /\brue\b/g,
     /\bplace\b/g,
     /\bpassage\b/g,
     /\bcité\b/g,
     /\bile\b/g,
+
     // English
     /\bacres\b/g,
     /\bannex\b/g,
@@ -151,14 +153,15 @@ var streetsDS = [
     /\bsquare\b/g,
     /\bterrace\b/g,
     /\bway\b/g,
+
     // German
-    /kamp/g,
-    /allee/g,
-    /stieg/g,
-    /damm/g,
-    /strasse/g,
-    /straße/g,
-    /weg/g,
-    /platz/g,
-    /moor/g
+    /\bkamp\b/g,
+    /\ballee\b/g,
+    /\bstieg\b/g,
+    /\bdamm\b/g,
+    /\bstrasse\b/g,
+    /\bstraße\b/g,
+    /\bweg\b/g,
+    /\bplatz\b/g,
+    /\bmoor\b/g
 ];

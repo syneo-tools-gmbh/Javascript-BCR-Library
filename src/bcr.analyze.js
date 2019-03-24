@@ -74,9 +74,6 @@ var regex_mobile = [
     { regex: /((mobi|cell|hand)\w*([.|:])*\s*)([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g, confidence: 0.5 }
 ];
 
-// job type (english, add languages)
-var regex_job = /(lead|analyst|customer|administrative|head|chief|director|senior|vice|president|manager|supervisor|assistant|intern|specialist|artist|worker|junior|cfo|cto|ceo|coo|cmo|chro)/g;
-
 // perform ocr and analyze text
 function analyze(canvas, callback, progress) {
     Tesseract.recognize(canvas)
@@ -819,13 +816,20 @@ function scoreJob(ocr) {
 
     // regex + font (max contribute: 0.3)
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
-        let matches = checkRE(regex_job, ocr.BCR.blocks[i].text);
-        if (matches.length > 0) ocr.BCR.blocks[i].fields.job += 0.55;
+        let txt = ocr.BCR.blocks[i].text.toLowerCase();
+        for (let j = 0; j < jobDS.length; j++) {
+            let re = jobDS[j];
+
+            // regex evaluation
+            if (checkRE(re, txt).length > 0) {
+                ocr.BCR.blocks[i].fields.address += 0.55;
+            }
+        }
 
         // contribute max 0.2, assigned by font criteria
         ocr.BCR.blocks[i].fields.job += getFontBiggerRatio(ocr.BCR.averageFontSize, ocr.BCR.blocks[i].fontSize) * 0.2;
     }
-
+    
     return ocr;
 }
 
