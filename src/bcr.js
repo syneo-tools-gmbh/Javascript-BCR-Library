@@ -75,6 +75,9 @@ var bcr = (function() {
             scripts.push("bcr.streets.js");
             scripts.push("bcr.job.js");
             scripts.push("bcr.utility.js");
+            scripts.push("opencv/opencv.js");
+            scripts.push("opencv/utils.js");
+            scripts.push("opencv/filters.js");
             scripts.push("tesseract/tesseract.js");
          
             // final callback function

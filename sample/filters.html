@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <link rel="stylesheet" type="text/css" href="style/common-style.css">
+        <link rel="stylesheet" type="text/css" href="style/index.css">
+        <title>Image filters</title>
+
+    </head>
+    <body class="body-index">
+
+        <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+        <script type="text/javascript" src="../src/bcr.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript" src="../src/opencv/opencv.js"></script>
+        <script type="text/javascript" src="../src/opencv/utils.js"></script>
+        <script type="text/javascript" src="../src/opencv/filters.js"></script>
+
+        <div id="header">Offline image filtering</div>
+        <input type="file" accept="image/*" id="inp"/>
+
+        <div id="form" class="section">
+            <div class="title"><i class="fas fa-upload"></i> Submit a business card</div>
+            <div class="center">
+                <img src="https://via.placeholder.com/400x300/ddd?text=upload+a+business+card" id="step0"
+                     class="img-original"/>
+            </div>
+        </div>
+
+        <div class="center section">
+                <img id="step1" class="img-original"/>
+        </div>
+
+        <div class="center section">
+                <img id="step2" class="img-original"/>
+        </div>
+
+        <div class="center section">
+                <img id="step3" class="img-original"/>
+        </div>
+
+        <script>
+
+			File.prototype.convertToBase64 = function (callback) {
+				var reader = new FileReader();
+				reader.onloadend = function (e) {
+					callback(e.target.result, e.target.error);
+				};
+				reader.readAsDataURL(this);
+			};
+
+            
+			$("#step0").on("click", function () {
+				$("#inp").trigger("click");
+			});
+
+			document.getElementById('inp').onchange = function (e) {
+			
+			    // step 0: Convert file to base64 image
+				var file = this.files[0];
+				file.convertToBase64(function (b64) {
+
+                    bcr.recognizeBcr(b64, x => console.log("STEP0", x.result), function(){});
+				    document.getElementById('step0').src = b64;
+  				    document.getElementById('step0').onload = function() {
+  				    
+  				        // step 1: Extract contours
+  				        documentScanner(document.getElementById('step0'), function(b64) {
+
+                            bcr.recognizeBcr(b64, x => console.log("STEP1", x.result), function(){});
+  				            document.getElementById("step1").src = b64;
+  				            document.getElementById("step1").onload = function() {
+  				            
+      				            // step 2: Apply filters
+                                denoise(document.getElementById("step1"), function(b64) {
+
+                                    bcr.recognizeBcr(b64, x => console.log("STEP2", x.result), function(){});
+          				            document.getElementById("step2").src = b64;      
+          				            document.getElementById("step2").onload = function () {
+          				            
+          				                // step 3: Apply business card cleaner pipeline
+          				                pipeline(b64, function() {}, function(cleanedCanvas) {
+
+                                            bcr.recognizeBcr(cleanedCanvas.toDataURL(), x => console.log("STEP3", x.result), function(){});
+          				                    document.getElementById("step3").src = cleanedCanvas.toDataURL();
+          				                    
+          				                    					          				                    					
+          				                });
+          				            };                              
+                                });
+                            };
+  				        });
+                    };
+				});
+			};
+			
+        </script>
+    </body>
+</html>

@@ -23,8 +23,6 @@
 */
 
 // job type (english, add languages)
-var regex_job = /(lead|analyst|customer|administrative|head|chief|director|senior|vice|president|manager|supervisor|assistant|intern|specialist|artist|worker|junior|cfo|cto|ceo|coo|cmo|chro)/g;
-
 var jobDS = [
     // Italian
 
