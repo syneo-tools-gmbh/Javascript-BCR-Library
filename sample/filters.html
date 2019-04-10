@@ -14,9 +14,6 @@
         <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
         <script type="text/javascript" src="../src/bcr.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
-        <script type="text/javascript" src="../src/opencv/opencv.js"></script>
-        <script type="text/javascript" src="../src/opencv/utils.js"></script>
-        <script type="text/javascript" src="../src/opencv/filters.js"></script>
 
         <div id="header">Offline image filtering</div>
         <input type="file" accept="image/*" id="inp"/>
@@ -62,28 +59,28 @@
 				var file = this.files[0];
 				file.convertToBase64(function (b64) {
 
-                    bcr.recognizeBcr(b64, x => console.log("STEP0", x.result), function(){});
+                    // bcr.recognizeBcr(b64, x => console.log("STEP0", x.result), function(){});
 				    document.getElementById('step0').src = b64;
   				    document.getElementById('step0').onload = function() {
   				    
   				        // step 1: Extract contours
   				        documentScanner(document.getElementById('step0'), function(b64) {
 
-                            bcr.recognizeBcr(b64, x => console.log("STEP1", x.result), function(){});
+                            // bcr.recognizeBcr(b64, x => console.log("STEP1", x.result), function(){});
   				            document.getElementById("step1").src = b64;
   				            document.getElementById("step1").onload = function() {
   				            
       				            // step 2: Apply filters
                                 denoise(document.getElementById("step1"), function(b64) {
 
-                                    bcr.recognizeBcr(b64, x => console.log("STEP2", x.result), function(){});
+                                    // bcr.recognizeBcr(b64, x => console.log("STEP2", x.result), function(){});
           				            document.getElementById("step2").src = b64;      
           				            document.getElementById("step2").onload = function () {
           				            
           				                // step 3: Apply business card cleaner pipeline
           				                pipeline(b64, function() {}, function(cleanedCanvas) {
 
-                                            bcr.recognizeBcr(cleanedCanvas.toDataURL(), x => console.log("STEP3", x.result), function(){});
+                                            // bcr.recognizeBcr(cleanedCanvas.toDataURL(), x => console.log("STEP3", x.result), function(){});
           				                    document.getElementById("step3").src = cleanedCanvas.toDataURL();
           				                    
           				                    					          				                    					

@@ -1,4 +1,4 @@
-/**
+/*
 * Cordova BCR Library 0.0.5
 * Authors: Gaspare Ferraro, Renzo Sala
 * Contributors: Simone Ponte, Paolo Macco
@@ -22,16 +22,15 @@
 *
 */
 
-const MIN_QUAD_AREA_RATIO = 0.15;
+var GOLD_RATIO = (Math.sqrt(5)+1)/2;
+var GOLD_RATIO_ERROR = 0.5;
+var MIN_QUAD_AREA_RATIO = 0.15;
 
-const GOLD_RATIO = (Math.sqrt(5)+1)/2;
-const GOLD_RATIO_ERROR = 0.5;
-
-const MAX_QUAD_ANGLE_RANGE = 40;
-const RESCALED_HEIGHT = 1024;
-const MORPH = 9;
-const CANNY = 84;
-const HOUGH = 25;
+var  MAX_QUAD_ANGLE_RANGE = 40;
+var  RESCALED_HEIGHT = 1024;
+var  MORPH = 9;
+var  CANNY = 84;
+var  HOUGH = 25;
 
 function documentScanner(img, callback)
 {
@@ -312,4 +311,16 @@ function documentScanner_old(img, callback)
 
 }
 
+function documentScanner_old2(img, callback)
+{
+    console.clear();
+    let src = cv.imread(img);
+    let dst = new cv.Mat();
+
+    // show results
+    let canvas = document.createElement("canvas");
+    cv.imshow(canvas, src);
+    callback(canvas.toDataURL());
+    src.delete(); dst.delete();
+}
 
