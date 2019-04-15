@@ -1,26 +1,26 @@
 /**
-* Cordova BCR Library 0.0.5
-* Authors: Gaspare Ferraro, Renzo Sala
-* Contributors: Simone Ponte, Paolo Macco
-* Filename: bcr.utility.js
-* Description: various utilities
-*
-* @license
-* Copyright 2019 Syneo Tools GmbH. All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-*/
+ * Cordova BCR Library 0.0.5
+ * Authors: Gaspare Ferraro, Renzo Sala
+ * Contributors: Simone Ponte, Paolo Macco
+ * Filename: bcr.utility.js
+ * Description: various utilities
+ *
+ * @license
+ * Copyright 2019 Syneo Tools GmbH. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 function titleCase(text) {
     if (!text) return text;
@@ -32,135 +32,133 @@ function titleCase(text) {
 }
 
 function editDistance(word1, word2) {
-	var i, j, Cmin;
-	if(word1 == undefined && word2 == undefined){
-		return 1;
-	}
-	if(word1 == undefined || word1.length === 0){
-		return word2.length;
-	}
-	if(word2 == undefined || word2.length === 0){
-		return word1.length;
-	}
-	
-	word1 = word1.toLowerCase();
-	word2 = word2.toLowerCase();
-	
-	var len1 = word1.length;
-	var len2 = word2.length;
-	
-	var dp = Array(len1+1).fill(0).map(x =>Array(len2+1).fill(0));
-	
-	for(i = 0; i<=len1; i++){
-		dp[i][0] = i;
-	}
-	for(j = 0; j<=len2; j++){
-		dp[0][j] = j;
-	}
-	
-	for(i = 0; i<len1; i++){
-		var c1 = word1.charAt(i);
-		
-		for(j = 0; j<len2; j++){
-			var c2 = word2.charAt(j);
-			
-			if(c1 == c2){
-				dp[i+1][j+1] = dp[i][j];
-			}
-			else{
-				var Creplace = dp[i][j]+1;
-				var Cinsert = dp[i][j+1]+1;
-				var Cdelete = dp[i+1][j]+1;
-				
-				Cmin = Math.min(Creplace, Math.min(Cinsert, Cdelete));
-				dp[i+1][j+1] = Cmin;
-			}
-		}
-	}
-	
-	return dp[len1][len2];
+    var i, j, Cmin;
+    if (word1 == undefined && word2 == undefined) {
+        return 1;
+    }
+    if (word1 == undefined || word1.length === 0) {
+        return word2.length;
+    }
+    if (word2 == undefined || word2.length === 0) {
+        return word1.length;
+    }
+
+    word1 = word1.toLowerCase();
+    word2 = word2.toLowerCase();
+
+    var len1 = word1.length;
+    var len2 = word2.length;
+
+    var dp = Array(len1 + 1).fill(0).map(x => Array(len2 + 1).fill(0));
+
+    for (i = 0; i <= len1; i++) {
+        dp[i][0] = i;
+    }
+    for (j = 0; j <= len2; j++) {
+        dp[0][j] = j;
+    }
+
+    for (i = 0; i < len1; i++) {
+        var c1 = word1.charAt(i);
+
+        for (j = 0; j < len2; j++) {
+            var c2 = word2.charAt(j);
+
+            if (c1 == c2) {
+                dp[i + 1][j + 1] = dp[i][j];
+            } else {
+                var Creplace = dp[i][j] + 1;
+                var Cinsert = dp[i][j + 1] + 1;
+                var Cdelete = dp[i + 1][j] + 1;
+
+                Cmin = Math.min(Creplace, Math.min(Cinsert, Cdelete));
+                dp[i + 1][j + 1] = Cmin;
+            }
+        }
+    }
+
+    return dp[len1][len2];
 }
 
 function substringEditDistance(word1, word2) {
-	var i, j, Cmin;
-	if(word1 == undefined && word2 == undefined){
-		return 1;
-	}
-	if(word1 == undefined || word1.length === 0){
-		return word2.length;
-	}
-	if(word2 == undefined || word2.length === 0){
-		return word1.length;
-	}
-	
-	word1 = word1.toLowerCase();
-	word2 = word2.toLowerCase();
-	
-	var len1 = word1.length;
-	var len2 = word2.length;
-	
-	var dp = Array(len1+1).fill(0).map(x =>Array(len2+1).fill(0));
-	
-	for(i = 0; i<=len1; i++){
-		dp[i][0] = i;
-	}
-	for(j = 0; j<=len2; j++){
-		dp[0][j] = 0;
-	}
-	
-	for(i = 0; i<len1; i++){
-		var c1 = word1.charAt(i);
-		
-		for(j = 0; j<len2; j++){
-			var c2 = word2.charAt(j);
-			
-			if(c1 == c2){
-				dp[i+1][j+1] = dp[i][j];
-			}
-			else{
-				var Creplace = dp[i][j]+1;
-				var Cinsert = dp[i][j+1]+1;
-				var Cdelete = dp[i+1][j]+1;
-				
-				Cmin = Math.min(Creplace, Math.min(Cinsert, Cdelete));
-				dp[i+1][j+1] = Cmin;
-			}
-		}
-	}
-	
-	var minLastRow = dp[len1][0];
-	for(i = 0; i<=len2; i++){
-		minLastRow = Math.min(minLastRow, dp[len1][i]);
-	}
-	
-	return minLastRow;
+    var i, j, Cmin;
+    if (word1 == undefined && word2 == undefined) {
+        return 1;
+    }
+    if (word1 == undefined || word1.length === 0) {
+        return word2.length;
+    }
+    if (word2 == undefined || word2.length === 0) {
+        return word1.length;
+    }
+
+    word1 = word1.toLowerCase();
+    word2 = word2.toLowerCase();
+
+    var len1 = word1.length;
+    var len2 = word2.length;
+
+    var dp = Array(len1 + 1).fill(0).map(x => Array(len2 + 1).fill(0));
+
+    for (i = 0; i <= len1; i++) {
+        dp[i][0] = i;
+    }
+    for (j = 0; j <= len2; j++) {
+        dp[0][j] = 0;
+    }
+
+    for (i = 0; i < len1; i++) {
+        var c1 = word1.charAt(i);
+
+        for (j = 0; j < len2; j++) {
+            var c2 = word2.charAt(j);
+
+            if (c1 == c2) {
+                dp[i + 1][j + 1] = dp[i][j];
+            } else {
+                var Creplace = dp[i][j] + 1;
+                var Cinsert = dp[i][j + 1] + 1;
+                var Cdelete = dp[i + 1][j] + 1;
+
+                Cmin = Math.min(Creplace, Math.min(Cinsert, Cdelete));
+                dp[i + 1][j + 1] = Cmin;
+            }
+        }
+    }
+
+    var minLastRow = dp[len1][0];
+    for (i = 0; i <= len2; i++) {
+        minLastRow = Math.min(minLastRow, dp[len1][i]);
+    }
+
+    return minLastRow;
 }
 
 function substringSimilarity(word1, word2) {
-	if(word1 == undefined || word2 == undefined){
-		return 0.;
-	}
-	if(word1.length === 0 || word2.length === 0){
-		return 0.;
-	}
-	return 1.-substringEditDistance(word1, word2)/Math.max(word1.length, word2.length);
+    if (word1 == undefined || word2 == undefined) {
+        return 0.;
+    }
+    if (word1.length === 0 || word2.length === 0) {
+        return 0.;
+    }
+    return 1. - substringEditDistance(word1, word2) / Math.max(word1.length, word2.length);
 }
 
 function stringSimilarity(word1, word2) {
-	if(word1 == undefined || word2 == undefined){
-		return 0.;
-	}
-	if(word1.length === 0 || word2.length === 0){
-		return 0.;
-	}
-	return 1.-editDistance(word1, word2)/Math.max(word1.length, word2.length);
+    if (word1 == undefined || word2 == undefined) {
+        return 0.;
+    }
+    if (word1.length === 0 || word2.length === 0) {
+        return 0.;
+    }
+    return 1. - editDistance(word1, word2) / Math.max(word1.length, word2.length);
 }
 
 function capitalize(str) {
-	if(str == undefined || str.length === 0){
-		return "";
-	}
-	return str.substr(0, 1).toUpperCase()+str.substring(1);
+    if (str == undefined || str.length === 0) {
+        return "";
+    }
+    return str.substr(0, 1).toUpperCase() + str.substring(1);
 }
 
 var sSimilarity = function (sa1, sa2) {
@@ -168,13 +166,13 @@ var sSimilarity = function (sa1, sa2) {
     // Answer is returned as a value from 0 - 1
     // 1 indicates a perfect similarity (100%) while 0 indicates no similarity (0%)
     // Algorithm is set up to closely mimic the mathematical formula from
-    // the article describing the algorithm, for clarity. 
+    // the article describing the algorithm, for clarity.
     // Algorithm source site: http://www.catalysoft.com/articles/StrikeAMatch.html
     // (Most specifically the slightly cryptic variable names were written as such
     // to mirror the mathematical implementation on the source site)
     //
     // 2014-04-03
-    // Found out that the algorithm is an implementation of the Sørensen–Dice coefficient [1]
+    // Found out that the algorithm is an implementation of the Sï¿½rensenï¿½Dice coefficient [1]
     // [1] http://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
     //
     // The algorithm is an n-gram comparison of bigrams of characters in a string

@@ -1,28 +1,28 @@
 /**
-* Cordova BCR Library 0.0.5
-* Authors: Gaspare Ferraro, Renzo Sala
-* Contributors: Simone Ponte, Paolo Macco
-* Filename: bcr.streets.js
-* Description: dataset of street definitions
-*
-* @license
-* Copyright 2019 Syneo Tools GmbH. All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-*/
+ * Cordova BCR Library 0.0.5
+ * Authors: Gaspare Ferraro, Renzo Sala
+ * Contributors: Simone Ponte, Paolo Macco
+ * Filename: bcr.streets.js
+ * Description: dataset of street definitions
+ *
+ * @license
+ * Copyright 2019 Syneo Tools GmbH. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
-var streetsDS = [
+let streetsDS = [
     // Italian
     /\bvia\b/g,
     /\bparco\b/g,
@@ -95,10 +95,10 @@ var streetsDS = [
     /\bpassage\b/g,
     /\bcité\b/g,
     /\bile\b/g,
-	/\bboulevard\b/g,
-	/\bavenue\b/g,
-	/\ballée\b/g,
-	
+    /\bboulevard\b/g,
+    /\bavenue\b/g,
+    /\ballée\b/g,
+
     // English
     /\bacres\b/g,
     /\bannex\b/g,
@@ -176,10 +176,10 @@ var streetsDS = [
     /\bpaseo\b/g,
     /\bplaza\b/g,
     /\bronda\b/g,
-    
+
     // Danish
-	/\bgade\b/g,
-	/\bvej\b/g,
+    /\bgade\b/g,
+    /\bvej\b/g,
     /\bvia\b/g,
     /\bfirkantet\b/g,
     /\bkursus\b/g,

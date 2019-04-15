@@ -1,26 +1,26 @@
 /**
-* Cordova BCR Library 0.0.5
-* Authors: Gaspare Ferraro, Renzo Sala
-* Contributors: Simone Ponte, Paolo Macco
-* Filename: bcr.analyze.js
-* Description: core module
-*
-* @license
-* Copyright 2019 Syneo Tools GmbH. All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-*/
+ * Cordova BCR Library 0.0.5
+ * Authors: Gaspare Ferraro, Renzo Sala
+ * Contributors: Simone Ponte, Paolo Macco
+ * Filename: bcr.analyze.js
+ * Description: core module
+ *
+ * @license
+ * Copyright 2019 Syneo Tools GmbH. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 // CONSTS
 const MIN_LINE_LENGHT = 4;
@@ -37,18 +37,18 @@ var result = {};
 // REGEXES
 // *********************************************
 var typos = [
-    { regex: /[A-Za-z]0[A-Za-z]/g, find: "0", replace: "o" }, // 0 instead of o inside a text
-    { regex: /[A-Za-z]\|[A-Za-z]/g, find: "|", replace: "l" }, // pipe for l
-    { regex: /[A-Za-z]\|0[A-Za-z]/g, find: "|0", replace: "lo" }, // 0 instead of o + pipe and words
-    { regex: /[A-Za-z]0\|[A-Za-z]/g, find: "0|", replace: "ol" }, // 0 instead of o + pipe and words
-    { regex: /[A-Za-z]\u00A9[A-Za-z]/g, find: /\u00A9/g, replace: "@" }, // @ instead of ©
-    { regex: /[A-Za-z]\u00AE[A-Za-z]/g, find: /\u00AE/g, replace: "@" }, // @ instead of ©
-    { regex: /.eh/g, find: ".eh", replace: ".ch" }, // .ch in domains, usually got wrong
-    { regex: /\s\|\s/g, find: "\s|\s", replace: "" }, // pipes on the fly (got from graphic elements)
-    { regex: /\u2014/g, find: /\u2014/g, replace: "-" }, // never use long -
-    { regex: /,com/g, find: ",com", replace: ".com" }, // .com in domains, usually got ,com
-    { regex: /.oom/g, find: ".oom", replace: ".com" }, // .com in domains, usually got .oom
-    { regex: /[A-Za-z]{2}1[A-Za-z]{2}/g, find: "1", replace: "i" } // 1 instead of i
+    {regex: /[A-Za-z]0[A-Za-z]/g, find: "0", replace: "o"}, // 0 instead of o inside a text
+    {regex: /[A-Za-z]\|[A-Za-z]/g, find: "|", replace: "l"}, // pipe for l
+    {regex: /[A-Za-z]\|0[A-Za-z]/g, find: "|0", replace: "lo"}, // 0 instead of o + pipe and words
+    {regex: /[A-Za-z]0\|[A-Za-z]/g, find: "0|", replace: "ol"}, // 0 instead of o + pipe and words
+    {regex: /[A-Za-z]\u00A9[A-Za-z]/g, find: /\u00A9/g, replace: "@"}, // @ instead of ©
+    {regex: /[A-Za-z]\u00AE[A-Za-z]/g, find: /\u00AE/g, replace: "@"}, // @ instead of ©
+    {regex: /.eh/g, find: ".eh", replace: ".ch"}, // .ch in domains, usually got wrong
+    {regex: /\s\|\s/g, find: "\s|\s", replace: ""}, // pipes on the fly (got from graphic elements)
+    {regex: /\u2014/g, find: /\u2014/g, replace: "-"}, // never use long -
+    {regex: /,com/g, find: ",com", replace: ".com"}, // .com in domains, usually got ,com
+    {regex: /.oom/g, find: ".oom", replace: ".com"}, // .com in domains, usually got .oom
+    {regex: /[A-Za-z]{2}1[A-Za-z]{2}/g, find: "1", replace: "i"} // 1 instead of i
 ];
 
 // email
@@ -59,19 +59,28 @@ var web = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\
 
 // tel
 var regex_tel = [
-    { regex: /([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g, confidence: 0.5 },
-    { regex: /((tel|phon|dir)\w*([.|:])*\s*)([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g, confidence: 0.5 }
+    {regex: /([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g, confidence: 0.5},
+    {
+        regex: /((tel|phon|dir)\w*([.|:])*\s*)([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g,
+        confidence: 0.5
+    }
 ];
 
 // fax
 var regex_fax = [
-    { regex: /((fax)\w*([.|:])*\s*)([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g, confidence: 0.5 }
+    {
+        regex: /((fax)\w*([.|:])*\s*)([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g,
+        confidence: 0.5
+    }
 ];
 
 // mobile
 var regex_mobile = [
-    { regex: /([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g, confidence: 0.5 },
-    { regex: /((mobi|cell|hand)\w*([.|:])*\s*)([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g, confidence: 0.5 }
+    {regex: /([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g, confidence: 0.5},
+    {
+        regex: /((mobi|cell|hand)\w*([.|:])*\s*)([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g,
+        confidence: 0.5
+    }
 ];
 
 // perform ocr and analyze text
@@ -104,33 +113,33 @@ function analyze(canvas, callback, progress) {
 function initializeResult() {
     return {
         fields:
-        {
-            Company: "",
-            Email: "",
-            Address: {
-                StreetAddress: "",
-                ZipCode: "",
-                Country: "",
-                Text: "",
-                City: ""
-            },
-            Web: "",
-            Phone: "",
-            Text: "",
-            Fax: "",
-            Job: "",
-            Mobile: "",
-            Name: {
-                Text: "",
-                Surname: "",
-                Name: {
-                    FirstName: "",
+            {
+                Company: "",
+                Email: "",
+                Address: {
+                    StreetAddress: "",
+                    ZipCode: "",
+                    Country: "",
                     Text: "",
-                    MiddleName: "",
-                    ExtraName: ""
+                    City: ""
+                },
+                Web: "",
+                Phone: "",
+                Text: "",
+                Fax: "",
+                Job: "",
+                Mobile: "",
+                Name: {
+                    Text: "",
+                    Surname: "",
+                    Name: {
+                        FirstName: "",
+                        Text: "",
+                        MiddleName: "",
+                        ExtraName: ""
+                    }
                 }
-            }
-        },
+            },
         blocks: []
     };
 }
@@ -152,13 +161,13 @@ function analyzePipeline(ocr) {
 
     // Step 3: Score email
     ocr = scoreEmail(ocr);
-    
+
     // Step 4: Score web
     ocr = scoreWeb(ocr);
 
     // Step 5: Score numbers
     ocr = scoreNumbers(ocr);
-    
+
     // Step 6: Score company
     ocr = scoreCompany(ocr);
 
@@ -222,8 +231,7 @@ function breakLines(ocr) {
             if (j !== w.length && (skipCondition || curLines.length === 0 || (w[j].bbox.x0 - curLines[curLines.length - 1].bbox.x1) < dist)) {
                 // Add word to current line
                 curLines.push(w[j]);
-            }
-            else {
+            } else {
                 // Create line object
                 var line = {};
 
@@ -334,26 +342,25 @@ function bcrBuildBlocks(ocr) {
         let block = {
             text: "",
             fontSize: 0,
-            fields: { email: 0, web: 0, phone: 0, fax: 0, mobile: 0, job: 0, name: 0, address: 0, company: 0 },
+            fields: {email: 0, web: 0, phone: 0, fax: 0, mobile: 0, job: 0, name: 0, address: 0, company: 0},
             used: false
         };
 
-        let assign_strategy = blocksStrategyAssignment(ocr.lines[i].text); 
+        let assign_strategy = blocksStrategyAssignment(ocr.lines[i].text);
 
         // ******************************************************
         // assignment
         // ******************************************************
         if (assign_strategy === "") {
             // trash
-        }
-        else if (assign_strategy.indexOf("|") > -1) {
+        } else if (assign_strategy.indexOf("|") > -1) {
             // extract
             subblocks = assign_strategy.split('|');
             for (let k = 0; k < subblocks.length; k++) {
                 let subblock = {
                     text: "",
                     fontSize: 0,
-                    fields: { email: 0, web: 0, phone: 0, fax: 0, mobile: 0, job: 0, name: 0, address: 0, company: 0 }
+                    fields: {email: 0, web: 0, phone: 0, fax: 0, mobile: 0, job: 0, name: 0, address: 0, company: 0}
                 };
                 subblock.text = subblocks[k];
                 subblock.fontSize = bcrGetWordsFont(ocr.lines[i].words);
@@ -480,7 +487,7 @@ function extractEmail(text) {
 function extractNumber(text) {
 
     // remove literals, multiple spaces
-    return text.replace(/[^0-9|+|-]/g,' ').replace(/\s{1,}/g," ").trim();
+    return text.replace(/[^0-9|+|-]/g, ' ').replace(/\s{1,}/g, " ").trim();
 }
 
 // extract company from candidate
@@ -728,7 +735,7 @@ function scoreCompany(ocr) {
             for (var k in keywords) {
 
                 // calculate similarity
-                var sim = sSimilarity(word, k);   
+                var sim = sSimilarity(word, k);
 
                 // assign if more than threshold
                 if (sim > THRESHOLD_LOW) {
@@ -780,7 +787,7 @@ function scoreName(ocr) {
                 }
                 // contribute max 0.2, assigned by font criteria
                 ocr.BCR.blocks[i].fields.name += getFontBiggerRatio(ocr.BCR.averageFontSize, ocr.BCR.blocks[i].fontSize) * 0.2;
-                
+
             }
         }
     }
@@ -829,7 +836,7 @@ function scoreJob(ocr) {
         // contribute max 0.2, assigned by font criteria
         ocr.BCR.blocks[i].fields.job += getFontBiggerRatio(ocr.BCR.averageFontSize, ocr.BCR.blocks[i].fontSize) * 0.2;
     }
-    
+
     return ocr;
 }
 
@@ -862,7 +869,7 @@ function scoreAddress(ocr) {
                 }
             }
         }
-    }	
+    }
 
     // score 0.2 for address pattern
     // Street address matching typical names
@@ -946,32 +953,55 @@ function assignResults(ocr) {
     // cycling on blocks
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.web > 0) {
-            web.push({ text: extractWeb(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.web, block: i });
+            web.push({text: extractWeb(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.web, block: i});
         }
         if (ocr.BCR.blocks[i].fields.email > 0) {
-            email.push({ text: extractEmail(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.email, block: i });
+            email.push({
+                text: extractEmail(ocr.BCR.blocks[i].text),
+                confidence: ocr.BCR.blocks[i].fields.email,
+                block: i
+            });
         }
         if (ocr.BCR.blocks[i].fields.phone > 0) {
-            phone.push({ text: extractNumber(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.phone, block: i });
+            phone.push({
+                text: extractNumber(ocr.BCR.blocks[i].text),
+                confidence: ocr.BCR.blocks[i].fields.phone,
+                block: i
+            });
         }
         if (ocr.BCR.blocks[i].fields.fax > 0) {
-            fax.push({ text: extractNumber(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.fax, block: i });
+            fax.push({text: extractNumber(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.fax, block: i});
         }
         if (ocr.BCR.blocks[i].fields.mobile > 0) {
-            mobile.push({ text: extractNumber(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.mobile, block: i });
+            mobile.push({
+                text: extractNumber(ocr.BCR.blocks[i].text),
+                confidence: ocr.BCR.blocks[i].fields.mobile,
+                block: i
+            });
         }
         if (ocr.BCR.blocks[i].fields.company > 0) {
-            company.push({ text: extractCompany(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.company, block: i });
+            company.push({
+                text: extractCompany(ocr.BCR.blocks[i].text),
+                confidence: ocr.BCR.blocks[i].fields.company,
+                block: i
+            });
         }
         if (ocr.BCR.blocks[i].fields.name > 0) {
-            name.push({ text: extractName(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.name, block: i });
+            name.push({text: extractName(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.name, block: i});
         }
         if (ocr.BCR.blocks[i].fields.job > 0) {
-            job.push({ text: extractJob(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.job, block: i });
+            job.push({text: extractJob(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.job, block: i});
         }
         if (ocr.BCR.blocks[i].fields.address > 0) {
             // special case, no text: the extraction is done
-            address.push({ city: extractCity(ocr.BCR.blocks[i].text), country: extractCountry(ocr.BCR.blocks[i].text), street: extractStreet(ocr.BCR.blocks[i].text), zip: extractZip(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.address, block: i });
+            address.push({
+                city: extractCity(ocr.BCR.blocks[i].text),
+                country: extractCountry(ocr.BCR.blocks[i].text),
+                street: extractStreet(ocr.BCR.blocks[i].text),
+                zip: extractZip(ocr.BCR.blocks[i].text),
+                confidence: ocr.BCR.blocks[i].fields.address,
+                block: i
+            });
         }
     }
 
@@ -993,7 +1023,7 @@ function assignResults(ocr) {
                 break;
             }
         }
-    } 
+    }
     if (phone.length > 0) {
         phone.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1);
         for (k = 0; k < phone.length; k++) {
@@ -1003,7 +1033,7 @@ function assignResults(ocr) {
                 break;
             }
         }
-    } 
+    }
     if (fax.length > 0) {
         fax.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         for (k = 0; k < fax.length; k++) {
@@ -1062,7 +1092,7 @@ function assignResults(ocr) {
                 // assign first found not empty
                 if (address[k].street.length > 0 && result.fields.Address.StreetAddress.length === 0) {
                     result.fields.Address.StreetAddress = address[k].street.trim();
-                    
+
                 }
                 if (address[k].city.length > 0 && result.fields.Address.City.length === 0) {
                     result.fields.Address.City = address[k].city.trim();
@@ -1078,12 +1108,12 @@ function assignResults(ocr) {
             }
         }
 
-        if (result.fields.Address.StreetAddress!=="") result.fields.Address.Text += ", " + titleCase(result.fields.Address.StreetAddress);
+        if (result.fields.Address.StreetAddress !== "") result.fields.Address.Text += ", " + titleCase(result.fields.Address.StreetAddress);
         if (result.fields.Address.City !== "") result.fields.Address.Text += ", " + titleCase(result.fields.Address.City);
         if (result.fields.Address.ZipCode !== "") result.fields.Address.Text += ", " + result.fields.Address.ZipCode;
         if (result.fields.Address.Country !== "") result.fields.Address.Text += ", " + titleCase(result.fields.Address.Country);
         if (result.fields.Address.Text !== "") result.fields.Address.Text = result.fields.Address.Text.substr(1);
-    } 
+    }
 
     // assign blocks
     result.blocks = ocr.BCR.blocks;

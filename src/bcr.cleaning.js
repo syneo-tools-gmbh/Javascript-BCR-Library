@@ -1,29 +1,29 @@
 /**
-* Cordova BCR Library 0.0.5
-* Authors: Gaspare Ferraro, Renzo Sala
-* Contributors: Simone Ponte, Paolo Macco
-* Filename: bcr.cleaning.js
-* Description: cleaning module
-*
-* @license
-* Copyright 2019 Syneo Tools GmbH. All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-*/
+ * Cordova BCR Library 0.0.5
+ * Authors: Gaspare Ferraro, Renzo Sala
+ * Contributors: Simone Ponte, Paolo Macco
+ * Filename: bcr.cleaning.js
+ * Description: cleaning module
+ *
+ * @license
+ * Copyright 2019 Syneo Tools GmbH. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 // local variables
-var stages = [];
+let stages = [];
 
 // load base64 image, prepare it and analyze it
 function loadAndProcess(b64, callback, progress) {
@@ -32,7 +32,7 @@ function loadAndProcess(b64, callback, progress) {
         analyze(canvas, function (data, blocks) {
 
             // return data and stages
-            var returnData = { stages: stages, result: data, blocks: blocks };
+            let returnData = {stages: stages, result: data, blocks: blocks};
             callback(returnData);
 
         }, progress);
@@ -42,7 +42,7 @@ function loadAndProcess(b64, callback, progress) {
 // preprocessing pipeline
 function pipeline(img, progress, callback) {
     prepareImage(img, progress, function (data) {
-        var canvas = data;
+        let canvas = data;
         stages = [];
 
         // **************************************
@@ -61,8 +61,8 @@ function pipeline(img, progress, callback) {
         stages.push(canvas.toDataURL());
 
         // Step 3 identify connected components of blocks and store it
-        var ccs = [];
-        var result = imageToCC(canvas);
+        let ccs = [];
+        let result = imageToCC(canvas);
         canvas = result.canvas;
         ccs = result.ccs;
         stages.push(canvas.toDataURL());
@@ -102,22 +102,22 @@ function prepareImage(b64image, progress, callback) {
 function normalizeSize(canvas) {
 
     // create context
-    var ctx = canvas.getContext("2d");
+    let ctx = canvas.getContext("2d");
 
     // **********************************************************************
     // RESIZE
     // **********************************************************************
-    var maxwidth = bcr.MAXWIDTH();
-    var maxheight = bcr.MAXHEIGHT();
-    var tempCanvas = document.createElement("canvas");
-    var tctx = tempCanvas.getContext("2d");
+    let maxwidth = bcr.MAXWIDTH();
+    let maxheight = bcr.MAXHEIGHT();
+    let tempCanvas = document.createElement("canvas");
+    let tctx = tempCanvas.getContext("2d");
 
     // orientation and resize
-    var width = canvas.width;
-    var height = canvas.height;
+    let width = canvas.width;
+    let height = canvas.height;
 
-    var newWidth = maxwidth;
-    var newHeight = height * newWidth / width;
+    let newWidth = maxwidth;
+    let newHeight = height * newWidth / width;
 
     // vertical case
     if (width < height) {
@@ -171,7 +171,7 @@ function smartCrop(b64img, progress, callback) {
 
         minY = cropResult.top * scale;
         minY -= 100; // minY * scaleMargin;
-                
+
         maxY = cropResult.bottom * scale;
         maxY += 100; // maxY * scaleMargin;
 
@@ -270,8 +270,7 @@ function backgroundElimination(canvas) {
                         setPixel(data2, y + i, x + j, width, 255, 255, 255, 255);
                     }
                 }
-            }
-            else {
+            } else {
                 for (i = 0; i < BlockH; i++) {
                     for (j = 0; j < BlockW; j++) {
                         var oldC = getPixel(data, y + i, x + j, width);
@@ -330,7 +329,7 @@ function imageToCC(canvas) {
             }
         }
     }
-    return { canvas: canvas, ccs: ccs };
+    return {canvas: canvas, ccs: ccs};
 }
 
 // bfs visit
@@ -397,15 +396,14 @@ function ccsClassification(ccs, canvas) {
                     }
                 }
             }
-        }
-        else {
+        } else {
             ccsClean.push(cc);
         }
     }
 
     ctx.putImageData(pixels, 0, 0);
 
-    return { canvas: canvas, ccs: ccsClean };
+    return {canvas: canvas, ccs: ccsClean};
 }
 
 // bounding box
@@ -437,7 +435,7 @@ function boundingBox(ccs, canvas) {
         }
     }
 
-    return { top: minY, left: minX, bottom: maxY, right: maxX };
+    return {top: minY, left: minX, bottom: maxY, right: maxX};
 }
 
 // analyze component
@@ -567,8 +565,7 @@ function imageCCBinarization(data, cc, canvas) {
 
                 if (intensity < Gmid) {
                     setPixel(data, y * BlockH + a, x * BlockW + b, W, 0, 0, 0, 255);
-                }
-                else {
+                } else {
                     var Gneigh = 0;
 
                     var by = y * BlockH + a;
@@ -608,8 +605,7 @@ function imageCCBinarization(data, cc, canvas) {
 
                     if (Gneigh > 4) {
                         setPixel(data, y * BlockH + a, x * BlockW + b, W, 0, 0, 0, 255);
-                    }
-                    else {
+                    } else {
                         setPixel(data, y * BlockH + a, x * BlockW + b, W, 255, 255, 255, 255);
                     }
                 }
