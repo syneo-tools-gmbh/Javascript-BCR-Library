@@ -161,4 +161,4 @@ function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
             this.stream.getVideoTracks()[0].stop();
         }
     };
-};
+}

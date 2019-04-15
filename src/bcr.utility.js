@@ -32,24 +32,24 @@ function titleCase(text) {
 }
 
 function editDistance(word1, word2) {
-    var i, j, Cmin;
-    if (word1 == undefined && word2 == undefined) {
+    let i, j, Cmin;
+    if (word1 === undefined && word2 === undefined) {
         return 1;
     }
-    if (word1 == undefined || word1.length === 0) {
+    if (word1 === undefined || word1.length === 0) {
         return word2.length;
     }
-    if (word2 == undefined || word2.length === 0) {
+    if (word2 === undefined || word2.length === 0) {
         return word1.length;
     }
 
     word1 = word1.toLowerCase();
     word2 = word2.toLowerCase();
 
-    var len1 = word1.length;
-    var len2 = word2.length;
+    let len1 = word1.length;
+    let len2 = word2.length;
 
-    var dp = Array(len1 + 1).fill(0).map(x => Array(len2 + 1).fill(0));
+    let dp = Array(len1 + 1).fill(0).map(() => Array(len2 + 1).fill(0));
 
     for (i = 0; i <= len1; i++) {
         dp[i][0] = i;
@@ -59,17 +59,17 @@ function editDistance(word1, word2) {
     }
 
     for (i = 0; i < len1; i++) {
-        var c1 = word1.charAt(i);
+        let c1 = word1.charAt(i);
 
         for (j = 0; j < len2; j++) {
-            var c2 = word2.charAt(j);
+            let c2 = word2.charAt(j);
 
-            if (c1 == c2) {
+            if (c1 === c2) {
                 dp[i + 1][j + 1] = dp[i][j];
             } else {
-                var Creplace = dp[i][j] + 1;
-                var Cinsert = dp[i][j + 1] + 1;
-                var Cdelete = dp[i + 1][j] + 1;
+                let Creplace = dp[i][j] + 1;
+                let Cinsert = dp[i][j + 1] + 1;
+                let Cdelete = dp[i + 1][j] + 1;
 
                 Cmin = Math.min(Creplace, Math.min(Cinsert, Cdelete));
                 dp[i + 1][j + 1] = Cmin;
@@ -81,24 +81,24 @@ function editDistance(word1, word2) {
 }
 
 function substringEditDistance(word1, word2) {
-    var i, j, Cmin;
-    if (word1 == undefined && word2 == undefined) {
+    let i, j, Cmin;
+    if (word1 === undefined && word2 === undefined) {
         return 1;
     }
-    if (word1 == undefined || word1.length === 0) {
+    if (word1 === undefined || word1.length === 0) {
         return word2.length;
     }
-    if (word2 == undefined || word2.length === 0) {
+    if (word2 === undefined || word2.length === 0) {
         return word1.length;
     }
 
     word1 = word1.toLowerCase();
     word2 = word2.toLowerCase();
 
-    var len1 = word1.length;
-    var len2 = word2.length;
+    let len1 = word1.length;
+    let len2 = word2.length;
 
-    var dp = Array(len1 + 1).fill(0).map(x => Array(len2 + 1).fill(0));
+    let dp = Array(len1 + 1).fill(0).map(() => Array(len2 + 1).fill(0));
 
     for (i = 0; i <= len1; i++) {
         dp[i][0] = i;
@@ -108,17 +108,17 @@ function substringEditDistance(word1, word2) {
     }
 
     for (i = 0; i < len1; i++) {
-        var c1 = word1.charAt(i);
+        let c1 = word1.charAt(i);
 
         for (j = 0; j < len2; j++) {
-            var c2 = word2.charAt(j);
+            let c2 = word2.charAt(j);
 
-            if (c1 == c2) {
+            if (c1 === c2) {
                 dp[i + 1][j + 1] = dp[i][j];
             } else {
-                var Creplace = dp[i][j] + 1;
-                var Cinsert = dp[i][j + 1] + 1;
-                var Cdelete = dp[i + 1][j] + 1;
+                let Creplace = dp[i][j] + 1;
+                let Cinsert = dp[i][j + 1] + 1;
+                let Cdelete = dp[i + 1][j] + 1;
 
                 Cmin = Math.min(Creplace, Math.min(Cinsert, Cdelete));
                 dp[i + 1][j + 1] = Cmin;
@@ -126,7 +126,7 @@ function substringEditDistance(word1, word2) {
         }
     }
 
-    var minLastRow = dp[len1][0];
+    let minLastRow = dp[len1][0];
     for (i = 0; i <= len2; i++) {
         minLastRow = Math.min(minLastRow, dp[len1][i]);
     }
@@ -135,7 +135,7 @@ function substringEditDistance(word1, word2) {
 }
 
 function substringSimilarity(word1, word2) {
-    if (word1 == undefined || word2 == undefined) {
+    if (word1 === undefined || word2 === undefined) {
         return 0.;
     }
     if (word1.length === 0 || word2.length === 0) {
@@ -145,7 +145,7 @@ function substringSimilarity(word1, word2) {
 }
 
 function stringSimilarity(word1, word2) {
-    if (word1 == undefined || word2 == undefined) {
+    if (word1 === undefined || word2 === undefined) {
         return 0.;
     }
     if (word1.length === 0 || word2.length === 0) {
@@ -155,13 +155,13 @@ function stringSimilarity(word1, word2) {
 }
 
 function capitalize(str) {
-    if (str == undefined || str.length === 0) {
+    if (str === undefined || str.length === 0) {
         return "";
     }
     return str.substr(0, 1).toUpperCase() + str.substring(1);
 }
 
-var sSimilarity = function (sa1, sa2) {
+let sSimilarity = function (sa1, sa2) {
     // Compare two strings to see how similar they are.
     // Answer is returned as a value from 0 - 1
     // 1 indicates a perfect similarity (100%) while 0 indicates no similarity (0%)
@@ -179,15 +179,15 @@ var sSimilarity = function (sa1, sa2) {
 
 
     // for my purposes, comparison should not check case or whitespace
-    var s1 = sa1.replace(/\s/g, "").toLowerCase();
-    var s2 = sa2.replace(/\s/g, "").toLowerCase();
+    let s1 = sa1.replace(/\s/g, "").toLowerCase();
+    let s2 = sa2.replace(/\s/g, "").toLowerCase();
 
     function intersect(arr1, arr2) {
         // I didn't write this.  I'd like to come back sometime
         // and write my own intersection algorithm.  This one seems
         // clean and fast, though.  Going to try to find out where
         // I got it for attribution.  Not sure right now.
-        var r = [], o = {}, l = arr2.length, i, v;
+        let r = [], o = {}, l = arr2.length, i, v;
         for (i = 0; i < l; i++) {
             o[arr2[i]] = true;
         }
@@ -201,17 +201,17 @@ var sSimilarity = function (sa1, sa2) {
         return r;
     }
 
-    var pairs = function (s) {
+    let pairs = function (s) {
         // Get an array of all pairs of adjacent letters in a string
-        var pairs = [];
-        for (var i = 0; i < s.length - 1; i++) {
+        let pairs = [];
+        for (let i = 0; i < s.length - 1; i++) {
             pairs[i] = s.slice(i, i + 2);
         }
         return pairs;
-    }
+    };
 
-    var similarity_num = 2 * intersect(pairs(s1), pairs(s2)).length;
-    var similarity_den = pairs(s1).length + pairs(s2).length;
-    var similarity = similarity_num / similarity_den;
-    return similarity;
+    let similarity_num = 2 * intersect(pairs(s1), pairs(s2)).length;
+    let similarity_den = pairs(s1).length + pairs(s2).length;
+
+    return similarity_num / similarity_den;
 };

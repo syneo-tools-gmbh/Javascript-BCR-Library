@@ -31,12 +31,12 @@ const DISTANCE_TOLERANCE = 4;
 const MIN_SCORE = 0.05;
 
 // define result template
-var result = {};
+let result = {};
 
 // *********************************************
 // REGEXES
 // *********************************************
-var typos = [
+let typos = [
     {regex: /[A-Za-z]0[A-Za-z]/g, find: "0", replace: "o"}, // 0 instead of o inside a text
     {regex: /[A-Za-z]\|[A-Za-z]/g, find: "|", replace: "l"}, // pipe for l
     {regex: /[A-Za-z]\|0[A-Za-z]/g, find: "|0", replace: "lo"}, // 0 instead of o + pipe and words
@@ -52,33 +52,33 @@ var typos = [
 ];
 
 // email
-var email = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/gi;
+let email = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/gi;
 
 // web
-var web = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/gi;
+let web = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/gi;
 
 // tel
-var regex_tel = [
-    {regex: /([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g, confidence: 0.5},
+let regex_tel = [
+    {regex: /([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g, confidence: 0.5},
     {
-        regex: /((tel|phon|dir)\w*([.|:])*\s*)([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g,
+        regex: /((tel|phon|dir)\w*([.|:])*\s*)([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
         confidence: 0.5
     }
 ];
 
 // fax
-var regex_fax = [
+let regex_fax = [
     {
-        regex: /((fax)\w*([.|:])*\s*)([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g,
+        regex: /((fax)\w*([.|:])*\s*)([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
         confidence: 0.5
     }
 ];
 
 // mobile
-var regex_mobile = [
-    {regex: /([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g, confidence: 0.5},
+let regex_mobile = [
+    {regex: /([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g, confidence: 0.5},
     {
-        regex: /((mobi|cell|hand)\w*([.|:])*\s*)([+]{1}[0-9]{1,4}\s*){0,1}(\([0-9]{1,2}\)\s*){0,1}([0-9]{1,}[\s|\\|\/|.|-]{0,1}){3,}/g,
+        regex: /((mobi|cell|hand)\w*([.|:])*\s*)([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
         confidence: 0.5
     }
 ];
@@ -87,7 +87,7 @@ var regex_mobile = [
 function analyze(canvas, callback, progress) {
     Tesseract.recognize(canvas)
         .progress(function (data) {
-            var result = {
+            let result = {
                 section: "",
                 progress: {}
             };
@@ -98,7 +98,7 @@ function analyze(canvas, callback, progress) {
         .then(function (ocrResult) {
 
             // BCR analisys from OCR
-            var result = analyzePipeline(ocrResult);
+            let result = analyzePipeline(ocrResult);
 
             // print result
             console.log("Result: ");
@@ -193,14 +193,14 @@ function analyzePipeline(ocr) {
 
 // break long line
 function breakLines(ocr) {
-    var ocrCleaned = {};
+    let ocrCleaned = {};
     ocrCleaned.info = {};
     ocrCleaned.lines = [];
     ocrCleaned.words = [];
     ocrCleaned.text = ocr.text;
 
-    for (i = 0; i < ocr.lines.length; i++) {
-        var w = ocr.lines[i].words;
+    for (let i = 0; i < ocr.lines.length; i++) {
+        let w = ocr.lines[i].words;
         w.sort(function (w1, w2) {
             return w1.bbox.x0 < w2.bbox.x0 ? -1 : +1;
         });
@@ -213,9 +213,9 @@ function breakLines(ocr) {
         }
 
         // Average char width distance
-        var dist = 0;
-        var len = 0;
-        for (j = 0; j < w.length; j++) {
+        let dist = 0;
+        let len = 0;
+        for (let j = 0; j < w.length; j++) {
             dist += w[j].bbox.x1 - w[j].bbox.x0;
             len += w[j].text.length;
         }
@@ -223,8 +223,8 @@ function breakLines(ocr) {
         dist *= DISTANCE_TOLERANCE;   // tolerance
 
         // Break lines
-        var curLines = [];
-        for (j = 0; j <= w.length; j++) {
+        let curLines = [];
+        for (let j = 0; j <= w.length; j++) {
 
             let skipCondition = j !== w.length && w[j].text.length > 0 && w[j].text.trim().endsWith(":");
 
@@ -233,7 +233,7 @@ function breakLines(ocr) {
                 curLines.push(w[j]);
             } else {
                 // Create line object
-                var line = {};
+                let line = {};
 
                 // Map bounding box
                 line.bbox = {};
@@ -267,7 +267,7 @@ function breakLines(ocr) {
 function blocksStrategyAssignment(text) {
 
     // "" = trash, "ok" = get, "subtext1|subtext2|.." = split
-    var result = "";
+    let result = "";
 
     // ******************************************************
     // conditions to strategy // 0 assign, 1 extract more blocks, 2 trash
@@ -279,12 +279,12 @@ function blocksStrategyAssignment(text) {
 
     // line contains more logical blocks (patterns, like tel[xxxxxxxx]fax[xxxxxxx])
     // numbers
-    telmatches = checkRE(regex_tel[1].regex, text);
-    faxmatches = checkRE(regex_fax[0].regex, text);
-    mobmatches = checkRE(regex_mobile[1].regex, text);
-    mailmatches = checkRE(email, text);
-    webmatches = checkRE(web, text);
-    total_matches = telmatches.length + faxmatches.length + mobmatches.length + mailmatches.length + webmatches.length;
+    let telmatches = checkRE(regex_tel[1].regex, text);
+    let faxmatches = checkRE(regex_fax[0].regex, text);
+    let mobmatches = checkRE(regex_mobile[1].regex, text);
+    let mailmatches = checkRE(email, text);
+    let webmatches = checkRE(web, text);
+    let total_matches = telmatches.length + faxmatches.length + mobmatches.length + mailmatches.length + webmatches.length;
 
     // check separate matches
 
@@ -355,7 +355,7 @@ function bcrBuildBlocks(ocr) {
             // trash
         } else if (assign_strategy.indexOf("|") > -1) {
             // extract
-            subblocks = assign_strategy.split('|');
+            let subblocks = assign_strategy.split('|');
             for (let k = 0; k < subblocks.length; k++) {
                 let subblock = {
                     text: "",
@@ -368,7 +368,7 @@ function bcrBuildBlocks(ocr) {
             }
         } else {
             // assign line as it is (trimmed, removed cr lf)
-            block.text = ocr.lines[i].text.replace(/[\n\r|\n|\r]/g, '').trim();
+            block.text = ocr.lines[i].text.replace(/[\n\r|]/g, '').trim();
             block.fontSize = bcrGetWordsFont(ocr.lines[i].words);
 
             //block.fontSize = ocr.
@@ -391,13 +391,13 @@ function cleanText(ocr) {
     for (let i = 0; i < ocr.words.length; i++) {
         for (let it = 0; it < typos.length; it++) {
             // replaces all the typos
-            var backupWord = ocr.words[i].text;
+            let backupWord = ocr.words[i].text;
 
             let matches = checkRE(typos[it].regex, ocr.words[i].text);
             if (matches.length > 0) {
 
                 // fix word
-                var word = ocr.words[i].text.replace(typos[it].find, typos[it].replace);
+                let word = ocr.words[i].text.replace(typos[it].find, typos[it].replace);
 
                 // replace the word
                 ocr.words[i].text = word;
@@ -442,6 +442,7 @@ function bcrGetWordsFont(words) {
     return fontSize;
 }
 
+/*
 // get average font size of words
 function bcrGetWordsBold(words) {
 
@@ -453,6 +454,7 @@ function bcrGetWordsBold(words) {
     }
     return words.length / 2 < fontBold;
 }
+*/
 
 // check regexp
 function checkRE(re, st) {
@@ -465,7 +467,7 @@ function checkRE(re, st) {
 
 // extract web from candidate
 function extractWeb(text) {
-    var result = checkRE(web, text);
+    let result = checkRE(web, text);
     if (result.length > 0) {
         return result[0];
     } else {
@@ -475,7 +477,7 @@ function extractWeb(text) {
 
 // extract mail from candidate
 function extractEmail(text) {
-    var result = checkRE(email, text);
+    let result = checkRE(email, text);
     if (result.length > 0) {
         return result[0];
     } else {
@@ -487,7 +489,7 @@ function extractEmail(text) {
 function extractNumber(text) {
 
     // remove literals, multiple spaces
-    return text.replace(/[^0-9|+|-]/g, ' ').replace(/\s{1,}/g, " ").trim();
+    return text.replace(/[^0-9|+-]/g, ' ').replace(/\s+/g, " ").trim();
 }
 
 // extract company from candidate
@@ -529,8 +531,8 @@ function extractCity(text) {
 function extractCountry(text) {
 
     let txt = text.toLowerCase().split(" ");
-    for (j = 0; j < countryDS.length; j++) {
-        for (k = 0; k < txt.length; k++) {
+    for (let j = 0; j < countryDS.length; j++) {
+        for (let k = 0; k < txt.length; k++) {
             if (txt[k].indexOf(countryDS[j]) !== -1) {
                 if (countryDS[j] / txt[k] < THRESHOLD_HIGH) continue;
                 return txt[k];
@@ -544,10 +546,10 @@ function extractCountry(text) {
 // extract address zip
 function extractZip(text) {
 
-    var numbers = text.replace(/[^0-9]/g, " ").trim().split(" ");
+    let numbers = text.replace(/[^0-9]/g, " ").trim().split(" ");
 
     if (numbers.length > 0) {
-        for (j = numbers.length - 1; j >= 0; j--) {
+        for (let j = numbers.length - 1; j >= 0; j--) {
             if (typeof numbers[j] === "undefined") {
                 continue;
             }
@@ -627,7 +629,7 @@ function splitName(text) {
 function scoreEmail(ocr) {
 
     // confidence 1
-    var confidence = 1;
+    let confidence = 1;
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         let matches = checkRE(email, ocr.BCR.blocks[i].text);
         if (matches.length > 0) ocr.BCR.blocks[i].fields.email = confidence;
@@ -646,7 +648,7 @@ function scoreEmail(ocr) {
 function scoreWeb(ocr) {
 
     // confidence 1
-    var confidence = 1;
+    let confidence = 1;
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         let matches = checkRE(web, ocr.BCR.blocks[i].text);
         if (matches.length > 0) ocr.BCR.blocks[i].fields.web = confidence;
@@ -695,7 +697,7 @@ function scoreNumbers(ocr) {
 // score company (mail similarity, font, website)
 function scoreCompany(ocr) {
 
-    var keywords = {};
+    let keywords = {};
 
     // cycle on candidates (web, email)
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
@@ -732,10 +734,11 @@ function scoreCompany(ocr) {
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.web === 0 && ocr.BCR.blocks[i].fields.email === 0) {
             let word = ocr.BCR.blocks[i].text.toLowerCase();
-            for (var k in keywords) {
+            let keys = Object.keys(keywords);
+            for (let k in keys) {
 
                 // calculate similarity
-                var sim = sSimilarity(word, k);
+                let sim = sSimilarity(word, k);
 
                 // assign if more than threshold
                 if (sim > THRESHOLD_LOW) {
@@ -754,7 +757,7 @@ function scoreCompany(ocr) {
 // score name (email, font, dataset)
 function scoreName(ocr) {
 
-    var keywords = [];
+    let keywords = [];
 
     // mail assigned case (0.6)
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
@@ -762,7 +765,7 @@ function scoreName(ocr) {
             let email = ocr.BCR.blocks[i].text;
 
             if (typeof email !== "undefined" && email.length > 0) {
-                var nick = email.substr(0, email.indexOf("@"));
+                let nick = email.substr(0, email.indexOf("@"));
                 nick = nick.replace(new RegExp("\\.", 'g'), " ");
 
                 if (typeof email !== undefined && email.length > 0)
@@ -775,10 +778,10 @@ function scoreName(ocr) {
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.email === 0) {
             let word = ocr.BCR.blocks[i].text.toLowerCase();
-            for (var k in keywords) {
+            for (let k in keywords) {
 
                 // calculate similarity
-                var sim = sSimilarity(word, keywords[k]);
+                let sim = sSimilarity(word, keywords[k]);
 
                 // assign if more than threshold
                 if (sim > THRESHOLD_HIGH) {
@@ -873,9 +876,9 @@ function scoreAddress(ocr) {
 
     // score 0.2 for address pattern
     // Street address matching typical names
-    for (i = 0; i < ocr.BCR.blocks.length; i++) {
+    for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         let txt = ocr.BCR.blocks[i].text.toLowerCase();
-        for (j = 0; j < streetsDS.length; j++) {
+        for (let j = 0; j < streetsDS.length; j++) {
             let re = streetsDS[j];
 
             // regex evaluation
@@ -889,10 +892,10 @@ function scoreAddress(ocr) {
     // Find zip code (in already used address scored)
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.address > 0) {
-            var numbers = ocr.BCR.blocks[i].text.replace(/[^0-9]/g, " ").trim().split(" ");
+            let numbers = ocr.BCR.blocks[i].text.replace(/[^0-9]/g, " ").trim().split(" ");
 
             if (numbers.length > 0) {
-                for (j = numbers.length - 1; j >= 0; j--) {
+                for (let j = numbers.length - 1; j >= 0; j--) {
                     if (typeof numbers[j] === "undefined") {
                         continue;
                     }
@@ -911,7 +914,7 @@ function scoreAddress(ocr) {
     }
 
     // score 0.1 for multiple assignment
-    for (i = 0; i < ocr.BCR.blocks.length; i++) {
+    for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.address > 2) ocr.BCR.blocks[i].fields.address += 0.1;
     }
 
@@ -940,15 +943,15 @@ function scoreAddress(ocr) {
 // *********************************************************************
 function assignResults(ocr) {
 
-    var web = [];
-    var email = [];
-    var name = [];
-    var company = [];
-    var job = [];
-    var phone = [];
-    var fax = [];
-    var mobile = [];
-    var address = [];
+    let web = [];
+    let email = [];
+    let name = [];
+    let company = [];
+    let job = [];
+    let phone = [];
+    let fax = [];
+    let mobile = [];
+    let address = [];
 
     // cycling on blocks
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
@@ -1007,16 +1010,16 @@ function assignResults(ocr) {
 
     // sort arrays and assign result
     if (web.length > 0) {
-        var web_found = web.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
+        let web_found = web.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
         if (web_found.confidence > MIN_SCORE) {
             result.fields.Web = web_found.text;
             ocr.BCR.blocks[web_found.block].used = true;
         }
     }
-    var k;
+
     if (email.length > 0) {
         email.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1);
-        for (k = 0; k < email.length; k++) {
+        for (let k = 0; k < email.length; k++) {
             if (!ocr.BCR.blocks[email[k].block].used && email[k].confidence > MIN_SCORE) {
                 result.fields.Email = email[k].text;
                 ocr.BCR.blocks[email[k].block].used = true;
@@ -1026,7 +1029,7 @@ function assignResults(ocr) {
     }
     if (phone.length > 0) {
         phone.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1);
-        for (k = 0; k < phone.length; k++) {
+        for (let k = 0; k < phone.length; k++) {
             if (!ocr.BCR.blocks[phone[k].block].used && phone[k].confidence > MIN_SCORE) {
                 result.fields.Phone = phone[k].text;
                 ocr.BCR.blocks[phone[k].block].used = true;
@@ -1035,8 +1038,8 @@ function assignResults(ocr) {
         }
     }
     if (fax.length > 0) {
-        fax.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
-        for (k = 0; k < fax.length; k++) {
+        fax.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1); // TODO: why [0] ?
+        for (let k = 0; k < fax.length; k++) {
             if (!ocr.BCR.blocks[fax[k].block].used && fax[k].confidence > MIN_SCORE) {
                 result.fields.Fax = fax[k].text;
                 ocr.BCR.blocks[fax[k].block].used = true;
@@ -1045,8 +1048,8 @@ function assignResults(ocr) {
         }
     }
     if (mobile.length > 0) {
-        mobile.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
-        for (k = 0; k < mobile.length; k++) {
+        mobile.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1); // TODO: why [0] ?
+        for (let k = 0; k < mobile.length; k++) {
             if (!ocr.BCR.blocks[mobile[k].block].used && mobile[k].confidence > MIN_SCORE) {
                 result.fields.Mobile = mobile[k].text;
                 ocr.BCR.blocks[mobile[k].block].used = true;
@@ -1055,8 +1058,8 @@ function assignResults(ocr) {
         }
     }
     if (company.length > 0) {
-        company.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
-        for (k = 0; k < company.length; k++) {
+        company.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1); // TODO: why [0] ?
+        for (let k = 0; k < company.length; k++) {
             if (!ocr.BCR.blocks[company[k].block].used && company[k].confidence > MIN_SCORE) {
                 result.fields.Company = company[k].text;
                 ocr.BCR.blocks[company[k].block].used = true;
@@ -1065,8 +1068,8 @@ function assignResults(ocr) {
         }
     }
     if (name.length > 0) {
-        name.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
-        for (k = 0; k < name.length; k++) {
+        name.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1); // TODO: why [0] ?
+        for (let k = 0; k < name.length; k++) {
             if (!ocr.BCR.blocks[name[k].block].used && name[k].confidence > MIN_SCORE) {
                 result.fields.Name = splitName(name[k].text);
                 ocr.BCR.blocks[name[k].block].used = true;
@@ -1075,8 +1078,8 @@ function assignResults(ocr) {
         }
     }
     if (job.length > 0) {
-        job.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
-        for (k = 0; k < job.length; k++) {
+        job.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1); // TODO: why [0] ?
+        for (let k = 0; k < job.length; k++) {
             if (!ocr.BCR.blocks[job[k].block].used && job[k].confidence > MIN_SCORE) {
                 result.fields.Job = job[k].text;
                 ocr.BCR.blocks[job[k].block].used = true;
@@ -1085,8 +1088,8 @@ function assignResults(ocr) {
         }
     }
     if (address.length > 0) {
-        address.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1)[0];
-        for (k = 0; k < address.length; k++) {
+        address.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1); // TODO: why [0] ?
+        for (let k = 0; k < address.length; k++) {
             if (!ocr.BCR.blocks[address[k].block].used && address[k].confidence > MIN_SCORE) {
 
                 // assign first found not empty

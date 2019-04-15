@@ -22,15 +22,15 @@
 *
 */
 
-var GOLD_RATIO = (Math.sqrt(5) + 1) / 2;
-var GOLD_RATIO_ERROR = 0.5;
-var MIN_QUAD_AREA_RATIO = 0.15;
+let GOLD_RATIO = (Math.sqrt(5) + 1) / 2;
+let GOLD_RATIO_ERROR = 0.5;
+let MIN_QUAD_AREA_RATIO = 0.15;
 
-var MAX_QUAD_ANGLE_RANGE = 40;
-var RESCALED_HEIGHT = 1024;
-var MORPH = 9;
-var CANNY = 84;
-var HOUGH = 25;
+let MAX_QUAD_ANGLE_RANGE = 40;
+let RESCALED_HEIGHT = 1024;
+let MORPH = 9;
+let CANNY = 84;
+let HOUGH = 25;
 
 function documentScanner(img, callback) {
     console.clear();
@@ -53,13 +53,13 @@ function documentScanner(img, callback) {
     for (let i = 0; i < contours.size(); ++i) {
         let tmp = new cv.Mat();
         let cnt = contours.get(i);
-        epsilon = 0.05 * cv.arcLength(cnt, true);
+        let epsilon = 0.05 * cv.arcLength(cnt, true);
         cv.approxPolyDP(cnt, tmp, epsilon, true);
         poly.push(tmp);
     }
 
     // Filter rectangles
-    poly = poly.filter(x => x.rows == 4);
+    poly = poly.filter(x => x.rows === 4);
 
     // Only golder-ratio rectangles
     poly = poly.filter(x => {
@@ -79,7 +79,7 @@ function documentScanner(img, callback) {
     // Biggest area first;
     poly.reverse();
 
-    let rectangleColor = new cv.Scalar(0, 255, 255);
+    // let rectangleColor = new cv.Scalar(0, 255, 255);
 
     if (poly.length > 0) {
         let rotatedRect = cv.minAreaRect(poly[0]);
@@ -115,7 +115,7 @@ function denoise(img, callback) {
     let dst = new cv.Mat();
 
     // gray scale image
-    var gray = new cv.Mat();
+    let gray = new cv.Mat();
     cv.cvtColor(src, gray, cv.COLOR_RGB2GRAY);
 
     // Noise removal via bilateral filtering
@@ -124,11 +124,11 @@ function denoise(img, callback) {
 
     let ksize = new cv.Size(1, 1);
 
-    cv.adaptiveThreshold(gray, gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2)
+    cv.adaptiveThreshold(gray, gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2);
 
     cv.GaussianBlur(gray, gray, ksize, 0, 0, cv.BORDER_DEFAULT);
 
-    cv.threshold(gray, gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
+    cv.threshold(gray, gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU);
 
     let canvas = document.createElement("canvas");
     cv.imshow(canvas, gray);
@@ -203,28 +203,27 @@ function getCorners(img) {
 
 function getContour(image) {
     image = image.clone();
-    var IM_HEIGHT = image.rows;
-    var IM_WIDTH = image.cols;
+    let IM_HEIGHT = image.rows;
+    let IM_WIDTH = image.cols;
 
     console.log(IM_HEIGHT, IM_WIDTH);
 
-    var gray = new cv.Mat();
+    let gray = new cv.Mat();
     cv.cvtColor(image, gray, cv.COLOR_RGB2GRAY);
     let ksize = new cv.Size(7, 7);
     cv.GaussianBlur(gray, gray, ksize, 0, 0, cv.BORDER_DEFAULT);
 
-    var kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(MORPH, MORPH));
-    var dilated = new cv.Mat();
+    let kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(MORPH, MORPH));
+    let dilated = new cv.Mat();
     cv.dilate(gray, dilated, kernel);
 
     console.log(kernel, dilated);
 
-    var edged = new cv.Mat();
+    let edged = new cv.Mat();
     cv.Canny(dilated, edged, 0, CANNY);
 
-    var test_corners = getCorners(edged);
-
-    var approx_contours = [];
+    // let test_corners = getCorners(edged);
+    // let approx_contours = [];
 
     /*
 
@@ -288,16 +287,16 @@ function getContour(image) {
   callback: function(base64) with returned cleaned and cropped document
 */
 function documentScanner_old(img, callback) {
-    var img = cv.imread(img);
+    img = cv.imread(img);
 
     // get the contour of the document
-    var screenCnt = getContour(img);
+    // let screenCnt = getContour(img);
 
     // apply the perspective transformation
-    var warped = img; // transform.four_point_transform(orig, screenCnt * ratio);
+    let warped = img; // transform.four_point_transform(orig, screenCnt * ratio);
 
     // convert the warped image to grayscale
-    var gray = new cv.Mat();
+    let gray = new cv.Mat();
     cv.cvtColor(warped, gray, cv.COLOR_BGR2GRAY);
 
     // show results
@@ -306,7 +305,6 @@ function documentScanner_old(img, callback) {
     callback(canvas.toDataURL());
     img.delete();
     gray.delete();
-
 }
 
 function documentScanner_old2(img, callback) {
