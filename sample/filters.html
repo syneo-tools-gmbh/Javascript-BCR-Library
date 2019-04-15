@@ -35,7 +35,8 @@
     File.prototype.convertToBase64 = function (callback) {
         let reader = new FileReader();
         reader.onloadend = function (e) {
-            callback(e.target.result, e.target.error);
+            // TODO: Check if e.target.result of e.result
+            callback(e.result, e.error);
         };
         reader.readAsDataURL(this);
     };
@@ -45,7 +46,7 @@
         $("#inp").trigger("click");
     });
 
-    document.getElementById('inp').onchange = function (e) {
+    document.getElementById('inp').onchange = function () {
 
         // step 0: Convert file to base64 image
         let file = this.files[0];

@@ -61,10 +61,9 @@ function pipeline(img, progress, callback) {
         stages.push(canvas.toDataURL());
 
         // Step 3 identify connected components of blocks and store it
-        let ccs = [];
         let result = imageToCC(canvas);
         canvas = result.canvas;
-        ccs = result.ccs;
+        let ccs = result.ccs;
         stages.push(canvas.toDataURL());
 
         // Step 4 classify each blocks as background/data
@@ -140,15 +139,15 @@ function normalizeSize(canvas) {
 
 // isolate card and crop
 function smartCrop(b64img, progress, callback) {
-    var img = new Image();
+    let img = new Image();
     img.onload = function () {
 
-        var scale = 1;
-        var canvas = document.createElement("canvas");
-        var ctx = canvas.getContext("2d");
+        let scale = 1;
+        let canvas = document.createElement("canvas");
+        let ctx = canvas.getContext("2d");
 
-        var width = img.width / scale;
-        var height = img.height / scale;
+        let width = img.width / scale;
+        let height = img.height / scale;
         canvas.width = width;
         canvas.height = height;
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -156,28 +155,28 @@ function smartCrop(b64img, progress, callback) {
         // clean (pipeline)
         canvas = greyScale(canvas);
         canvas = backgroundElimination(canvas);
-        var ccs = [];
-        var result = imageToCC(canvas);
-        ccs = result.ccs;
+
+        let result = imageToCC(canvas);
+        let ccs = result.ccs;
         canvas = result.canvas;
-        var cropResult = boundingBox(ccs, canvas);
+        let cropResult = boundingBox(ccs, canvas);
 
         // readjust
-        minX = cropResult.left * scale;
+        let minX = cropResult.left * scale;
         minX -= 100; //minX * scaleMargin;
 
-        maxX = cropResult.right * scale;
+        let maxX = cropResult.right * scale;
         maxX += 100; // maxX * scaleMargin;
 
-        minY = cropResult.top * scale;
+        let minY = cropResult.top * scale;
         minY -= 100; // minY * scaleMargin;
 
-        maxY = cropResult.bottom * scale;
+        let maxY = cropResult.bottom * scale;
         maxY += 100; // maxY * scaleMargin;
 
         // parse result
-        var tempCanvas = document.createElement("canvas");
-        var tempCtx = tempCanvas.getContext("2d");
+        let tempCanvas = document.createElement("canvas");
+        let tempCtx = tempCanvas.getContext("2d");
         width = maxX - minX;
         height = maxY - minY;
         tempCanvas.width = width;
@@ -192,8 +191,8 @@ function smartCrop(b64img, progress, callback) {
 
 // get pixel function
 function getPixel(data, y, x, width) {
-    var baseIdx = (y * width + x) * 4;
-    return [data[baseIdx + 0], data[baseIdx + 1], data[baseIdx + 2], data[baseIdx + 3]];
+    let baseIdx = (y * width + x) * 4;
+    return [data[baseIdx], data[baseIdx + 1], data[baseIdx + 2], data[baseIdx + 3]];
 }
 
 // set pixel function
@@ -201,8 +200,8 @@ function setPixel(data, y, x, width, r, g, b, a) {
     if (typeof a === "undefined") {
         a = 255;
     }
-    var baseIdx = (y * width + x) * 4;
-    data[baseIdx + 0] = r;
+    let baseIdx = (y * width + x) * 4;
+    data[baseIdx] = r;
     data[baseIdx + 1] = g;
     data[baseIdx + 2] = b;
     data[baseIdx + 3] = a;
@@ -210,11 +209,11 @@ function setPixel(data, y, x, width, r, g, b, a) {
 
 // transform in grey scale
 function greyScale(canvas) {
-    var ctx = canvas.getContext("2d");
-    var pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    var data = pixels.data;
-    for (var i = 0; i < data.length; i += 4) {
-        var avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+    let ctx = canvas.getContext("2d");
+    let pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = pixels.data;
+    for (let i = 0; i < data.length; i += 4) {
+        let avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
         data[i] = avg; // red
         data[i + 1] = avg; // green
         data[i + 2] = avg; // blue
@@ -225,33 +224,32 @@ function greyScale(canvas) {
 
 // eliminate background
 function backgroundElimination(canvas) {
-    var ctx = canvas.getContext("2d");
-    var pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    var data = pixels.data;
+    let ctx = canvas.getContext("2d");
+    let pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = pixels.data;
 
-    var width = canvas.width;
-    var height = canvas.height;
+    let width = canvas.width;
+    let height = canvas.height;
 
-    var pixels2 = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    var data2 = pixels2.data;
+    let pixels2 = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data2 = pixels2.data;
 
-    var BlockW = parseInt(width / 64);
-    var BlockH = 2;
+    let BlockW = Math.floor(width / 64);
+    let BlockH = 2;
 
-    var Tfixed = 20.;
-    var Tmin = 100.;
+    let Tfixed = 20.;
+    let Tmin = 100.;
 
-    for (var y = 0; y < height; y += BlockH) {
-        for (var x = 0; x < width; x += BlockW) {
-            var Gmin = 255;
-            var Gmax = 0;
+    for (let y = 0; y < height; y += BlockH) {
+        for (let x = 0; x < width; x += BlockW) {
+            let Gmin = 255;
+            let Gmax = 0;
 
-            var Gx2 = 0;
-            var Gx = 0;
-            var i, j;
-            for (i = 0; i < BlockH; i++) {
-                for (j = 0; j < BlockW; j++) {
-                    var G = getPixel(data, y + i, x + j, width)[0];
+            let Gx2 = 0;
+            let Gx = 0;
+            for (let i = 0; i < BlockH; i++) {
+                for (let j = 0; j < BlockW; j++) {
+                    let G = getPixel(data, y + i, x + j, width)[0];
                     Gmin = Math.min(Gmin, G);
                     Gmax = Math.max(Gmax, G);
                     Gx2 += G * G;
@@ -259,21 +257,21 @@ function backgroundElimination(canvas) {
                 }
             }
 
-            var N = (BlockH * BlockW);
-            var variance = (Gx2 / N) - Math.pow(Gx / N, 2);
+            let N = (BlockH * BlockW);
+            let variance = (Gx2 / N) - Math.pow(Gx / N, 2);
 
-            var Tvar = ((Gmin - Tmin) - Math.min(Tfixed, Gmin - Tmin)) * 2;
+            let Tvar = ((Gmin - Tmin) - Math.min(Tfixed, Gmin - Tmin)) * 2;
 
             if (variance < Tvar) {
-                for (i = 0; i < BlockH; i++) {
-                    for (j = 0; j < BlockW; j++) {
+                for (let i = 0; i < BlockH; i++) {
+                    for (let j = 0; j < BlockW; j++) {
                         setPixel(data2, y + i, x + j, width, 255, 255, 255, 255);
                     }
                 }
             } else {
-                for (i = 0; i < BlockH; i++) {
-                    for (j = 0; j < BlockW; j++) {
-                        var oldC = getPixel(data, y + i, x + j, width);
+                for (let i = 0; i < BlockH; i++) {
+                    for (let j = 0; j < BlockW; j++) {
+                        let oldC = getPixel(data, y + i, x + j, width);
                         setPixel(data2, y + i, x + j, width, oldC[0], oldC[1], oldC[2], oldC[3]);
                     }
                 }
@@ -287,29 +285,28 @@ function backgroundElimination(canvas) {
 
 // put image in canvas
 function imageToCC(canvas) {
-    var ctx = canvas.getContext("2d");
-    var pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    var data = pixels.data;
+    let ctx = canvas.getContext("2d");
+    let pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = pixels.data;
 
-    var width = canvas.width;
-    var height = canvas.height;
+    let width = canvas.width;
+    let height = canvas.height;
 
-    var BlockW = parseInt(width / 64);
-    var BlockH = 2;
+    let BlockW = Math.floor(width / 64);
+    let BlockH = 2;
 
-    var BlockNW = parseInt(width / BlockW);
-    var BlockNH = parseInt(height / BlockH);
+    let BlockNW = Math.floor(width / BlockW);
+    let BlockNH = Math.floor(height / BlockH);
 
-    var blockBackground = Array(BlockNH).fill().map(() => Array(BlockNW).fill(false));
-    var visited = Array(BlockNH).fill().map(() => Array(BlockNW).fill(false));
+    let blockBackground = Array(BlockNH).fill(undefined).map(() => Array(BlockNW).fill(false));
+    let visited = Array(BlockNH).fill(undefined).map(() => Array(BlockNW).fill(false));
 
-    var i, j;
-    for (i = 0; i < BlockNH; i++) {
-        for (j = 0; j < BlockNW; j++) {
-            var empty = true;
-            for (var a = 0; a < BlockH && empty; a++) {
-                for (var b = 0; b < BlockW && empty; b++) {
-                    var color = getPixel(data, i * BlockH + a, j * BlockW + b, width)[0];
+    for (let i = 0; i < BlockNH; i++) {
+        for (let j = 0; j < BlockNW; j++) {
+            let empty = true;
+            for (let a = 0; a < BlockH && empty; a++) {
+                for (let b = 0; b < BlockW && empty; b++) {
+                    let color = getPixel(data, i * BlockH + a, j * BlockW + b, width)[0];
                     if (color !== 255) {
                         empty = false;
                     }
@@ -320,10 +317,10 @@ function imageToCC(canvas) {
         }
     }
 
-    var ccs = [];
+    let ccs = [];
 
-    for (i = 0; i < BlockNH; i++) {
-        for (j = 0; j < BlockNW; j++) {
+    for (let i = 0; i < BlockNH; i++) {
+        for (let j = 0; j < BlockNW; j++) {
             if (!visited[i][j]) {
                 ccs.push(bfsVisit(visited, i, j));
             }
@@ -334,19 +331,19 @@ function imageToCC(canvas) {
 
 // bfs visit
 function bfsVisit(visited, i, j) {
-    var out = [];
-    var Q = [];
+    let out = [];
+    let Q = [];
 
     Q.push([i, j]);
 
-    var width = visited[0].length;
-    var height = visited.length;
+    let width = visited[0].length;
+    let height = visited.length;
 
     while (Q.length > 0) {
-        var top = Q.pop();
+        let top = Q.pop();
 
-        var x = top[1];
-        var y = top[0];
+        let x = top[1];
+        let y = top[0];
 
         if (x < 0 || y < 0 || x >= width || y >= height || visited[y][x]) {
             continue;
@@ -373,25 +370,25 @@ function bfsVisit(visited, i, j) {
 
 // css classification
 function ccsClassification(ccs, canvas) {
-    var ctx = canvas.getContext("2d");
-    var pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    var data = pixels.data;
+    let ctx = canvas.getContext("2d");
+    let pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = pixels.data;
 
-    var W = canvas.width;
+    let W = canvas.width;
 
-    var BlockW = parseInt(W / 64);
-    var BlockH = 2;
+    let BlockW = Math.floor(W / 64);
+    let BlockH = 2;
 
-    var ccsClean = [];
-    for (var k = 0; k < ccs.length; k++) {
-        var cc = ccs[k];
-        var background = analyzeComponent(cc, canvas);
+    let ccsClean = [];
+    for (let k = 0; k < ccs.length; k++) {
+        let cc = ccs[k];
+        let background = analyzeComponent(cc, canvas);
         if (background) {
-            for (var l = 0; l < cc.length; l++) {
-                var y = cc[l][0];
-                var x = cc[l][1];
-                for (var i = 0; i < BlockH; i++) {
-                    for (var j = 0; j < BlockW; j++) {
+            for (let l = 0; l < cc.length; l++) {
+                let y = cc[l][0];
+                let x = cc[l][1];
+                for (let i = 0; i < BlockH; i++) {
+                    for (let j = 0; j < BlockW; j++) {
                         setPixel(data, y * BlockH + i, x * BlockW + j, W, 255, 255, 255, 255);
                     }
                 }
@@ -408,22 +405,22 @@ function ccsClassification(ccs, canvas) {
 
 // bounding box
 function boundingBox(ccs, canvas) {
-    var W = canvas.width;
+    let W = canvas.width;
 
-    var BlockW = parseInt(W / 64);
-    var BlockH = 2;
+    let BlockW = Math.floor(W / 64);
+    let BlockH = 2;
 
-    var minX = 999999, minY = 999999, maxX = 0, maxY = 0;
+    let minX = 999999, minY = 999999, maxX = 0, maxY = 0;
 
-    for (var k = 0; k < ccs.length; k++) {
-        var cc = ccs[k];
-        var background = analyzeComponent(cc, canvas);
+    for (let k = 0; k < ccs.length; k++) {
+        let cc = ccs[k];
+        let background = analyzeComponent(cc, canvas);
         if (!background) {
-            for (var l = 0; l < cc.length; l++) {
-                var y = cc[l][0];
-                var x = cc[l][1];
-                for (var i = 0; i < BlockH; i++) {
-                    for (var j = 0; j < BlockW; j++) {
+            for (let l = 0; l < cc.length; l++) {
+                let y = cc[l][0];
+                let x = cc[l][1];
+                for (let i = 0; i < BlockH; i++) {
+                    for (let j = 0; j < BlockW; j++) {
                         // calculate minx, maxx, width, height
                         if (x * BlockW + j < minX) minX = x * BlockW + j;
                         if (y * BlockH + i < minY) minY = y * BlockH + i;
@@ -440,40 +437,36 @@ function boundingBox(ccs, canvas) {
 
 // analyze component
 function analyzeComponent(cc, canvas) {
-    var W = canvas.width;
-    var H = canvas.height;
+    let W = canvas.width;
+    let H = canvas.height;
 
-    var BlockW = parseInt(W / 64);
-    var BlockH = 2;
+    let BlockW = Math.floor(W / 64);
+    let BlockH = 2;
 
     // Black magic costants... :D
-    var HTH = H / 60;
-    var WTH = W / 40;
-    var ATH = W * H / 1500;
-    var BTH = H / 100;
-    var LTH = W / 40;
+    let HTH = H / 60;
+    let WTH = W / 40;
+    let ATH = W * H / 1500;
+    let BTH = H / 100;
+    let LTH = W / 40;
 
-    var Hcc = 0;
-    var Wcc = 0;
-    var Acc = 0;
+    let minX = 1 << 30;
+    let minY = 1 << 30;
+    let maxX = 0;
+    let maxY = 0;
 
-    var minX = 1 << 30;
-    var minY = 1 << 30;
-    var maxX = 0;
-    var maxY = 0;
-
-    Acc = (BlockW * BlockH) * cc.length;
-    for (var i = 0; i < cc.length; i++) {
-        var x = cc[i][1];
-        var y = cc[i][0];
+    let Acc = (BlockW * BlockH) * cc.length;
+    for (let i = 0; i < cc.length; i++) {
+        let x = cc[i][1];
+        let y = cc[i][0];
         minX = Math.min(minX, x);
         minY = Math.min(minY, y);
         maxX = Math.max(maxX, x);
         maxY = Math.max(maxY, y);
     }
 
-    Hcc = (maxY - minY + 1) * BlockH;
-    Wcc = (maxX - minX + 1) * BlockW;
+    let Hcc = (maxY - minY + 1) * BlockH;
+    let Wcc = (maxX - minX + 1) * BlockW;
 
     if (Hcc < HTH) {
         return true;
@@ -492,31 +485,29 @@ function analyzeComponent(cc, canvas) {
         return true;
     }
 
-    var Rw2h = Wcc / Hcc;
-    var Rmin = 1.2;
-    var Rmax = 32.;
+    let Rw2h = Wcc / Hcc;
+    let Rmin = 1.2;
+    let Rmax = 32.;
 
-    var RAmin = 1.;
-    var RAmax = 2.5;
+    let RAmin = 1.;
+    let RAmax = 2.5;
 
-    var RA = (Wcc * Hcc) / Acc;
+    let RA = (Wcc * Hcc) / Acc;
 
     if (!(Rmin < Rw2h && Rw2h < Rmax)) {
         return true;
     }
 
     return !(RAmin < RA && RA < RAmax);
-
-
 }
 
 // image binarization
 function imageBinarization(ccs, canvas) {
-    var ctx = canvas.getContext("2d");
-    var pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    var data = pixels.data;
+    let ctx = canvas.getContext("2d");
+    let pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = pixels.data;
 
-    for (var i = 0; i < ccs.length; i++) {
+    for (let i = 0; i < ccs.length; i++) {
         canvas = imageCCBinarization(data, ccs[i], canvas);
     }
 
@@ -526,57 +517,56 @@ function imageBinarization(ccs, canvas) {
 
 // image cc binarization
 function imageCCBinarization(data, cc, canvas) {
-    var ctx = canvas.getContext("2d");
-    var W = canvas.width;
-    var H = canvas.height;
+    let ctx = canvas.getContext("2d");
+    let W = canvas.width;
+    let H = canvas.height;
 
-    var BlockW = parseInt(W / 64);
-    var BlockH = 2;
+    let BlockW = Math.floor(W / 64);
+    let BlockH = 2;
 
-    var Gmin = 256;
-    var Gmax = -1;
+    let Gmin = 256;
+    let Gmax = -1;
 
-    var pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    var copy = pixels.data;
+    let pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let copy = pixels.data;
 
-    var i, y, x, a, b, intensity;
-    for (i = 0; i < cc.length; i++) {
-        y = cc[i][0];
-        x = cc[i][1];
-        for (a = 0; a < BlockH; a++) {
-            for (b = 0; b < BlockW; b++) {
-                intensity = getPixel(data, y * BlockH + a, x * BlockW + b, W)[0];
+    for (let i = 0; i < cc.length; i++) {
+        let y = cc[i][0];
+        let x = cc[i][1];
+        for (let a = 0; a < BlockH; a++) {
+            for (let b = 0; b < BlockW; b++) {
+                let intensity = getPixel(data, y * BlockH + a, x * BlockW + b, W)[0];
                 Gmin = Math.min(Gmin, intensity);
                 Gmax = Math.max(Gmax, intensity);
             }
         }
     }
 
-    var Gmid = (Gmin + Gmax) / 2;
+    let Gmid = (Gmin + Gmax) / 2;
 
-    for (i = 0; i < cc.length; i++) {
-        y = cc[i][0];
-        x = cc[i][1];
+    for (let i = 0; i < cc.length; i++) {
+        let y = cc[i][0];
+        let x = cc[i][1];
 
-        for (a = 0; a < BlockH; a++) {
-            for (b = 0; b < BlockW; b++) {
+        for (let a = 0; a < BlockH; a++) {
+            for (let b = 0; b < BlockW; b++) {
 
-                intensity = getPixel(data, y * BlockH + a, x * BlockW + b, W)[0];
+                let intensity = getPixel(data, y * BlockH + a, x * BlockW + b, W)[0];
 
                 if (intensity < Gmid) {
                     setPixel(data, y * BlockH + a, x * BlockW + b, W, 0, 0, 0, 255);
                 } else {
-                    var Gneigh = 0;
+                    let Gneigh = 0;
 
-                    var by = y * BlockH + a;
-                    var bx = x * BlockW + b;
+                    let by = y * BlockH + a;
+                    let bx = x * BlockW + b;
 
                     if (by > 0 && bx > 0) {
                         Gneigh += getPixel(copy, by - 1, bx - 1, W)[0] < Gmid ? 1 : 0;
                     }
 
                     if (by > 0) {
-                        Gneigh += getPixel(copy, by - 1, bx + 0, W)[0] < Gmid ? 1 : 0;
+                        Gneigh += getPixel(copy, by - 1, bx, W)[0] < Gmid ? 1 : 0;
                     }
 
                     if (by > 0 && bx < W - 1) {
@@ -584,11 +574,11 @@ function imageCCBinarization(data, cc, canvas) {
                     }
 
                     if (bx > 0) {
-                        Gneigh += getPixel(copy, by + 0, bx - 1, W)[0] < Gmid ? 1 : 0;
+                        Gneigh += getPixel(copy, by, bx - 1, W)[0] < Gmid ? 1 : 0;
                     }
 
                     if (bx < W - 1) {
-                        Gneigh += getPixel(copy, by + 0, bx + 1, W)[0] < Gmid ? 1 : 0;
+                        Gneigh += getPixel(copy, by, bx + 1, W)[0] < Gmid ? 1 : 0;
                     }
 
                     if (by < H - 1 && bx > 0) {
@@ -596,7 +586,7 @@ function imageCCBinarization(data, cc, canvas) {
                     }
 
                     if (by < H - 1) {
-                        Gneigh += getPixel(copy, by + 1, bx + 0, W)[0] < Gmid ? 1 : 0;
+                        Gneigh += getPixel(copy, by + 1, bx, W)[0] < Gmid ? 1 : 0;
                     }
 
                     if (by < H - 1 && bx < W - 1) {

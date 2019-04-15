@@ -12940,8 +12940,10 @@ for (let i = 0; i < cities.length; i++) {
     cityDS[cities[i][1]].push([cities[i][0], cities[i][2]]);
 }
 
-for (let k in cityDS) {
+const keys = Object.keys(cityDS);
+for (const k in keys) {
     cityDS[k].sort();
     countryDS.push(k);
 }
+
 countryDS.sort();

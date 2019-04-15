@@ -41,29 +41,29 @@ JSON object in the format:
 
 ```json
 {
-  Company: "",
-  Email: "",
-  Address: {
-      StreetAddress: "",
-      ZipCode: "",
-      Country: "",
-      Text: "",
-      City: ""
+  "Company": "",
+  "Email": "",
+  "Address": {
+      "StreetAddress": "",
+      "ZipCode": "",
+      "Country": "",
+      "Text": "",
+      "City": ""
   },
-  Web: "",
-  Phone: "",
-  Text: "",
-  Fax: "",
-  Job: "",
-  Mobile: "",
-  Name: {
-      Text: "",
-      Surname: "",
-      Name: {
-          FirstName: "",
-          Text: "",
-          MiddleName: "",
-          ExtraName: ""
+  "Web": "",
+  "Phone": "",
+  "Text": "",
+  "Fax": "",
+  "Job": "",
+  "Mobile": "",
+  "Name": {
+      "Text": "",
+      "Surname": "",
+      "Name": {
+          "FirstName": "",
+          "Text": "",
+          "MiddleName": "",
+          "ExtraName": ""
       }
   }
 }
@@ -75,10 +75,10 @@ JSON object in the format:
 
 ```json
 {
-  section: "",
-  progress: {
-    status: ""
-    progress: 1.0
+  "section": "",
+  "progress": {
+    "status": "",
+    "progress": 1.0
   }
 }
 ```
@@ -87,6 +87,9 @@ JSON object in the format:
 
 * [Tesseract.JS](https://github.com/naptha/tesseract.js) - 1.0.14<br/>
 Tesseract.js wraps an [emscripten](https://github.com/kripken/emscripten) [port](https://github.com/naptha/tesseract.js-core) of the [Tesseract](https://github.com/tesseract-ocr/tesseract) [OCR](https://en.wikipedia.org/wiki/Optical_character_recognition) Engine.
+
+* [OpenCV.js](https://github.com/opencv/opencv/tree/master/platforms/js) - 4.1.0<br/>
+
 
 ## Required Cordova Plugins (in case of cordova project) 
 

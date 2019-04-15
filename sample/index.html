@@ -129,7 +129,8 @@
     File.prototype.convertToBase64 = function (callback) {
         let reader = new FileReader();
         reader.onloadend = function (e) {
-            callback(e.target.result, e.target.error);
+            // TODO: check if e.target.result of e.result
+            callback(e.result, e.error);
         };
         reader.readAsDataURL(this);
     };
@@ -181,7 +182,7 @@
 
         let section = data.section;
         let status = data.progress.status;
-        let percentage = parseInt(data.progress.progress * 100);
+        let percentage = Math.floor(data.progress.progress * 100);
         document.getElementById("status").innerText = section + " - " + status + " (" + percentage + "%)";
     }
 
@@ -190,7 +191,7 @@
         $("#inp").trigger("click");
     });
 
-    document.getElementById('inp').onchange = function (e) {
+    document.getElementById('inp').onchange = function () {
 
         let file = this.files[0];
         displayResult(resultEmpty);
