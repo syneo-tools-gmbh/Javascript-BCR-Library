@@ -22,12 +22,41 @@
 *
 */
 
-// job type (english, add languages)
+// job type
 var jobDS = [
-    // Italian
 
-    // French
-
+    // Corporate title
+	/\bcae\b/g,
+	/\bcaio\b/g,
+	/\bcao\b/g,
+	/\bcbdo\b/g,
+	/\bcbo\b/g,
+	/\bcco\b/g,
+	/\bcdo\b/g,
+	/\bceo\b/g,
+	/\bcfo\b/g,
+	/\bcgo\b/g,
+	/\bchro\b/g,
+	/\bcino\b/g,
+	/\bcio\b/g,
+	/\bciso\b/g,
+	/\bcito\b/g,
+	/\bcko\b/g,
+	/\bclo\b/g,
+	/\bcmo\b/g,
+	/\bcno\b/g,
+	/\bcoo\b/g,
+	/\bcpo\b/g,
+	/\bcqo\b/g,
+	/\bcrdo\b/g,
+	/\bcro\b/g,
+	/\bcse\b/g,
+	/\bcso\b/g,
+	/\bcto\b/g,
+	/\bcvo\b/g,
+	/\bcwo\b/g,
+	/\bcxo\b/g,
+	
     // English
 	/\blead\b/g,
 	/\banalyst\b/g,
@@ -36,7 +65,6 @@ var jobDS = [
 	/\bhead\b/g,
 	/\bchief\b/g,
 	/\bdirector\b/g,
-	/\bsenior\b/g,
 	/\bvice\b/g,
 	/\bpresident\b/g,
 	/\bmanager\b/g,
@@ -47,13 +75,18 @@ var jobDS = [
 	/\bartist\b/g,
 	/\bworker\b/g,
 	/\bjunior\b/g,
-	/\bcfo\b/g,
-	/\bcto\b/g,
-	/\bceo\b/g,
-	/\bcoo\b/g,
-	/\bcmo\b/g,
-	/\bchro\b/g
+	/\bsenior\b/g,
+
+	// German
 	
-    // German
+    // Italian
+	
+    // French
+
+    // Spanish
+    
+    // Danish
+
+    // Swedish
 ];
 

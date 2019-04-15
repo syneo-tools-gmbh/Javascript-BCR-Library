@@ -95,7 +95,10 @@ var streetsDS = [
     /\bpassage\b/g,
     /\bcité\b/g,
     /\bile\b/g,
-
+	/\bboulevard\b/g,
+	/\bavenue\b/g,
+	/\ballée\b/g,
+	
     // English
     /\bacres\b/g,
     /\bannex\b/g,
@@ -163,5 +166,34 @@ var streetsDS = [
     /\bstraße\b/g,
     /\bweg\b/g,
     /\bplatz\b/g,
-    /\bmoor\b/g
+    /\bmoor\b/g,
+
+    // Spanish
+    /\bcalle\b/g,
+    /\bcarrera\b/g,
+    /\bcarretera\b/g,
+    /\bcuesta\b/g,
+    /\bpaseo\b/g,
+    /\bplaza\b/g,
+    /\bronda\b/g,
+    
+    // Danish
+	/\bgade\b/g,
+	/\bvej\b/g,
+    /\bvia\b/g,
+    /\bfirkantet\b/g,
+    /\bkursus\b/g,
+    /\bboulevard\b/g,
+
+    // Swedish
+    /\bmäster\b/g,
+    /\bnorr\b/g,
+    /\bgata\b/g,
+    /gatan\b/g,
+    /svägen\b/g,
+    /\bsätt\b/g,
+    /\bfrån\b/g,
+    /\bkvadrat\b/g,
+    /\bnaturligtvis\b/g,
+    /\bavenue\b/g
 ];
