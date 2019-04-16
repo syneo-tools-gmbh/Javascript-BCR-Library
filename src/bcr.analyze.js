@@ -30,13 +30,14 @@ const TEL_MIN_LENGTH = 6;
 const DISTANCE_TOLERANCE = 4;
 const MIN_SCORE = 0.05;
 
+// TODO: Remove global result
 // define result template
 let result = {};
 
-// *********************************************
+// ****************************************************************************
 // REGEXES
-// *********************************************
-let typos = [
+// ****************************************************************************
+const typos = [
     {regex: /[A-Za-z]0[A-Za-z]/g, find: "0", replace: "o"}, // 0 instead of o inside a text
     {regex: /[A-Za-z]\|[A-Za-z]/g, find: "|", replace: "l"}, // pipe for l
     {regex: /[A-Za-z]\|0[A-Za-z]/g, find: "|0", replace: "lo"}, // 0 instead of o + pipe and words
@@ -52,13 +53,13 @@ let typos = [
 ];
 
 // email
-let email = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/gi;
+const email = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/gi;
 
 // web
-let web = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/gi;
+const web = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/gi;
 
 // tel
-let regex_tel = [
+const regex_tel = [
     {regex: /([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g, confidence: 0.5},
     {
         regex: /((tel|phon|dir)\w*([.|:])*\s*)([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
@@ -67,7 +68,7 @@ let regex_tel = [
 ];
 
 // fax
-let regex_fax = [
+const regex_fax = [
     {
         regex: /((fax)\w*([.|:])*\s*)([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
         confidence: 0.5
@@ -75,8 +76,11 @@ let regex_fax = [
 ];
 
 // mobile
-let regex_mobile = [
-    {regex: /([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g, confidence: 0.5},
+const regex_mobile = [
+    {
+        regex: /([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
+        confidence: 0.5
+    },
     {
         regex: /((mobi|cell|hand)\w*([.|:])*\s*)([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
         confidence: 0.5
@@ -151,45 +155,56 @@ function analyzePipeline(ocr) {
     result = initializeResult();
 
     // Step 0: Break lines from tesseract
+    console.log("Analyze pipeline", "stage", 0, "breakLines");
     ocr = breakLines(ocr);
 
     // Step 1: Clean text from tesseract
+    console.log("Analyze pipeline", "stage", 1, "cleanText");
     ocr = cleanText(ocr);
 
     // Step 2: Build logical blocks
+    console.log("Analyze pipeline", "stage", 2, "buildBlocks");
     ocr = bcrBuildBlocks(ocr);
 
     // Step 3: Score email
+    console.log("Analyze pipeline", "stage", 3, "scoreEmail");
     ocr = scoreEmail(ocr);
 
     // Step 4: Score web
+    console.log("Analyze pipeline", "stage", 4, "scoreWeb");
     ocr = scoreWeb(ocr);
 
     // Step 5: Score numbers
+    console.log("Analyze pipeline", "stage", 5, "scoreNumbers");
     ocr = scoreNumbers(ocr);
 
     // Step 6: Score company
+    console.log("Analyze pipeline", "stage", 6, "scoreCompany");
     ocr = scoreCompany(ocr);
 
     // Step 7: Score name
+    console.log("Analyze pipeline", "stage", 7, "scoreName");
     ocr = scoreName(ocr);
 
     // Step 8: Score job
+    console.log("Analyze pipeline", "stage", 8, "scoreJob");
     ocr = scoreJob(ocr);
 
     // Step 9: Score address
+    console.log("Analyze pipeline", "stage", 9, "scoreAddress");
     ocr = scoreAddress(ocr);
 
     // Step 10: Assign result
+    console.log("Analyze pipeline", "stage", 10, "assignResult");
     assignResults(ocr);
 
     // return result
     return result;
 }
 
-// *********************************************************************
-// PREPROCESS
-// *********************************************************************
+// ****************************************************************************
+// PREPROCESS OCR Object
+// ****************************************************************************
 
 // break long line
 function breakLines(ocr) {
@@ -413,9 +428,9 @@ function cleanText(ocr) {
     return ocr;
 }
 
-// *********************************************************************
+// ****************************************************************************
 // UTILITIES
-// *********************************************************************
+// ****************************************************************************
 
 // get font distance
 function getFontBiggerRatio(average, real) {
@@ -442,7 +457,6 @@ function bcrGetWordsFont(words) {
     return fontSize;
 }
 
-/*
 // get average font size of words
 function bcrGetWordsBold(words) {
 
@@ -454,16 +468,15 @@ function bcrGetWordsBold(words) {
     }
     return words.length / 2 < fontBold;
 }
-*/
 
 // check regexp
 function checkRE(re, st) {
     return String(st).toLowerCase().match(re) || [];
 }
 
-// *********************************************************************
+// ****************************************************************************
 // EXTARCT VALUE FROM BLOCK
-// *********************************************************************
+// ****************************************************************************
 
 // extract web from candidate
 function extractWeb(text) {
@@ -569,16 +582,13 @@ function extractZip(text) {
 
 // extract address street
 function extractStreet(text) {
-
     let txt = text.toLowerCase();
     for (let j = 0; j < streetsDS.length; j++) {
         let re = streetsDS[j];
-
         if (checkRE(re, txt).length > 0) {
             return txt;
         }
     }
-
     return "";
 }
 
@@ -621,9 +631,9 @@ function splitName(text) {
     return result;
 }
 
-// *********************************************************************
+// ****************************************************************************
 // SCORES BLOCKS
-// *********************************************************************
+// ****************************************************************************
 
 // score email (strategies: regex, @)
 function scoreEmail(ocr) {
@@ -711,7 +721,7 @@ function scoreCompany(ocr) {
                     website = website.substr(0, website.lastIndexOf("."));
                 }
                 website = website.toLowerCase();
-                if (typeof website !== undefined && website.length > 0)
+                if (typeof website !== "undefined" && website.length > 0)
                     keywords[website] = website;
             }
         }
@@ -723,7 +733,7 @@ function scoreCompany(ocr) {
                 email = email.substr(email.indexOf("@") + 1);
                 email = email.substr(0, email.indexOf("."));
                 email = email.toLowerCase();
-                if (typeof email !== undefined && email.length > 0)
+                if (typeof email !== "undefined" && email.length > 0)
                     keywords[email] = email;
             }
         }
@@ -734,9 +744,7 @@ function scoreCompany(ocr) {
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.web === 0 && ocr.BCR.blocks[i].fields.email === 0) {
             let word = ocr.BCR.blocks[i].text.toLowerCase();
-            let keys = Object.keys(keywords);
-            for (let k in keys) {
-
+            Object.keys(keywords).forEach(k => {
                 // calculate similarity
                 let sim = sSimilarity(word, k);
 
@@ -747,7 +755,7 @@ function scoreCompany(ocr) {
                 }
                 // remaining 0.2, assigned by font criteria
                 ocr.BCR.blocks[i].fields.company += getFontBiggerRatio(ocr.BCR.averageFontSize, ocr.BCR.blocks[i].fontSize) * 0.2;
-            }
+            });
         }
     }
 
@@ -768,7 +776,7 @@ function scoreName(ocr) {
                 let nick = email.substr(0, email.indexOf("@"));
                 nick = nick.replace(new RegExp("\\.", 'g'), " ");
 
-                if (typeof email !== undefined && email.length > 0)
+                if (typeof email !== "undefined" && email.length > 0)
                     keywords.push(nick);
             }
         }
@@ -778,8 +786,7 @@ function scoreName(ocr) {
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.email === 0) {
             let word = ocr.BCR.blocks[i].text.toLowerCase();
-            for (let k in keywords) {
-
+            for (let k = 0; k < keywords.length; k++) {
                 // calculate similarity
                 let sim = sSimilarity(word, keywords[k]);
 
@@ -792,10 +799,11 @@ function scoreName(ocr) {
                 ocr.BCR.blocks[i].fields.name += getFontBiggerRatio(ocr.BCR.averageFontSize, ocr.BCR.blocks[i].fontSize) * 0.2;
 
             }
+
         }
     }
 
-    // contribute max 0.3, assigned by dataset
+// contribute max 0.3, assigned by dataset
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.email === 0) {
             let line = ocr.BCR.blocks[i].text.toLowerCase();
@@ -938,9 +946,9 @@ function scoreAddress(ocr) {
     return ocr;
 }
 
-// *********************************************************************
+// ****************************************************************************
 // Assign results
-// *********************************************************************
+// ****************************************************************************
 function assignResults(ocr) {
 
     let web = [];

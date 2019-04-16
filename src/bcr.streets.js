@@ -197,3 +197,5 @@ let streetsDS = [
     /\bnaturligtvis\b/g,
     /\bavenue\b/g
 ];
+
+console.log("Loaded", streetsDS.length, "streets");

@@ -6,6 +6,8 @@
     <meta name="msapplication-tap-highlight" content="no">
     <link rel="stylesheet" type="text/css" href="style/common-style.css">
     <link rel="stylesheet" type="text/css" href="style/index.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <title>Business Card Reader Library DEMO Application</title>
 </head>
 <body class="body-index">
@@ -85,12 +87,16 @@
     <div class="center">
         <img src="https://via.placeholder.com/400x300/ddd?text=upload+a+business+card" id="step1" class="img"
              alt="step1"/>
+        <br>
         <img src="https://via.placeholder.com/400x300/ddd?text=upload+a+business+card" id="step2" class="img"
              alt="step2"/>
+        <br>
         <img src="https://via.placeholder.com/400x300/ddd?text=upload+a+business+card" id="step3" class="img"
              alt="step3"/>
+        <br>
         <img src="https://via.placeholder.com/400x300/ddd?text=upload+a+business+card" id="step4" class="img"
              alt="step4"/>
+        <br>
         <img src="https://via.placeholder.com/400x300/ddd?text=upload+a+business+card" id="step5" class="img"
              alt="step5"/>
     </div>
@@ -129,8 +135,8 @@
     File.prototype.convertToBase64 = function (callback) {
         let reader = new FileReader();
         reader.onloadend = function (e) {
-            // TODO: check if e.target.result of e.result
-            callback(e.result, e.error);
+            console.log(e);
+            callback(e.target.result, e.target.error);
         };
         reader.readAsDataURL(this);
     };
@@ -151,24 +157,25 @@
             let img4 = document.getElementById("step4");
             let img5 = document.getElementById("step5");
 
-            img0.src = data.stages[0];
-            img1.src = data.stages[1];
-            img2.src = data.stages[2];
-            img3.src = data.stages[3];
-            img4.src = data.stages[4];
-            img5.src = data.stages[5];
+            if (data.stages.length > 0) img0.src = data.stages[0];
+            if (data.stages.length > 1) img1.src = data.stages[1];
+            if (data.stages.length > 2) img2.src = data.stages[2];
+            if (data.stages.length > 3) img3.src = data.stages[3];
+            if (data.stages.length > 4) img4.src = data.stages[4];
+            if (data.stages.length > 5) img5.src = data.stages[5];
         }
 
         // display result
-        let keys = Object.keys(data.result);
-        for (const k of keys) {
-            if (k === "Name") {
-                document.getElementById(k).innerHTML = data.result[k].Text;
-            } else if (k === "Address") {
-                document.getElementById(k).innerHTML = data.result[k].Text;
-            } else if (k !== "Text") {
-                document.getElementById(k).innerHTML = data.result[k];
-            }
+        if (typeof data.result !== "undefined") {
+            Object.keys(data.result).forEach(k => {
+                if (k === "Name") {
+                    document.getElementById(k).innerHTML = data.result[k].Text;
+                } else if (k === "Address") {
+                    document.getElementById(k).innerHTML = data.result[k].Text;
+                } else if (k !== "Text") {
+                    document.getElementById(k).innerHTML = data.result[k];
+                }
+            });
         }
 
         $("#result").show();
@@ -176,7 +183,6 @@
     }
 
     function displayProgress(data) {
-
         if (typeof data.progress === "undefined")
             return;
 

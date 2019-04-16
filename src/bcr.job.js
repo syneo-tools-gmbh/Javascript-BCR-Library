@@ -92,3 +92,4 @@ let jobDS = [
     // Swedish
 ];
 
+console.log("Loaded", jobDS.length, "jobs");

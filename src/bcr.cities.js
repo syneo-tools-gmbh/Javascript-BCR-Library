@@ -12935,15 +12935,16 @@ for (let i = 0; i < cities.length; i++) {
 }
 
 for (let i = 0; i < cities.length; i++) {
-    if (cityDS[cities[i][1]] === undefined)
+    if (typeof cityDS[cities[i][1]] === "undefined")
         cityDS[cities[i][1]] = [];
     cityDS[cities[i][1]].push([cities[i][0], cities[i][2]]);
 }
 
-const keys = Object.keys(cityDS);
-for (const k in keys) {
+Object.keys(cityDS).forEach(k => {
     cityDS[k].sort();
     countryDS.push(k);
-}
+    // console.log("Loaded", cityDS[k].length, "cities from", k); Too verbose
+});
 
 countryDS.sort();
+console.log("Loaded", countryDS.length, "countries");

@@ -177,7 +177,6 @@ let sSimilarity = function (sa1, sa2) {
     //
     // The algorithm is an n-gram comparison of bigrams of characters in a string
 
-
     // for my purposes, comparison should not check case or whitespace
     let s1 = sa1.replace(/\s/g, "").toLowerCase();
     let s2 = sa2.replace(/\s/g, "").toLowerCase();

@@ -22,7 +22,9 @@
  *
  */
 
-// bcr main class
+// ****************************************************************************
+// BCR main class
+// ****************************************************************************
 let bcr = (function () {
 
     // ************************************************************
@@ -44,6 +46,7 @@ let bcr = (function () {
 
     // load files
     let loadJs = function (filename, callback) {
+        console.log("Loading", filename);
         let scriptTag = document.createElement('script');
         scriptTag.src = filename;
 
@@ -68,16 +71,24 @@ let bcr = (function () {
 
             // scripts to include
             let scripts = [];
-            scripts.push("bcr.cleaning.js");
+
+            // BCR library
             scripts.push("bcr.analyze.js");
-            scripts.push("bcr.names.js");
-            scripts.push("bcr.cities.js");
-            scripts.push("bcr.streets.js");
-            scripts.push("bcr.job.js");
+            scripts.push("bcr.cleaning.js");
             scripts.push("bcr.utility.js");
+
+            // Datasets
+            scripts.push("bcr.cities.js");
+            scripts.push("bcr.job.js");
+            scripts.push("bcr.names.js");
+            scripts.push("bcr.streets.js");
+
+            // OpenCV.js
             scripts.push("opencv/opencv.js");
             scripts.push("opencv/utils.js");
             scripts.push("opencv/filters.js");
+
+            // Tesseract.js
             scripts.push("tesseract/tesseract.js");
 
             // final callback function
@@ -96,12 +107,13 @@ let bcr = (function () {
             };
 
             nextLoad();
-
         },
 
         // main method for recognizing
         recognizeBcr: function (b64image, callback, progress) {
+            console.log("recognizeBCR", "start");
             loadAndProcess(b64image, callback, progress);
+            console.log("recognizeBCR", "end");
         },
 
         /**

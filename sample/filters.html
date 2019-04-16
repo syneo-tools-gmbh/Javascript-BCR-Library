@@ -6,6 +6,8 @@
     <meta name="msapplication-tap-highlight" content="no">
     <link rel="stylesheet" type="text/css" href="style/common-style.css">
     <link rel="stylesheet" type="text/css" href="style/index.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <title>Image filters</title>
 
 </head>
@@ -35,8 +37,7 @@
     File.prototype.convertToBase64 = function (callback) {
         let reader = new FileReader();
         reader.onloadend = function (e) {
-            // TODO: Check if e.target.result of e.result
-            callback(e.result, e.error);
+            callback(e.target.result, e.target.error);
         };
         reader.readAsDataURL(this);
     };

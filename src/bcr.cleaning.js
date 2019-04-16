@@ -22,24 +22,31 @@
  *
  */
 
+// TODO: Remove global variable stages
 // local variables
 let stages = [];
 
+// ****************************************************************************
 // load base64 image, prepare it and analyze it
+// ****************************************************************************
 function loadAndProcess(b64, callback, progress) {
-
+    console.log("loadAndProcess start");
     pipeline(b64, progress, function (canvas) {
         analyze(canvas, function (data, blocks) {
 
-            // return data and stages
             let returnData = {stages: stages, result: data, blocks: blocks};
+            // return data and stages
+            console.log("Finish analysis");
+            console.log("Result:", returnData);
             callback(returnData);
 
         }, progress);
     });
 }
 
+// ****************************************************************************
 // preprocessing pipeline
+// ****************************************************************************
 function pipeline(img, progress, callback) {
     prepareImage(img, progress, function (data) {
         let canvas = data;
@@ -83,7 +90,9 @@ function pipeline(img, progress, callback) {
     });
 }
 
+// ****************************************************************************
 // image preparation pipeline
+// ****************************************************************************
 function prepareImage(b64image, progress, callback) {
 
     // smart crop
@@ -97,7 +106,9 @@ function prepareImage(b64image, progress, callback) {
     });
 }
 
+// ****************************************************************************
 // normalize size
+// ****************************************************************************
 function normalizeSize(canvas) {
 
     // create context
@@ -137,7 +148,9 @@ function normalizeSize(canvas) {
     return canvas;
 }
 
+// ****************************************************************************
 // isolate card and crop
+// ****************************************************************************
 function smartCrop(b64img, progress, callback) {
     let img = new Image();
     img.onload = function () {
@@ -189,13 +202,17 @@ function smartCrop(b64img, progress, callback) {
     img.src = b64img;
 }
 
+// ****************************************************************************
 // get pixel function
+// ****************************************************************************
 function getPixel(data, y, x, width) {
     let baseIdx = (y * width + x) * 4;
     return [data[baseIdx], data[baseIdx + 1], data[baseIdx + 2], data[baseIdx + 3]];
 }
 
+// ****************************************************************************
 // set pixel function
+// ****************************************************************************
 function setPixel(data, y, x, width, r, g, b, a) {
     if (typeof a === "undefined") {
         a = 255;
@@ -207,7 +224,9 @@ function setPixel(data, y, x, width, r, g, b, a) {
     data[baseIdx + 3] = a;
 }
 
+// ****************************************************************************
 // transform in grey scale
+// ****************************************************************************
 function greyScale(canvas) {
     let ctx = canvas.getContext("2d");
     let pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -222,7 +241,9 @@ function greyScale(canvas) {
     return canvas;
 }
 
+// ****************************************************************************
 // eliminate background
+// ****************************************************************************
 function backgroundElimination(canvas) {
     let ctx = canvas.getContext("2d");
     let pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -283,7 +304,9 @@ function backgroundElimination(canvas) {
     return canvas;
 }
 
+// ****************************************************************************
 // put image in canvas
+// ****************************************************************************
 function imageToCC(canvas) {
     let ctx = canvas.getContext("2d");
     let pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -329,7 +352,9 @@ function imageToCC(canvas) {
     return {canvas: canvas, ccs: ccs};
 }
 
+// ****************************************************************************
 // bfs visit
+// ****************************************************************************
 function bfsVisit(visited, i, j) {
     let out = [];
     let Q = [];
@@ -368,7 +393,9 @@ function bfsVisit(visited, i, j) {
 
 }
 
+// ****************************************************************************
 // css classification
+// ****************************************************************************
 function ccsClassification(ccs, canvas) {
     let ctx = canvas.getContext("2d");
     let pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -403,7 +430,9 @@ function ccsClassification(ccs, canvas) {
     return {canvas: canvas, ccs: ccsClean};
 }
 
+// ****************************************************************************
 // bounding box
+// ****************************************************************************
 function boundingBox(ccs, canvas) {
     let W = canvas.width;
 
@@ -435,7 +464,9 @@ function boundingBox(ccs, canvas) {
     return {top: minY, left: minX, bottom: maxY, right: maxX};
 }
 
+// ****************************************************************************
 // analyze component
+// ****************************************************************************
 function analyzeComponent(cc, canvas) {
     let W = canvas.width;
     let H = canvas.height;
@@ -501,7 +532,9 @@ function analyzeComponent(cc, canvas) {
     return !(RAmin < RA && RA < RAmax);
 }
 
+// ****************************************************************************
 // image binarization
+// ****************************************************************************
 function imageBinarization(ccs, canvas) {
     let ctx = canvas.getContext("2d");
     let pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -515,7 +548,9 @@ function imageBinarization(ccs, canvas) {
     return canvas;
 }
 
+// ****************************************************************************
 // image cc binarization
+// ****************************************************************************
 function imageCCBinarization(data, cc, canvas) {
     let ctx = canvas.getContext("2d");
     let W = canvas.width;
