@@ -45,7 +45,7 @@ function loadAndProcess(b64, callback, progress) {
 }
 
 // ****************************************************************************
-// preprocessing pipeline
+// Preprocessing pipeline
 // ****************************************************************************
 function pipeline(img, progress, callback) {
     prepareImage(img, progress, function (data) {
@@ -91,7 +91,7 @@ function pipeline(img, progress, callback) {
 }
 
 // ****************************************************************************
-// image preparation pipeline
+// Image preparation pipeline
 // ****************************************************************************
 function prepareImage(b64image, progress, callback) {
 
@@ -148,6 +148,7 @@ function normalizeSize(canvas) {
     return canvas;
 }
 
+// TODO: Replace with OpenCV.js smart crop
 // ****************************************************************************
 // isolate card and crop
 // ****************************************************************************
@@ -214,9 +215,16 @@ function getPixel(data, y, x, width) {
 // set pixel function
 // ****************************************************************************
 function setPixel(data, y, x, width, r, g, b, a) {
+
     if (typeof a === "undefined") {
         a = 255;
     }
+
+    r = Math.min(255, Math.max(r, 0));
+    g = Math.min(255, Math.max(g, 0));
+    b = Math.min(255, Math.max(b, 0));
+    a = Math.min(255, Math.max(a, 0));
+
     let baseIdx = (y * width + x) * 4;
     data[baseIdx] = r;
     data[baseIdx + 1] = g;
@@ -439,7 +447,7 @@ function boundingBox(ccs, canvas) {
     let BlockW = Math.floor(W / 64);
     let BlockH = 2;
 
-    let minX = 999999, minY = 999999, maxX = 0, maxY = 0;
+    let minX = 10e9, minY = 10e9, maxX = 0, maxY = 0;
 
     for (let k = 0; k < ccs.length; k++) {
         let cc = ccs[k];
