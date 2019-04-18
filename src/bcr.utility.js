@@ -33,13 +33,13 @@ function titleCase(text) {
 
 function editDistance(word1, word2) {
     let i, j, Cmin;
-    if (word1 === undefined && word2 === undefined) {
+    if (typeof word1 === "undefined" && typeof word2 === "undefined") {
         return 1;
     }
-    if (word1 === undefined || word1.length === 0) {
+    if (typeof word1 === "undefined" || word1.length === 0) {
         return word2.length;
     }
-    if (word2 === undefined || word2.length === 0) {
+    if (typeof word2 === "undefined" || word2.length === 0) {
         return word1.length;
     }
 
@@ -82,7 +82,7 @@ function editDistance(word1, word2) {
 
 function substringEditDistance(word1, word2) {
     let i, j, Cmin;
-    if (word1 === undefined && word2 === undefined) {
+    if (typeof word1 === "undefined" && typeof word2 === "undefined") {
         return 1;
     }
     if (word1 === undefined || word1.length === 0) {
@@ -135,7 +135,7 @@ function substringEditDistance(word1, word2) {
 }
 
 function substringSimilarity(word1, word2) {
-    if (word1 === undefined || word2 === undefined) {
+    if (typeof word1 === "undefined" || typeof word2 === "undefined") {
         return 0.;
     }
     if (word1.length === 0 || word2.length === 0) {
@@ -145,7 +145,7 @@ function substringSimilarity(word1, word2) {
 }
 
 function stringSimilarity(word1, word2) {
-    if (word1 === undefined || word2 === undefined) {
+    if (typeof word1 === "undefined" || typeof word2 === "undefined") {
         return 0.;
     }
     if (word1.length === 0 || word2.length === 0) {
@@ -155,62 +155,43 @@ function stringSimilarity(word1, word2) {
 }
 
 function capitalize(str) {
-    if (str === undefined || str.length === 0) {
+    if (typeof str === "undefined" || str.length === 0) {
         return "";
     }
     return str.substr(0, 1).toUpperCase() + str.substring(1);
 }
 
-let sSimilarity = function (sa1, sa2) {
-    // Compare two strings to see how similar they are.
-    // Answer is returned as a value from 0 - 1
-    // 1 indicates a perfect similarity (100%) while 0 indicates no similarity (0%)
-    // Algorithm is set up to closely mimic the mathematical formula from
-    // the article describing the algorithm, for clarity.
-    // Algorithm source site: http://www.catalysoft.com/articles/StrikeAMatch.html
-    // (Most specifically the slightly cryptic variable names were written as such
-    // to mirror the mathematical implementation on the source site)
-    //
-    // 2014-04-03
-    // Found out that the algorithm is an implementation of the S�rensen�Dice coefficient [1]
-    // [1] http://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
-    //
-    // The algorithm is an n-gram comparison of bigrams of characters in a string
+function sSimilarity(sa1, sa2) {
 
-    // for my purposes, comparison should not check case or whitespace
     let s1 = sa1.replace(/\s/g, "").toLowerCase();
     let s2 = sa2.replace(/\s/g, "").toLowerCase();
 
-    function intersect(arr1, arr2) {
-        // I didn't write this.  I'd like to come back sometime
-        // and write my own intersection algorithm.  This one seems
-        // clean and fast, though.  Going to try to find out where
-        // I got it for attribution.  Not sure right now.
-        let r = [], o = {}, l = arr2.length, i, v;
-        for (i = 0; i < l; i++) {
-            o[arr2[i]] = true;
-        }
-        l = arr1.length;
-        for (i = 0; i < l; i++) {
-            v = arr1[i];
-            if (v in o) {
-                r.push(v);
-            }
-        }
-        return r;
-    }
-
     let pairs = function (s) {
-        // Get an array of all pairs of adjacent letters in a string
-        let pairs = [];
+        let pairs = new Set();
         for (let i = 0; i < s.length - 1; i++) {
-            pairs[i] = s.slice(i, i + 2);
+            pairs.add(s.slice(i, i + 2));
         }
-        return pairs;
+        return Object.keys(pairs);
     };
 
-    let similarity_num = 2 * intersect(pairs(s1), pairs(s2)).length;
-    let similarity_den = pairs(s1).length + pairs(s2).length;
+    let intersect = function (arr1, arr2) {
+        return new Set([...arr1].filter(x => arr2.has(x)));
+    };
+
+    let p1 = pairs(s1);
+    let p2 = pairs(s2);
+
+    let similarity_num = 2 * intersect(p1, p2).size;
+    let similarity_den = p1.size + p2.size;
 
     return similarity_num / similarity_den;
+}
+
+File.prototype.convertToBase64 = function (callback) {
+    let reader = new FileReader();
+    reader.onloadend = function (e) {
+        console.log(e);
+        callback(e.target.result, e.target.error);
+    };
+    reader.readAsDataURL(this);
 };

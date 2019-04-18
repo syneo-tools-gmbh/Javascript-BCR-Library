@@ -132,15 +132,6 @@
         }
     };
 
-    File.prototype.convertToBase64 = function (callback) {
-        let reader = new FileReader();
-        reader.onloadend = function (e) {
-            console.log(e);
-            callback(e.target.result, e.target.error);
-        };
-        reader.readAsDataURL(this);
-    };
-
     function displayResult(data) {
         let progressLabel = {
             section: "OCR",
@@ -183,8 +174,9 @@
     }
 
     function displayProgress(data) {
-        if (typeof data.progress === "undefined")
+        if (typeof data.progress === "undefined") {
             return;
+        }
 
         let section = data.section;
         let status = data.progress.status;
@@ -200,12 +192,16 @@
     document.getElementById('inp').onchange = function () {
 
         let file = this.files[0];
-        displayResult(resultEmpty);
         let progressLabel = {
             section: "Loading",
             progress: {status: "Loading image", progress: 0}
         };
+
+        displayResult(resultEmpty);
         displayProgress(progressLabel);
+
+        if (typeof file === "undefined") return;
+
         file.convertToBase64(function (b64) {
             progressLabel = {
                 section: "Pre-processing",
@@ -214,6 +210,7 @@
             displayProgress(progressLabel);
             bcr.recognizeBcr(b64, displayResult, displayProgress);
         });
+
     };
 </script>
 </body>

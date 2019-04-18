@@ -30,10 +30,6 @@ const TEL_MIN_LENGTH = 6;
 const DISTANCE_TOLERANCE = 4;
 const MIN_SCORE = 0.05;
 
-// TODO: Remove global result
-// define result template
-let result = {};
-
 // ****************************************************************************
 // REGEXES
 // ****************************************************************************
@@ -89,7 +85,9 @@ const regex_mobile = [
 
 // perform ocr and analyze text
 function analyze(canvas, callback, progress) {
-    Tesseract.recognize(canvas)
+    Tesseract.recognize(canvas, {
+        lang: 'deu'
+    })
         .progress(function (data) {
             let result = {
                 section: "",
@@ -151,9 +149,6 @@ function initializeResult() {
 // analyze pipeline
 function analyzePipeline(ocr) {
 
-    // initialize result
-    result = initializeResult();
-
     // Step 0: Break lines from tesseract
     console.log("Analyze pipeline", "stage", 0, "breakLines");
     ocr = breakLines(ocr);
@@ -196,10 +191,9 @@ function analyzePipeline(ocr) {
 
     // Step 10: Assign result
     console.log("Analyze pipeline", "stage", 10, "assignResult");
-    assignResults(ocr);
 
     // return result
-    return result;
+    return assignResults(ocr);
 }
 
 // ****************************************************************************
@@ -951,6 +945,7 @@ function scoreAddress(ocr) {
 // ****************************************************************************
 function assignResults(ocr) {
 
+    let result = initializeResult();
     let web = [];
     let email = [];
     let name = [];
@@ -1128,4 +1123,6 @@ function assignResults(ocr) {
 
     // assign blocks
     result.blocks = ocr.BCR.blocks;
+
+    return result;
 }

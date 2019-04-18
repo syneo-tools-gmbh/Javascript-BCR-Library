@@ -22,20 +22,16 @@
  *
  */
 
-// TODO: Remove global variable stages
-// local variables
-let stages = [];
-
 // ****************************************************************************
 // load base64 image, prepare it and analyze it
 // ****************************************************************************
 function loadAndProcess(b64, callback, progress) {
     console.log("loadAndProcess start");
-    pipeline(b64, progress, function (canvas) {
+    pipeline(b64, progress, function (canvas, stages) {
         analyze(canvas, function (data, blocks) {
 
-            let returnData = {stages: stages, result: data, blocks: blocks};
             // return data and stages
+            let returnData = {stages: stages, result: data, blocks: blocks};
             console.log("Finish analysis");
             console.log("Result:", returnData);
             callback(returnData);
@@ -50,7 +46,7 @@ function loadAndProcess(b64, callback, progress) {
 function pipeline(img, progress, callback) {
     prepareImage(img, progress, function (data) {
         let canvas = data;
-        stages = [];
+        let stages = [];
 
         // **************************************
         // Cleaning pipeline
@@ -86,7 +82,7 @@ function pipeline(img, progress, callback) {
         // **************************************
         // END Cleaning pipeline
         // **************************************
-        callback(canvas);
+        callback(canvas, stages);
     });
 }
 
@@ -166,6 +162,8 @@ function smartCrop(b64img, progress, callback) {
         canvas.height = height;
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
+        /*
+
         // clean (pipeline)
         canvas = greyScale(canvas);
         canvas = backgroundElimination(canvas);
@@ -196,8 +194,10 @@ function smartCrop(b64img, progress, callback) {
         tempCanvas.width = width;
         tempCanvas.height = height;
         tempCtx.drawImage(img, minX, minY, width, height, 0, 0, width, height);
+        */
 
-        callback(tempCanvas);
+        // callback(tempCanvas);
+        callback(canvas);
 
     };
     img.src = b64img;

@@ -34,15 +34,6 @@
 
 <script>
 
-    File.prototype.convertToBase64 = function (callback) {
-        let reader = new FileReader();
-        reader.onloadend = function (e) {
-            callback(e.target.result, e.target.error);
-        };
-        reader.readAsDataURL(this);
-    };
-
-
     $("#step0").on("click", function () {
         $("#inp").trigger("click");
     });
