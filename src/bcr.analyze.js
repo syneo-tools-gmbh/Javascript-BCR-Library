@@ -86,7 +86,7 @@ const regex_mobile = [
 // perform ocr and analyze text
 function analyze(canvas, callback, progress) {
     Tesseract.recognize(canvas, {
-        lang: 'deu'
+       // lang: 'deu'
     })
         .progress(function (data) {
             let result = {

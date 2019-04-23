@@ -210,15 +210,15 @@
             displayProgress(progressLabel);
 
             let img = new Image();
-            img.src = b64;
             img.onload = function () {
 
                 documentScanner(img, function (b64_2) {
                     document.getElementById("step0").src = b64_2;
                     bcr.recognizeBcr(b64_2, displayResult, displayProgress);
                 });
-
             };
+            img.src = b64;
+
         });
 
 

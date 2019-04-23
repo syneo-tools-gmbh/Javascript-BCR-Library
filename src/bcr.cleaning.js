@@ -91,15 +91,20 @@ function pipeline(img, progress, callback) {
 // ****************************************************************************
 function prepareImage(b64image, progress, callback) {
 
-    // smart crop
-    smartCrop(b64image, progress, function (canvas) {
+    // Load b64 in image
+    let img = new Image();
+    img.onload = function () {
+        // Smart crop
+        documentScanner(img, function (b64, canvas) {
 
-        // other actions on the canvas
-        normalizeSize(canvas);
+            // other actions on the canvas
+            normalizeSize(canvas);
 
-        // return canvas
-        callback(canvas);
-    });
+            // return canvas
+            callback(canvas);
+        });
+    };
+    img.src = b64image;
 }
 
 // ****************************************************************************
