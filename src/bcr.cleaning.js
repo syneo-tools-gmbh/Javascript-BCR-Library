@@ -91,20 +91,76 @@ function pipeline(img, progress, callback) {
 // ****************************************************************************
 function prepareImage(b64image, progress, callback) {
 
-    // Load b64 in image
-    let img = new Image();
+    // document scanner
+    crop(b64image, function (b64, canvas) {
+
+        // other actions on the canvas
+        normalizeSize(canvas);
+
+        // return canvas
+        callback(canvas);
+
+    });
+}
+
+// isolate card and crop
+function crop(b64img, callback) {
+    var img = new Image();
     img.onload = function () {
-        // Smart crop
-        documentScanner(img, function (b64, canvas) {
 
-            // other actions on the canvas
-            normalizeSize(canvas);
+        // select crop strategy
+        if (bcr.CROP_STRATEGY() === "smartcrop") {
+            // smart crop strategy
 
-            // return canvas
-            callback(canvas);
-        });
+            var scale = 1;
+            var canvas = document.createElement("canvas");
+            var ctx = canvas.getContext("2d");
+
+            var width = img.width / scale;
+            var height = img.height / scale;
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            // clean (pipeline)
+            canvas = greyScale(canvas);
+            canvas = backgroundElimination(canvas);
+            var ccs = [];
+            var result = imageToCC(canvas);
+            ccs = result.ccs;
+            canvas = result.canvas;
+            var cropResult = boundingBox(ccs, canvas);
+
+            // readjust
+            minX = cropResult.left * scale;
+            minX -= 100; //minX * scaleMargin;
+
+            maxX = cropResult.right * scale;
+            maxX += 100; // maxX * scaleMargin;
+
+            minY = cropResult.top * scale;
+            minY -= 100; // minY * scaleMargin;
+
+            maxY = cropResult.bottom * scale;
+            maxY += 100; // maxY * scaleMargin;
+
+            // parse result
+            var tempCanvas = document.createElement("canvas");
+            var tempCtx = tempCanvas.getContext("2d");
+            width = maxX - minX;
+            height = maxY - minY;
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            tempCtx.drawImage(img, minX, minY, width, height, 0, 0, width, height);
+
+            callback(b64img, tempCanvas);
+        } else {
+            // open cv strategy
+            documentScanner(img, callback);
+        }
+
     };
-    img.src = b64image;
+    img.src = b64img;
 }
 
 // ****************************************************************************
