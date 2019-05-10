@@ -39,6 +39,44 @@ function documentScanner(img, callback) {
     let src = cv.imread(img);
     let dst = new cv.Mat();
 
+    // Phase 1
+    let gray = new cv.Mat();
+    cv.cvtColor(src, gray, cv.COLOR_BGR2GRAY);
+    cv.bitwise_not(gray, gray);
+
+    let thresh = new cv.Mat();
+    cv.threshold(gray, thresh, 0, 255, cv.THRESH_TOZERO | cv.THRESH_BINARY );
+
+    let kernel1 = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(11, 11));
+    let kernel2 = cv.Mat.ones(3, 3, cv.CV_8U);
+
+    let erosion = new cv.Mat();
+    cv.erode(thresh, erosion, kernel2, new cv.Point(-1, -1), 1);
+
+    let dilation = new cv.Mat();
+    cv.dilate(erosion, dilation, kernel1, new cv.Point(-1, -1), 7);
+
+    let thres_otsu = new cv.Mat();
+    cv.threshold(dilation, thres_otsu, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU);
+
+    console.log(src);
+    console.log(thres_otsu);
+    cv.cvtColor(thres_otsu, thres_otsu, cv.COLOR_GRAY2RGBA);
+    cv.bitwise_and(thres_otsu, src, src);
+
+    // show results
+    let canvas = document.createElement("canvas");
+    cv.imshow(canvas, src);
+    callback(canvas.toDataURL(), canvas);
+    src.delete();
+    dst.delete();
+
+}
+
+function documentScanner2(img, callback) {
+    let src = cv.imread(img);
+    let dst = new cv.Mat();
+
     cv.cvtColor(src, dst, cv.COLOR_RGB2GRAY);
 
     let ksize = new cv.Size(5, 5);
@@ -57,7 +95,7 @@ function documentScanner(img, callback) {
     for (let i = 0; i < contours.size(); ++i) {
         let tmp = new cv.Mat();
         let cnt = contours.get(i);
-        let epsilon = 0.05 * cv.arcLength(cnt, true);
+        let epsilon = 0.005 * cv.arcLength(cnt, true);
         cv.approxPolyDP(cnt, tmp, epsilon, true);
         poly.push(tmp);
     }
@@ -74,7 +112,7 @@ function documentScanner(img, callback) {
     });*/
 
     // Filter small rect
-    poly = poly.filter(x => cv.contourArea(x) > (src.cols * src.rows) * MIN_QUAD_AREA_RATIO);
+    poly = poly.filter(x => cv.contourArea(x) - (src.cols * src.rows) * MIN_QUAD_AREA_RATIO);
 
     // Sort by area
     poly.sort((a, b) => cv.contourArea(a) - cv.contourArea(b));

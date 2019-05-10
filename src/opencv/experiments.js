@@ -359,3 +359,31 @@ function documentScanner_old2(img, callback) {
     dst.delete();
 }
 
+function documentScanner_dilate(img, callback) {
+    let src = cv.imread(img);
+    let dst = new cv.Mat();
+
+    let gray = new cv.Mat();
+    cv.cvtColor(src, gray, cv.COLOR_BGR2GRAY);
+    cv.bitwise_not(gray, gray);
+
+    let thresh = new cv.Mat();
+    cv.threshold(gray, thresh, 5, 255, cv.THRESH_TOZERO);
+
+    let kernel1 = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(11, 11));
+    let kernel2 = cv.Mat.ones(3, 3, cv.CV_8U);
+
+    let erosion = new cv.Mat();
+    cv.erode(thresh, erosion, kernel2, new cv.Point(-1, -1), 1);
+
+    let dilation = new cv.Mat();
+    cv.dilate(erosion, dilation, kernel1, new cv.Point(-1, -1), 5);
+
+    // show results
+    let canvas = document.createElement("canvas");
+    cv.imshow(canvas, dilation);
+    callback(canvas.toDataURL(), canvas);
+
+    src.delete();
+    dst.delete();
+}
