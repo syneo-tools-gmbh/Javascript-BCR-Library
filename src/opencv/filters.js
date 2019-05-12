@@ -32,46 +32,154 @@ let MORPH = 9;
 let CANNY = 84;
 let HOUGH = 25;
 
-/******************************************************************************/
-// Document scanner for smart crop
+function line2line(src, dst) {
+    let x1 = src[0];
+    let y1 = src[1];
+    let x2 = src[2];
+    let y2 = src[3];
+
+    let x3 = dst[0];
+    let y3 = dst[1];
+    let x4 = dst[2];
+    let y4 = dst[3];
+
+    let det = (a, b, c, d) => a * d - b * c;
+
+    let detL1 = det(x1, y1, x2, y2);
+    let detL2 = det(x3, y3, x4, y4);
+    let x1mx2 = x1 - x2;
+    let x3mx4 = x3 - x4;
+    let y1my2 = y1 - y2;
+    let y3my4 = y3 - y4;
+
+    let xnom = det(detL1, x1mx2, detL2, x3mx4);
+    let ynom = det(detL1, y1my2, detL2, y3my4);
+    let denom = det(x1mx2, y1my2, x3mx4, y3my4);
+
+    if (denom === 0.0)
+        return [undefined, undefined];
+
+    return [xnom / denom, ynom / denom];
+}
+
+
 /******************************************************************************/
 function documentScanner(img, callback) {
     let src = cv.imread(img);
-    let dst = new cv.Mat();
 
-    // Phase 1
     let gray = new cv.Mat();
     cv.cvtColor(src, gray, cv.COLOR_BGR2GRAY);
-    cv.bitwise_not(gray, gray);
 
-    let thresh = new cv.Mat();
-    cv.threshold(gray, thresh, 0, 255, cv.THRESH_TOZERO | cv.THRESH_BINARY );
+    let blurred = new cv.Mat();
+    cv.medianBlur(gray, blurred, 21);
 
-    let kernel1 = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(11, 11));
-    let kernel2 = cv.Mat.ones(3, 3, cv.CV_8U);
+    let thres = new cv.Mat();
+    cv.adaptiveThreshold(blurred, thres, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 21, 2);
 
-    let erosion = new cv.Mat();
-    cv.erode(thresh, erosion, kernel2, new cv.Point(-1, -1), 1);
+    let dilated = new cv.Mat();
+    let kernel = cv.Mat.ones(5, 5, cv.CV_8U);
+    cv.dilate(thres, dilated, kernel, new cv.Point(-1, -1), 1);
 
-    let dilation = new cv.Mat();
-    cv.dilate(erosion, dilation, kernel1, new cv.Point(-1, -1), 7);
+    let edges = new cv.Mat();
+    cv.Canny(dilated, edges, 1, 255, 3);
 
-    let thres_otsu = new cv.Mat();
-    cv.threshold(dilation, thres_otsu, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU);
+    let lines = new cv.Mat();
+    cv.HoughLines(edges, lines, 1, Math.PI / 180, 80);
 
-    console.log(src);
-    console.log(thres_otsu);
-    cv.cvtColor(thres_otsu, thres_otsu, cv.COLOR_GRAY2RGBA);
-    cv.bitwise_and(thres_otsu, src, src);
+    let points = [];
+    for (let i = 0; i < lines.rows; i++) {
+        let rho = lines.data32F[i * 2];
+        let theta = lines.data32F[i * 2 + 1];
+        let a = Math.cos(theta);
+        let b = Math.sin(theta);
+        let x0 = a * rho;
+        let y0 = b * rho;
+        let start = {x: x0 - 10000 * b, y: y0 + 10000 * a};
+        let end = {x: x0 + 10000 * b, y: y0 - 10000 * a};
+        points.push([start.x, start.y, end.x, end.y]);
+        // cv.line(dst, start, end, [255, 0, 0, 255]);
+    }
 
-    // show results
+    let minX = src.cols;
+    let minY = src.rows;
+    let maxX = 0;
+    let maxY = 0;
+
+    for (let i = 0; i < points.length; i++) {
+        for (let j = 0; j < i; j++) {
+            let intpoint = line2line(points[i], points[j]);
+
+            if (intpoint[0] === undefined || intpoint[1] === undefined) continue;
+            if (intpoint[0] < 0 || intpoint[1] < 0) continue;
+            if (intpoint[0] >= src.cols || intpoint[1] >= src.rows) continue;
+
+            // cv.circle(dst, {x: intpoint[0], y: intpoint[1]}, 3, [0, 0, 255, 255], -1);
+
+            minX = Math.min(minX, intpoint[0]);
+            maxX = Math.max(maxX, intpoint[0]);
+            minY = Math.min(minY, intpoint[1]);
+            maxY = Math.max(maxY, intpoint[1]);
+        }
+    }
+
+    let rect = new cv.Rect(minX, minY, maxX - minX, maxY - minY);
+    let dst = src.roi(rect);
+
+    //cv.circle(dst, {x: minX, y: minY}, 5, [255, 0, 255, 255], -1);
+    //cv.circle(dst, {x: maxX, y: minY}, 5, [255, 0, 255, 255], -1);
+    //cv.circle(dst, {x: minX, y: maxY}, 5, [255, 0, 255, 255], -1);
+    //cv.circle(dst, {x: maxX, y: maxY}, 5, [255, 0, 255, 255], -1);
+
     let canvas = document.createElement("canvas");
-    cv.imshow(canvas, src);
+    cv.imshow(canvas, dst);
     callback(canvas.toDataURL(), canvas);
-    src.delete();
-    dst.delete();
 
+    src.delete();
+    gray.delete();
+    blurred.delete();
+    thres.delete();
+    dilated.delete();
+    kernel.delete();
+    edges.delete();
+    lines.delete();
 }
+
+// Sauvola Thresholding for scanned document
+function sauvolaThresholding(img, callback) {
+    let src = cv.imread(img);
+    let gray = new cv.Mat();
+    let sauvola = new cv.Mat();
+
+    cv.cvtColor(src, gray, cv.COLOR_BGR2GRAY);
+
+    // <https://imagej.net/Auto_Local_Threshold#Sauvola>
+    let k = 0.5;
+    let r = 128;
+
+    let mean = 0;
+    let std = 0;
+
+    for (let i = 0; i < gray.data.length; i++) mean += gray.data[i];
+    mean /= gray.data.length;
+
+    for (let i = 0; i < gray.data.length; i++) std += (mean - gray.data[i]) * (mean - gray.data[i]);
+    std /= gray.data.length;
+    std = Math.sqrt(std);
+
+    let bin_threshold = mean * (1 + k * (std / r - 1));
+
+    cv.threshold(gray, sauvola, bin_threshold, 255, cv.THRESH_BINARY);
+
+    let canvas = document.createElement("canvas");
+    cv.imshow(canvas, sauvola);
+    callback(canvas.toDataURL(), canvas);
+
+    src.delete();
+    gray.delete();
+    sauvola.delete();
+}
+
+// Document scanner for smart crop
 
 function documentScanner2(img, callback) {
     let src = cv.imread(img);
