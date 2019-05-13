@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.6
+ * Cordova BCR Library 0.0.5
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.cleaning.js
@@ -91,71 +91,20 @@ function pipeline(img, progress, callback) {
 // ****************************************************************************
 function prepareImage(b64image, progress, callback) {
 
-    // document scanner
-    crop(b64image, function (b64, canvas) {
-
-        // other actions on the canvas
-        normalizeSize(canvas);
-
-        // return canvas
-        callback(canvas);
-
-    });
-}
-
-// ****************************************************************************
-// isolate card and crop
-// ****************************************************************************
-function crop(b64img, callback) {
-    var img = new Image();
+    // Load b64 in image
+    let img = new Image();
     img.onload = function () {
+        // Smart crop
+        documentScanner(img, function (b64, canvas) {
 
-        // smart crop strategy
-        var scale = 1;
-        var canvas = document.createElement("canvas");
-        var ctx = canvas.getContext("2d");
+            // other actions on the canvas
+            normalizeSize(canvas);
 
-        var width = img.width / scale;
-        var height = img.height / scale;
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        // clean (pipeline)
-        canvas = greyScale(canvas);
-        canvas = backgroundElimination(canvas);
-        var ccs = [];
-        var result = imageToCC(canvas);
-        ccs = result.ccs;
-        canvas = result.canvas;
-        var cropResult = boundingBox(ccs, canvas);
-
-        // readjust
-        minX = cropResult.left * scale;
-        minX -= 100; //minX * scaleMargin;
-
-        maxX = cropResult.right * scale;
-        maxX += 100; // maxX * scaleMargin;
-
-        minY = cropResult.top * scale;
-        minY -= 100; // minY * scaleMargin;
-
-        maxY = cropResult.bottom * scale;
-        maxY += 100; // maxY * scaleMargin;
-
-        // parse result
-        var tempCanvas = document.createElement("canvas");
-        var tempCtx = tempCanvas.getContext("2d");
-        width = maxX - minX;
-        height = maxY - minY;
-        tempCanvas.width = width;
-        tempCanvas.height = height;
-        tempCtx.drawImage(img, minX, minY, width, height, 0, 0, width, height);
-
-        callback(b64img, tempCanvas);
-
+            // return canvas
+            callback(canvas);
+        });
     };
-    img.src = b64img;
+    img.src = b64image;
 }
 
 // ****************************************************************************
@@ -200,6 +149,64 @@ function normalizeSize(canvas) {
     return canvas;
 }
 
+// TODO: Replace with OpenCV.js smart crop
+// ****************************************************************************
+// isolate card and crop
+// ****************************************************************************
+function smartCrop(b64img, progress, callback) {
+    let img = new Image();
+    img.onload = function () {
+
+        let scale = 1;
+        let canvas = document.createElement("canvas");
+        let ctx = canvas.getContext("2d");
+
+        let width = img.width / scale;
+        let height = img.height / scale;
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        /*
+
+        // clean (pipeline)
+        canvas = greyScale(canvas);
+        canvas = backgroundElimination(canvas);
+
+        let result = imageToCC(canvas);
+        let ccs = result.ccs;
+        canvas = result.canvas;
+        let cropResult = boundingBox(ccs, canvas);
+
+        // readjust
+        let minX = cropResult.left * scale;
+        minX -= 100; //minX * scaleMargin;
+
+        let maxX = cropResult.right * scale;
+        maxX += 100; // maxX * scaleMargin;
+
+        let minY = cropResult.top * scale;
+        minY -= 100; // minY * scaleMargin;
+
+        let maxY = cropResult.bottom * scale;
+        maxY += 100; // maxY * scaleMargin;
+
+        // parse result
+        let tempCanvas = document.createElement("canvas");
+        let tempCtx = tempCanvas.getContext("2d");
+        width = maxX - minX;
+        height = maxY - minY;
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        tempCtx.drawImage(img, minX, minY, width, height, 0, 0, width, height);
+        */
+
+        // callback(tempCanvas);
+        callback(canvas);
+
+    };
+    img.src = b64img;
+}
 
 // ****************************************************************************
 // get pixel function
