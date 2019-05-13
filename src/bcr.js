@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.5
+ * Cordova BCR Library 0.0.6
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.js
@@ -32,6 +32,7 @@ let bcr = (function () {
     // ************************************************************
     const maxwidth = 2160;
     const maxheight = 1440;
+    var default_crop_strategy = "smartcrop"; // "smartcrop" | "opencv"
 
     // get current script path
     let currentScriptPath = function () {
@@ -67,7 +68,13 @@ let bcr = (function () {
     return {
 
         // init function
-        initialize: function () {
+        initialize: function (crop_strategy) {
+
+            // check crop_strategy
+            if (typeof crop_strategy === "undefined") crop_strategy = default_crop_strategy;
+
+            // assign crop strategy
+            default_crop_strategy = crop_strategy;
 
             // scripts to include
             let scripts = [];
@@ -82,11 +89,6 @@ let bcr = (function () {
             scripts.push("bcr.job.js");
             scripts.push("bcr.names.js");
             scripts.push("bcr.streets.js");
-
-            // OpenCV.js
-            scripts.push("opencv/opencv.js");
-            scripts.push("opencv/utils.js");
-            scripts.push("opencv/filters.js");
 
             // Tesseract.js
             scripts.push("tesseract/tesseract.js");
@@ -117,14 +119,27 @@ let bcr = (function () {
         },
 
         /**
+         * return crop strategy set
+         * @return {string}
+         * the strategy label internally set
+         */
+        CROP_STRATEGY: function () {
+            return default_crop_strategy;
+        },
+
+        /**
+         * return maxwidth default
          * @return {number}
+          the value of the max width used internally to normalize the resolution
          */
         MAXWIDTH: function () {
             return maxwidth;
         },
 
         /**
+         * return maxheight default
          * @return {number}
+         * the value of the max height used internally to normalize the resolution
          */
         MAXHEIGHT: function () {
             return maxheight;

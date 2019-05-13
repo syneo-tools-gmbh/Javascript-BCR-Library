@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.5
+ * Cordova BCR Library 0.0.6
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.utility.js
@@ -163,26 +163,40 @@ function capitalize(str) {
 
 function sSimilarity(sa1, sa2) {
 
+    // for my purposes, comparison should not check case or whitespace
     let s1 = sa1.replace(/\s/g, "").toLowerCase();
     let s2 = sa2.replace(/\s/g, "").toLowerCase();
 
-    let pairs = function (s) {
-        let pairs = new Set();
-        for (let i = 0; i < s.length - 1; i++) {
-            pairs.add(s.slice(i, i + 2));
+    function intersect(arr1, arr2) {
+        // I didn't write this.  I'd like to come back sometime
+        // and write my own intersection algorithm.  This one seems
+        // clean and fast, though.  Going to try to find out where
+        // I got it for attribution.  Not sure right now.
+        let r = [], o = {}, l = arr2.length, i, v;
+        for (i = 0; i < l; i++) {
+            o[arr2[i]] = true;
         }
-        return Object.keys(pairs);
+        l = arr1.length;
+        for (i = 0; i < l; i++) {
+            v = arr1[i];
+            if (v in o) {
+                r.push(v);
+            }
+        }
+        return r;
+    }
+
+    var pairs = function (s) {
+        // Get an array of all pairs of adjacent letters in a string
+        let pairs = [];
+        for (var i = 0; i < s.length - 1; i++) {
+            pairs[i] = s.slice(i, i + 2);
+        }
+        return pairs;
     };
 
-    let intersect = function (arr1, arr2) {
-        return new Set([...arr1].filter(x => arr2.has(x)));
-    };
-
-    let p1 = pairs(s1);
-    let p2 = pairs(s2);
-
-    let similarity_num = 2 * intersect(p1, p2).size;
-    let similarity_den = p1.size + p2.size;
+    let similarity_num = 2 * intersect(pairs(s1), pairs(s2)).length;
+    let similarity_den = pairs(s1).length + pairs(s2).length;
 
     return similarity_num / similarity_den;
 }
