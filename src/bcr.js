@@ -53,7 +53,7 @@ let bcr = (function () {
     };
 
     // load files
-    let loadJs = async function (filename, callback) {
+    let loadJs = function (filename, callback) {
         console.log("Loading", filename);
         let scriptTag = document.createElement('script');
         scriptTag.src = filename;
