@@ -110,49 +110,55 @@ function crop(b64img, callback) {
     var img = new Image();
     img.onload = function () {
 
-        // smart crop strategy
-        var scale = 1;
-        var canvas = document.createElement("canvas");
-        var ctx = canvas.getContext("2d");
+        if (bcr.cropStrategy() === "smartcrop") {
 
-        var width = img.width / scale;
-        var height = img.height / scale;
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            // smart crop strategy
+            var scale = 1;
+            var canvas = document.createElement("canvas");
+            var ctx = canvas.getContext("2d");
 
-        // clean (pipeline)
-        canvas = greyScale(canvas);
-        canvas = backgroundElimination(canvas);
-        var ccs = [];
-        var result = imageToCC(canvas);
-        ccs = result.ccs;
-        canvas = result.canvas;
-        var cropResult = boundingBox(ccs, canvas);
+            var width = img.width / scale;
+            var height = img.height / scale;
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // readjust
-        minX = cropResult.left * scale;
-        minX -= 100; //minX * scaleMargin;
+            // clean (pipeline)
+            canvas = greyScale(canvas);
+            canvas = backgroundElimination(canvas);
+            var ccs = [];
+            var result = imageToCC(canvas);
+            ccs = result.ccs;
+            canvas = result.canvas;
+            var cropResult = boundingBox(ccs, canvas);
 
-        maxX = cropResult.right * scale;
-        maxX += 100; // maxX * scaleMargin;
+            // readjust
+            minX = cropResult.left * scale;
+            minX -= 100; //minX * scaleMargin;
 
-        minY = cropResult.top * scale;
-        minY -= 100; // minY * scaleMargin;
+            maxX = cropResult.right * scale;
+            maxX += 100; // maxX * scaleMargin;
 
-        maxY = cropResult.bottom * scale;
-        maxY += 100; // maxY * scaleMargin;
+            minY = cropResult.top * scale;
+            minY -= 100; // minY * scaleMargin;
 
-        // parse result
-        var tempCanvas = document.createElement("canvas");
-        var tempCtx = tempCanvas.getContext("2d");
-        width = maxX - minX;
-        height = maxY - minY;
-        tempCanvas.width = width;
-        tempCanvas.height = height;
-        tempCtx.drawImage(img, minX, minY, width, height, 0, 0, width, height);
+            maxY = cropResult.bottom * scale;
+            maxY += 100; // maxY * scaleMargin;
 
-        callback(b64img, tempCanvas);
+            // parse result
+            var tempCanvas = document.createElement("canvas");
+            var tempCtx = tempCanvas.getContext("2d");
+            width = maxX - minX;
+            height = maxY - minY;
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            tempCtx.drawImage(img, minX, minY, width, height, 0, 0, width, height);
+
+            callback(b64img, tempCanvas);
+
+        } else {
+            // new alternative
+        }
 
     };
     img.src = b64img;
