@@ -8,7 +8,15 @@ Description: demo app
 
 */
 
+async function init() {
+    console.log("init BCR");
+    await bcr.initialize();
+    console.log("BCR initialized");
+}
+
 // app init
 $(document).ready(function() {
-	bcr.initialize();
+    init();
 });
+
+

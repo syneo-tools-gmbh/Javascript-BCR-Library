@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.5
+ * Cordova BCR Library 0.0.6
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.js
@@ -28,10 +28,18 @@
 let bcr = (function () {
 
     // ************************************************************
+    // private properties (defaults)
+    // ************************************************************
+
+    var defaultMaxWidth = 2160;
+    var defaultMaxHeight = 1440;
+    var defaultLanguage = "deu"; // available: "deu","eng" (todo: transform in enum)
+    var defaultCropStrategy = "smartcrop"; // available: "smartcrop" | "opencv" (todo: transform in enum)
+    var tesseractWorker;
+
+    // ************************************************************
     // private methods
     // ************************************************************
-    const maxwidth = 2160;
-    const maxheight = 1440;
 
     // get current script path
     let currentScriptPath = function () {
@@ -45,7 +53,7 @@ let bcr = (function () {
     };
 
     // load files
-    let loadJs = function (filename, callback) {
+    let loadJs = async function (filename, callback) {
         console.log("Loading", filename);
         let scriptTag = document.createElement('script');
         scriptTag.src = filename;
@@ -57,7 +65,7 @@ let bcr = (function () {
     };
 
     let executionPath = currentScriptPath();
-    let WORKER_PATH = executionPath + 'tesseract/worker.js';
+    let WORKER_PATH = executionPath + 'tesseract/worker.min.js';
     let TESSERACT_PATH = executionPath + 'tesseract/tesseract-core.js';
     let LANG_PATH = executionPath + 'data/';
 
@@ -66,47 +74,81 @@ let bcr = (function () {
     // ************************************************************
     return {
 
-        // init function
-        initialize: function () {
+        /**
+         * return maxwidth default
+         * @param {string} crop the crop strategy.
+         * @param {string} language the language trained data.
+         * @param {string} width max internal width.
+         * @param {string} height max internal height.
+         * @return {void} return promise
+         */
+        initialize: function (crop, language, width, height) {
 
-            // scripts to include
-            let scripts = [];
+            return new Promise(resolve => {
 
-            // BCR library
-            scripts.push("bcr.analyze.js");
-            scripts.push("bcr.cleaning.js");
-            scripts.push("bcr.utility.js");
+                // check crop_strategy
+                if (typeof width === "undefined") width = defaultMaxWidth;
 
-            // Datasets
-            scripts.push("bcr.cities.js");
-            scripts.push("bcr.job.js");
-            scripts.push("bcr.names.js");
-            scripts.push("bcr.streets.js");
+                // check crop_strategy
+                if (typeof height === "undefined") height = defaultMaxHeight;
 
-            // OpenCV.js
-            scripts.push("opencv/opencv.js");
-            scripts.push("opencv/utils.js");
-            scripts.push("opencv/filters.js");
+                // check crop_strategy
+                if (typeof crop === "undefined") crop = defaultCropStrategy;
 
-            // Tesseract.js
-            scripts.push("tesseract/tesseract.js");
+                // check crop_strategy
+                if (typeof language === "undefined") language = defaultLanguage;
 
-            // final callback function
-            let callback = function () {
-                window.Tesseract = Tesseract.create({
-                    workerPath: WORKER_PATH,
-                    langPath: LANG_PATH,
-                    corePath: TESSERACT_PATH
-                });
-            };
+                // assign defaults from init
+                defaultMaxWidth = width;
+                defaultMaxHeight = height;
+                defaultCropStrategy = crop;
+                defaultLanguage = language;
 
-            // load next available script of callback if none
-            let nextLoad = function () {
-                if (scripts.length === 0) return callback();
-                return loadJs(executionPath + scripts.shift(), nextLoad);
-            };
+                // scripts to include
+                let scripts = [];
 
-            nextLoad();
+                // BCR library
+                scripts.push("bcr.analyze.js");
+                scripts.push("bcr.cleaning.js");
+                scripts.push("bcr.utility.js");
+
+                // Datasets
+                scripts.push("bcr.cities.js");
+                scripts.push("bcr.job.js");
+                scripts.push("bcr.names.js");
+                scripts.push("bcr.streets.js");
+
+                // Tesseract.js
+                scripts.push("tesseract/tesseract.min.js");
+
+                // create tesseract engine
+                let createTesseractEngine = function () {
+                    tesseractWorker = Tesseract.create({
+                        workerPath: WORKER_PATH,
+                        langPath: LANG_PATH,
+                        corePath: TESSERACT_PATH
+                    });
+
+                    // resolve after tesseract initialization
+                    resolve();
+                };
+
+                // load next available script of callback if none
+                let nextLoad = function () {
+
+                    // no more scripts
+                    if (scripts.length === 0) {
+                        // create engine and return promise
+                        createTesseractEngine();
+                    } else {
+                        // load next script
+                        loadJs(executionPath + scripts.shift(), nextLoad);
+                    }
+                };
+
+                nextLoad();
+
+            });
         },
 
         // main method for recognizing
@@ -117,18 +159,48 @@ let bcr = (function () {
         },
 
         /**
-         * @return {number}
+         * public property to expose the strategy set
+         * @return {string}
+         * the strategy label internally set
          */
-        MAXWIDTH: function () {
-            return maxwidth;
+        cropStrategy: function () {
+            return defaultCropStrategy;
         },
 
         /**
+         * public property to expose maxwidth default
          * @return {number}
+          the value of the max width used internally to normalize the resolution
          */
-        MAXHEIGHT: function () {
-            return maxheight;
-        }
+        maxWidth: function () {
+            return defaultMaxWidth;
+        },
 
+        /**
+         * public property to expose maxheight default
+         * @return {number}
+         * the value of the max height used internally to normalize the resolution
+         */
+        maxHeight: function () {
+            return defaultMaxHeight;
+        },
+
+        /**
+         * public property to expose default language
+         * @return {string}
+         * the value of the language trained data
+         */
+        language: function () {
+            return defaultLanguage;
+        },
+
+        /**
+         * public property to expose the worker
+         * @return {object}
+         * the initialized tesseract worker
+         */
+        tesseract: function () {
+            return tesseractWorker;
+        }
     };
 })();

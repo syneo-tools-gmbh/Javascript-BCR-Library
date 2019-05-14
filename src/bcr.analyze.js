@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.5
+ * Cordova BCR Library 0.0.6
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.analyze.js
@@ -86,7 +86,7 @@ const regex_mobile = [
 // perform ocr and analyze text
 function analyze(canvas, callback, progress) {
     Tesseract.recognize(canvas, {
-       // lang: 'deu'
+       lang: bcr.language()
     })
         .progress(function (data) {
             let result = {
