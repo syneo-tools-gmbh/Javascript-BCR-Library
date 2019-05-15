@@ -84,7 +84,9 @@ function documentScanner(img, callback) {
     cv.Canny(dilated, edges, 1, 255, 3);
 
     let lines = new cv.Mat();
-    cv.HoughLines(edges, lines, 1, Math.PI / 180, 80);
+    cv.HoughLines(edges, lines, 1, Math.PI / 180, 100);
+
+    let dst = src;
 
     let points = [];
     for (let i = 0; i < lines.rows; i++) {
@@ -97,7 +99,7 @@ function documentScanner(img, callback) {
         let start = {x: x0 - 10000 * b, y: y0 + 10000 * a};
         let end = {x: x0 + 10000 * b, y: y0 - 10000 * a};
         points.push([start.x, start.y, end.x, end.y]);
-        // cv.line(dst, start, end, [255, 0, 0, 255]);
+        cv.line(dst, start, end, [255, 0, 0, 255]);
     }
 
     let minX = src.cols;
@@ -113,7 +115,7 @@ function documentScanner(img, callback) {
             if (intpoint[0] < 0 || intpoint[1] < 0) continue;
             if (intpoint[0] >= src.cols || intpoint[1] >= src.rows) continue;
 
-            // cv.circle(dst, {x: intpoint[0], y: intpoint[1]}, 3, [0, 0, 255, 255], -1);
+            cv.circle(dst, {x: intpoint[0], y: intpoint[1]}, 3, [0, 0, 255, 255], -1);
 
             minX = Math.min(minX, intpoint[0]);
             maxX = Math.max(maxX, intpoint[0]);
@@ -122,13 +124,13 @@ function documentScanner(img, callback) {
         }
     }
 
-    let rect = new cv.Rect(minX, minY, maxX - minX, maxY - minY);
-    let dst = src.roi(rect);
+    //let rect = new cv.Rect(minX, minY, maxX - minX, maxY - minY);
+    //let dst = src.roi(rect);
 
-    //cv.circle(dst, {x: minX, y: minY}, 5, [255, 0, 255, 255], -1);
-    //cv.circle(dst, {x: maxX, y: minY}, 5, [255, 0, 255, 255], -1);
-    //cv.circle(dst, {x: minX, y: maxY}, 5, [255, 0, 255, 255], -1);
-    //cv.circle(dst, {x: maxX, y: maxY}, 5, [255, 0, 255, 255], -1);
+    cv.circle(dst, {x: minX, y: minY}, 5, [255, 0, 255, 255], -1);
+    cv.circle(dst, {x: maxX, y: minY}, 5, [255, 0, 255, 255], -1);
+    cv.circle(dst, {x: minX, y: maxY}, 5, [255, 0, 255, 255], -1);
+    cv.circle(dst, {x: maxX, y: maxY}, 5, [255, 0, 255, 255], -1);
 
     let canvas = document.createElement("canvas");
     cv.imshow(canvas, dst);
