@@ -1,4 +1,4 @@
-# [Javascript BCR Library](https://github.com/syneo-tools-gmbh/Javascript-BCR-Library) 0.0.6
+# [Javascript BCR Library](https://github.com/syneo-tools-gmbh/Javascript-BCR-Library) 0.0.8
 ## Authors: Gaspare Ferraro, Renzo Sala, Simone Ponte, Paolo Macco
 
 BCR Library is a javascript library, using the OCR engine Tesseract.JS, that extracts name, company name, job, address, phone numbers, email and web address out of a business card picture.
@@ -22,17 +22,91 @@ If you use cordova, you can add the `browser` platform and run it (it works on o
 # Reference
 
 ## Methods
-### Init method
-`bcr.initialize();`
+### Init methods
+`bcr.initialize(crop, language, width, height);`
+
+Initialize the bcr reader.
+
+Where:
+
+- **STRING** `crop`: the crop strategy (see [languages](#languages)), default `languages.GERMAN`.
+- **STRING** `language`: the language trained data (see [cropStrategy](#cropStrategy)), default `cropStrategy.SMART`.
+- **NUMBER** `width`: max internal width, default `2160`.
+- **NUMBER** `height`: max internal height, default `1440`.
+- Return Promise about JS loading.
+
+---------------
+
+`initializeForBCR(dynamicInclude);`
+
+Initialize bcr reader given the ocr from google mobile vision text recognition API (cordova-plugin-mobile-ocr).
+
+Where:
+- **BOOL** `dynamicInclude`: if the references are not included externally (default `true`).
+- Return Promise about JS loading.
+
 
 ### Recognize business card 
+
 `bcr.recognizeBcr(base64image, displayResultCallback, displayProgressCallback);`
 
 Where:
 
-- `base64image` is the base64 string of the image to analyze.
-- `displayResultCallback(result_data)` is a function called when the analysis of the business card is completed.
-- `displayProgressCallback(progress_data)` is a function called after each progress in the analysis.
+- **STRING** `base64image`: base64 string of the image to analyze.
+- **FUNCTION** `displayResultCallback(result_data)` function called when the analysis of the business card is completed.
+- **FUNCTION** `displayProgressCallback(progress_data)` function called after each progress in the analysis.
+
+-----------------
+
+`bcr.recognizeBcrFromOcr(ocr, displayResultCallback, displayProgressCallback);`
+
+Where:
+
+- **OBJECT** `ocr`: object containing ocr results data.
+- **FUNCTION** `displayResultCallback(result_data)` function called when the analysis of the business card is completed.
+- **FUNCTION** `displayProgressCallback(progress_data)` function called after each progress in the analysis.
+
+### Getter methods
+
+`cropStrategy()`
+
+- Return the strategy label internally set.
+
+------------
+
+`maxWidth()`
+
+- Return the value of the max width used internally to normalize the resolution.
+
+------------
+
+`maxHeight()`
+
+- Return the value of the max height used internally to normalize the resolution.
+
+------------
+
+`language()`
+
+- Return the value of the language trained data.
+
+------------
+
+`tesseract()`
+
+- Return the initialized tesseract worker.
+
+------------
+
+`ocr()`
+
+- Return the ocr passed.
+
+------------
+
+`onlyBCR()`
+
+- Return if only BCR should be performed.
 
 ## Object
 
@@ -82,6 +156,22 @@ JSON object in the format:
   }
 }
 ```
+
+## ENUM
+
+### languages
+
+- `languages.DANISH`: Danish language
+- `languages.GERMAN`: German language
+- `languages.ENGLISH`: English language
+- `languages.FRENCH`: French language
+- `languages.ITALIAN`: Italian language
+- `languages.SPANISH`: Spanish language
+- `languages.SWEDISH`: Swedish language
+
+### cropStrategy
+
+- `cropStrategy.SMART`: clean the image
 
 ## JS Libraries used 
 

@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.6
+ * Cordova BCR Library 0.0.8
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.analyze.js
@@ -56,7 +56,10 @@ const web = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[
 
 // tel
 const regex_tel = [
-    {regex: /([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g, confidence: 0.5},
+    {
+        regex: /([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
+        confidence: 0.5
+    },
     {
         regex: /((tel|phon|dir)\w*([.|:])*\s*)([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
         confidence: 0.5
@@ -65,6 +68,10 @@ const regex_tel = [
 
 // fax
 const regex_fax = [
+    {
+        regex: /([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
+        confidence: 0.5
+    },
     {
         regex: /((fax)\w*([.|:])*\s*)([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
         confidence: 0.5
@@ -83,10 +90,47 @@ const regex_mobile = [
     }
 ];
 
+// perform text analysis
+function analyzeOcr(ocr, callback, progress) {
+
+    // init progress object
+    let progressData = {
+        section: "",
+        progress: {}
+    };
+
+    console.log(ocr);
+
+    progressData.section = "BCR";
+    progressData.progress = {
+        status: "Text analysis",
+        progress: 0
+    };
+    progress(progressData);
+
+    // BCR analisys from OCR
+    let result = analyzePipelineBCR(ocr);
+
+    progressData.section = "BCR";
+    progressData.progress = {
+        status: "Text analysis",
+        progress: 1
+    };
+    progress(progressData);
+
+    // print result
+    console.log("Result: ");
+    console.log(result);
+
+    // callback
+    callback(result.fields, result.blocks);
+
+}
+
 // perform ocr and analyze text
 function analyze(canvas, callback, progress) {
     Tesseract.recognize(canvas, {
-       lang: bcr.language()
+        lang: bcr.language()
     })
         .progress(function (data) {
             let result = {
@@ -98,6 +142,8 @@ function analyze(canvas, callback, progress) {
             progress(result);
         })
         .then(function (ocrResult) {
+
+            console.log(ocrResult);
 
             // BCR analisys from OCR
             let result = analyzePipeline(ocrResult);
@@ -144,6 +190,52 @@ function initializeResult() {
             },
         blocks: []
     };
+}
+
+// analyze pipeline from given ocr
+function analyzePipelineBCR(ocr) {
+
+    // Step 1: Clean text from tesseract
+    console.log("Analyze pipeline", "stage", 0, "cleanText");
+    ocr = cleanExternalText(ocr);
+
+    // Step 2: Map logical blocks
+    console.log("Analyze pipeline", "stage", 1, "mapBlocks");
+    ocr = bcrAssignBlocks(ocr);
+
+    // Step 3: Score email
+    console.log("Analyze pipeline", "stage", 2, "scoreEmail");
+    ocr = scoreEmail(ocr);
+
+    // Step 4: Score web
+    console.log("Analyze pipeline", "stage", 3, "scoreWeb");
+    ocr = scoreWeb(ocr);
+
+    // Step 5: Score numbers
+    console.log("Analyze pipeline", "stage", 4, "scoreNumbers");
+    ocr = scoreNumbers(ocr);
+
+    // Step 6: Score company
+    console.log("Analyze pipeline", "stage", 5, "scoreCompany");
+    ocr = scoreCompany(ocr);
+
+    // Step 7: Score name
+    console.log("Analyze pipeline", "stage", 6, "scoreName");
+    ocr = scoreName(ocr);
+
+    // Step 8: Score job
+    console.log("Analyze pipeline", "stage", 7, "scoreJob");
+    ocr = scoreJob(ocr);
+
+    // Step 9: Score address
+    console.log("Analyze pipeline", "stage", 8, "scoreAddress");
+    ocr = scoreAddress(ocr);
+
+    // Step 10: Assign result
+    console.log("Analyze pipeline", "stage", 9, "assignResult");
+
+    // return result
+    return assignResults(ocr);
 }
 
 // analyze pipeline
@@ -200,7 +292,7 @@ function analyzePipeline(ocr) {
 // PREPROCESS OCR Object
 // ****************************************************************************
 
-// break long line
+// break long line (only tesseract)
 function breakLines(ocr) {
     let ocrCleaned = {};
     ocrCleaned.info = {};
@@ -272,7 +364,7 @@ function breakLines(ocr) {
     return ocrCleaned;
 }
 
-// blocks strategy assignment
+// blocks strategy assignment (only tesseract)
 function blocksStrategyAssignment(text) {
 
     // "" = trash, "ok" = get, "subtext1|subtext2|.." = split
@@ -394,6 +486,41 @@ function bcrBuildBlocks(ocr) {
     return ocr;
 }
 
+// Assign blocks from given ocr to outputstructure
+function bcrAssignBlocks(ocr) {
+
+    // add field
+    ocr.BCR = {};
+    ocr.BCR.blocks = [];
+
+    // cycle over lines
+    if (ocr.lines !== null && typeof ocr.lines !== "undefined" && ocr.lines.linetext !== null && typeof ocr.lines.linetext !== "undefined") {
+        for (let i = 0; i < ocr.lines.linetext.length; i++) {
+            let block = {
+                text: "",
+                fontSize: 0,
+                fields: {email: 0, web: 0, phone: 0, fax: 0, mobile: 0, job: 0, name: 0, address: 0, company: 0},
+                used: false
+            };
+
+            // assign line as it is (remove extra space, trimmed, removed cr lf)
+            block.text = cleanLine(ocr.lines.linetext[i]);
+            block.fontSize = parseInt(ocr.lines.lineframe[i].height);
+
+            //block.fontSize = ocr.
+            ocr.BCR.blocks.push(block);
+        }
+
+        let averageFontSize = 0;
+        for (let i = 0; i < ocr.BCR.blocks.length; i++) {
+            averageFontSize += ocr.BCR.blocks[i].fontSize;
+        }
+        ocr.BCR.averageFontSize = averageFontSize / ocr.BCR.blocks.length;
+    }
+
+    return ocr;
+}
+
 // clean text
 function cleanText(ocr) {
     // foreach word, make correction (and propagate to text and to lines)
@@ -419,6 +546,26 @@ function cleanText(ocr) {
             }
         }
     }
+    return ocr;
+}
+
+// clean the line from extra spaces
+function cleanLine(ocr) {
+
+    // remove extra spaces after + and - from ocr given
+    ocr = ocr.replace(/\+ /g, '+');
+    ocr = ocr.replace(/- /g, '-');
+    ocr = ocr.replace(/ \+/g, '+');
+    ocr = ocr.replace(/ -/g, '-');
+
+    // remove cr lf
+    ocr = ocr.replace(/[\n\r|]/g, '');
+
+    return ocr.trim();
+}
+
+// clean text from imported ocr
+function cleanExternalText(ocr) {
     return ocr;
 }
 
@@ -449,18 +596,6 @@ function bcrGetWordsFont(words) {
     fontSize = fontSize / words.length;
 
     return fontSize;
-}
-
-// get average font size of words
-function bcrGetWordsBold(words) {
-
-    let fontBold = 0;
-
-    // cycle over words
-    for (let i = 0; i < words.length; i++) {
-        if (words[i].is_bold) fontBold++;
-    }
-    return words.length / 2 < fontBold;
 }
 
 // check regexp
@@ -513,6 +648,12 @@ function extractName(text) {
 
 // extract job
 function extractJob(text) {
+    // return as it is
+    return text;
+}
+
+// extract title
+function extractTitle(text) {
     // return as it is
     return text;
 }
@@ -575,12 +716,14 @@ function extractZip(text) {
 }
 
 // extract address street
-function extractStreet(text) {
+function extractStreet(text, city, country, zip) {
     let txt = text.toLowerCase();
     for (let j = 0; j < streetsDS.length; j++) {
         let re = streetsDS[j];
         if (checkRE(re, txt).length > 0) {
-            return txt;
+            let result = txt.replace(city, '').replace(country, '').replace(zip, '').trim();
+            result = result.replace(/  +/g, ' ');
+            return result;
         }
     }
     return "";
@@ -597,7 +740,8 @@ function splitName(text) {
             Text: "",
             MiddleName: "",
             ExtraName: ""
-        }
+        },
+        Title: "",
     };
 
     let name_parts = text.split(' ');
@@ -606,16 +750,32 @@ function splitName(text) {
     result.Surname = name_parts[name_parts.length - 1];
 
     // assign name
+    let firstPosition = 0;
     for (let iCounter = 0; iCounter < name_parts.length - 1; iCounter++) {
-        result.Name.Text += " " + name_parts[iCounter].trim();
+
+        // find title in first chunk only
+        if (iCounter === 0) {
+            let txt = name_parts[iCounter].trim();
+            for (let j = 0; j < titleDS.length; j++) {
+                let matches = checkRE(titleDS[j], txt);
+                if (matches.length > 0) {
+                    result.Title = txt;
+                    firstPosition = 1;
+                    break;
+                }
+            }
+        }
 
         // first name
-        if (iCounter === 0) {
+        if (iCounter === firstPosition) {
             result.Name.FirstName = name_parts[iCounter].trim();
-        } else if (iCounter === 1) {
+            result.Name.Text += " " + name_parts[iCounter].trim();
+        } else if (iCounter === firstPosition + 1) {
             result.Name.MiddleName = name_parts[iCounter].trim();
-        } else if (iCounter === 1) {
+            result.Name.Text += " " + name_parts[iCounter].trim();
+        } else if (iCounter === firstPosition + 2) {
             result.Name.ExtraName = name_parts[iCounter].trim();
+            result.Name.Text += " " + name_parts[iCounter].trim();
         }
 
         // trim the name text
@@ -797,7 +957,7 @@ function scoreName(ocr) {
         }
     }
 
-// contribute max 0.3, assigned by dataset
+    // contribute max 0.3, assigned by dataset
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         if (ocr.BCR.blocks[i].fields.email === 0) {
             let line = ocr.BCR.blocks[i].text.toLowerCase();
@@ -811,6 +971,18 @@ function scoreName(ocr) {
         }
     }
 
+    // regex for title + font (max contribute: 0.1)
+    for (let i = 0; i < ocr.BCR.blocks.length; i++) {
+        let txt = ocr.BCR.blocks[i].text.toLowerCase();
+        for (let j = 0; j < titleDS.length; j++) {
+            let re = titleDS[j];
+
+            // regex evaluation
+            if (checkRE(re, txt).length > 0) {
+                ocr.BCR.blocks[i].fields.name += 0.1;
+            }
+        }
+    }
 
     return ocr;
 }
@@ -863,7 +1035,7 @@ function scoreAddress(ocr) {
     }
 
     // score 0.2 for city
-    // find city in dataset 
+    // find city in dataset
     for (let i = 0; i < ocr.BCR.blocks.length; i++) {
         let txt = ocr.BCR.blocks[i].text.toLowerCase().split(" ");
         for (let j = 0; j < cities.length; j++) {
@@ -940,6 +1112,19 @@ function scoreAddress(ocr) {
     return ocr;
 }
 
+// get max score from other fields
+function getMaxScore(excludedField, block) {
+    let maxScore = 0;
+    for (let property in block.fields) {
+        if (!block.fields.hasOwnProperty(property)) continue;
+        if (property !== excludedField) {
+            maxScore = Math.max(maxScore, parseFloat(block.fields[property]));
+        }
+    }
+
+    return maxScore;
+}
+
 // ****************************************************************************
 // Assign results
 // ****************************************************************************
@@ -969,21 +1154,37 @@ function assignResults(ocr) {
             });
         }
         if (ocr.BCR.blocks[i].fields.phone > 0) {
-            phone.push({
-                text: extractNumber(ocr.BCR.blocks[i].text),
-                confidence: ocr.BCR.blocks[i].fields.phone,
-                block: i
-            });
+            let telmatches = checkRE(regex_tel[1].regex, ocr.BCR.blocks[i].text);
+            let telmatch = (telmatches.length > 0) ? telmatches[0] : ocr.BCR.blocks[i].text;
+            if (telmatch !== "") {
+                phone.push({
+                    text: extractNumber(telmatch),
+                    confidence: ocr.BCR.blocks[i].fields.phone,
+                    block: i
+                });
+            }
         }
         if (ocr.BCR.blocks[i].fields.fax > 0) {
-            fax.push({text: extractNumber(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.fax, block: i});
+            let faxmatches = checkRE(regex_fax[1].regex, ocr.BCR.blocks[i].text);
+            let faxmatch = (faxmatches.length > 0) ? faxmatches[0] : ocr.BCR.blocks[i].text;
+            if (faxmatch !== "") {
+                fax.push({
+                    text: extractNumber(faxmatch),
+                    confidence: ocr.BCR.blocks[i].fields.fax,
+                    block: i
+                });
+            }
         }
         if (ocr.BCR.blocks[i].fields.mobile > 0) {
-            mobile.push({
-                text: extractNumber(ocr.BCR.blocks[i].text),
-                confidence: ocr.BCR.blocks[i].fields.mobile,
-                block: i
-            });
+            let mobmatches = checkRE(regex_mobile[1].regex, ocr.BCR.blocks[i].text);
+            let mobmatch = (mobmatches.length > 0) ? mobmatches[0] : ocr.BCR.blocks[i].text;
+            if (mobmatch !== "") {
+                mobile.push({
+                    text: extractNumber(mobmatch),
+                    confidence: ocr.BCR.blocks[i].fields.mobile,
+                    block: i
+                });
+            }
         }
         if (ocr.BCR.blocks[i].fields.company > 0) {
             company.push({
@@ -999,12 +1200,17 @@ function assignResults(ocr) {
             job.push({text: extractJob(ocr.BCR.blocks[i].text), confidence: ocr.BCR.blocks[i].fields.job, block: i});
         }
         if (ocr.BCR.blocks[i].fields.address > 0) {
+
+            let city = extractCity(ocr.BCR.blocks[i].text);
+            let country = extractCountry(ocr.BCR.blocks[i].text);
+            let zip = extractZip(ocr.BCR.blocks[i].text);
+
             // special case, no text: the extraction is done
             address.push({
-                city: extractCity(ocr.BCR.blocks[i].text),
-                country: extractCountry(ocr.BCR.blocks[i].text),
-                street: extractStreet(ocr.BCR.blocks[i].text),
-                zip: extractZip(ocr.BCR.blocks[i].text),
+                city: city,
+                country: country,
+                zip: zip,
+                street: extractStreet(ocr.BCR.blocks[i].text, city, country, zip),
                 confidence: ocr.BCR.blocks[i].fields.address,
                 block: i
             });
@@ -1033,7 +1239,7 @@ function assignResults(ocr) {
     if (phone.length > 0) {
         phone.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1);
         for (let k = 0; k < phone.length; k++) {
-            if (!ocr.BCR.blocks[phone[k].block].used && phone[k].confidence > MIN_SCORE) {
+            if (!ocr.BCR.blocks[phone[k].block].used && phone[k].confidence > MIN_SCORE && phone[k].confidence >= getMaxScore("phone", ocr.BCR.blocks[phone[k].block])) {
                 result.fields.Phone = phone[k].text;
                 ocr.BCR.blocks[phone[k].block].used = true;
                 break;
@@ -1043,7 +1249,7 @@ function assignResults(ocr) {
     if (fax.length > 0) {
         fax.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1); // TODO: why [0] ?
         for (let k = 0; k < fax.length; k++) {
-            if (!ocr.BCR.blocks[fax[k].block].used && fax[k].confidence > MIN_SCORE) {
+            if (!ocr.BCR.blocks[fax[k].block].used && fax[k].confidence > MIN_SCORE && fax[k].confidence >= getMaxScore("fax", ocr.BCR.blocks[fax[k].block])) {
                 result.fields.Fax = fax[k].text;
                 ocr.BCR.blocks[fax[k].block].used = true;
                 break;
@@ -1053,7 +1259,7 @@ function assignResults(ocr) {
     if (mobile.length > 0) {
         mobile.sort((a, b) => (a.confidence < b.confidence) ? 1 : -1); // TODO: why [0] ?
         for (let k = 0; k < mobile.length; k++) {
-            if (!ocr.BCR.blocks[mobile[k].block].used && mobile[k].confidence > MIN_SCORE) {
+            if (!ocr.BCR.blocks[mobile[k].block].used && mobile[k].confidence > MIN_SCORE && mobile[k].confidence >= getMaxScore("mobile", ocr.BCR.blocks[mobile[k].block])) {
                 result.fields.Mobile = mobile[k].text;
                 ocr.BCR.blocks[mobile[k].block].used = true;
                 break;
@@ -1097,17 +1303,16 @@ function assignResults(ocr) {
 
                 // assign first found not empty
                 if (address[k].street.length > 0 && result.fields.Address.StreetAddress.length === 0) {
-                    result.fields.Address.StreetAddress = address[k].street.trim();
-
+                    if (address[k].street.trim() !== "") result.fields.Address.StreetAddress = address[k].street.trim();
                 }
                 if (address[k].city.length > 0 && result.fields.Address.City.length === 0) {
-                    result.fields.Address.City = address[k].city.trim();
+                    if (address[k].city.trim() !== "") result.fields.Address.City = address[k].city.trim();
                 }
                 if (address[k].zip.length > 0 && result.fields.Address.ZipCode.length === 0) {
-                    result.fields.Address.ZipCode = address[k].zip;
+                    if (address[k].zip.trim() !== "") result.fields.Address.ZipCode = address[k].zip.trim();
                 }
                 if (address[k].country.length > 0 && result.fields.Address.Country.length === 0) {
-                    result.fields.Address.Country = address[k].country.trim();
+                    if (address[k].country.trim() !== "") result.fields.Address.Country = address[k].country.trim();
                 }
 
                 ocr.BCR.blocks[address[k].block].used = true;

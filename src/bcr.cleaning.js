@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.6
+ * Cordova BCR Library 0.0.8
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.cleaning.js
@@ -27,17 +27,30 @@
 // ****************************************************************************
 function loadAndProcess(b64, callback, progress) {
     console.log("loadAndProcess start");
-    pipeline(b64, progress, function (canvas, stages) {
-        analyze(canvas, function (data, blocks) {
+
+    if (bcr.onlyBCR()) {
+        analyzeOcr(bcr.ocr(), function (data, blocks) {
 
             // return data and stages
-            let returnData = {stages: stages, result: data, blocks: blocks};
+            let returnData = {stages: null, result: data, blocks: blocks};
             console.log("Finish analysis");
             console.log("Result:", returnData);
             callback(returnData);
 
         }, progress);
-    });
+    } else {
+        pipeline(b64, progress, function (canvas, stages) {
+            analyze(canvas, function (data, blocks) {
+
+                // return data and stages
+                let returnData = {stages: stages, result: data, blocks: blocks};
+                console.log("Finish analysis");
+                console.log("Result:", returnData);
+                callback(returnData);
+
+            }, progress);
+        });
+    }
 }
 
 // ****************************************************************************
@@ -107,18 +120,18 @@ function prepareImage(b64image, progress, callback) {
 // isolate card and crop
 // ****************************************************************************
 function crop(b64img, callback) {
-    var img = new Image();
+    let img = new Image();
     img.onload = function () {
 
         if (bcr.cropStrategy() === "smartcrop") {
 
             // smart crop strategy
-            var scale = 1;
-            var canvas = document.createElement("canvas");
-            var ctx = canvas.getContext("2d");
+            let scale = 1;
+            let canvas = document.createElement("canvas");
+            let ctx = canvas.getContext("2d");
 
-            var width = img.width / scale;
-            var height = img.height / scale;
+            let width = img.width / scale;
+            let height = img.height / scale;
             canvas.width = width;
             canvas.height = height;
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -126,28 +139,27 @@ function crop(b64img, callback) {
             // clean (pipeline)
             canvas = greyScale(canvas);
             canvas = backgroundElimination(canvas);
-            var ccs = [];
-            var result = imageToCC(canvas);
-            ccs = result.ccs;
+            let result = imageToCC(canvas);
+            let ccs = result.ccs;
             canvas = result.canvas;
-            var cropResult = boundingBox(ccs, canvas);
+            let cropResult = boundingBox(ccs, canvas);
 
             // readjust
-            minX = cropResult.left * scale;
+            let minX = cropResult.left * scale;
             minX -= 100; //minX * scaleMargin;
 
-            maxX = cropResult.right * scale;
+            let maxX = cropResult.right * scale;
             maxX += 100; // maxX * scaleMargin;
 
-            minY = cropResult.top * scale;
+            let minY = cropResult.top * scale;
             minY -= 100; // minY * scaleMargin;
 
-            maxY = cropResult.bottom * scale;
+            let maxY = cropResult.bottom * scale;
             maxY += 100; // maxY * scaleMargin;
 
             // parse result
-            var tempCanvas = document.createElement("canvas");
-            var tempCtx = tempCanvas.getContext("2d");
+            let tempCanvas = document.createElement("canvas");
+            let tempCtx = tempCanvas.getContext("2d");
             width = maxX - minX;
             height = maxY - minY;
             tempCanvas.width = width;
@@ -157,7 +169,7 @@ function crop(b64img, callback) {
             callback(b64img, tempCanvas);
 
         } else {
-            // new alternative
+            // new alternatives for crop strategies
         }
 
     };

@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.6
+ * Cordova BCR Library 0.0.8
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.streets.js
@@ -92,4 +92,40 @@ let jobDS = [
     // Swedish
 ];
 
+
+let titleDS = [
+
+    // personal title
+
+    // English
+    /\bdr\b/g,
+    /\bdr.\b/g,
+    /\bing\b/g,
+    /\bing.\b/g,
+    /\bdoctor\b/g,
+    /\bdoctor.\b/g,
+    /\bmr\b/g,
+    /\bmr.\b/g,
+    /\bmrs\b/g,
+    /\bmrs.\b/g,
+    /\bmiss\b/g,
+    /\bphd.\b/g,
+    /\bphd\b/g
+
+    // German
+
+    // Italian
+
+    // French
+
+    // Spanish
+
+    // Danish
+
+    // Swedish
+
+
+];
+
 console.log("Loaded", jobDS.length, "jobs");
+console.log("Loaded", titleDS.length, "titles");

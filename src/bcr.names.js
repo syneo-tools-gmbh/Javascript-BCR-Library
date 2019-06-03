@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.6
+ * Cordova BCR Library 0.0.8
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.names.js

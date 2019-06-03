@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.6
+ * Cordova BCR Library 0.0.8
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.js
@@ -22,6 +22,23 @@
  *
  */
 
+// ************************************************************
+// Enum values
+// ************************************************************
+const languages = {
+    DANISH: "dan",
+    GERMAN: "deu",
+    ENGLISH: "eng",
+    FRENCH: "fra",
+    ITALIAN: "ita",
+    SPANISH: "spa",
+    SWEDISH: "swe"
+};
+
+const cropStrategy = {
+    SMART: "smartcrop"
+};
+
 // ****************************************************************************
 // BCR main class
 // ****************************************************************************
@@ -30,12 +47,13 @@ let bcr = (function () {
     // ************************************************************
     // private properties (defaults)
     // ************************************************************
-
-    var defaultMaxWidth = 2160;
-    var defaultMaxHeight = 1440;
-    var defaultLanguage = "deu"; // available: "deu","eng" (todo: transform in enum)
-    var defaultCropStrategy = "smartcrop"; // available: "smartcrop" | "opencv" (todo: transform in enum)
-    var tesseractWorker;
+    let defaultMaxWidth = 2160;
+    let defaultMaxHeight = 1440;
+    let defaultLanguage = languages.GERMAN;
+    let defaultCropStrategy = cropStrategy.SMART;
+    let inputOcr = "";
+    let onlyBCR = false;
+    let tesseractWorker;
 
     // ************************************************************
     // private methods
@@ -75,15 +93,62 @@ let bcr = (function () {
     return {
 
         /**
-         * return maxwidth default
-         * @param {string} crop the crop strategy.
-         * @param {string} language the language trained data.
-         * @param {string} width max internal width.
-         * @param {string} height max internal height.
+         * initialize bcr reader given the ocr from google mobile vision text recognition API (cordova-plugin-mobile-ocr)
+         * @param {bool} dynamicInclude if the references are included externally
          * @return {void} return promise
          */
-        initialize: function (crop, language, width, height) {
+        initializeForBCR: function (dynamicInclude = true) {
 
+            return new Promise(resolve => {
+
+                onlyBCR = true;
+
+                if (dynamicInclude) {
+
+                    // scripts to include
+                    let scripts = [];
+
+                    // BCR library
+                    scripts.push("bcr.analyze.js");
+                    scripts.push("bcr.cleaning.js");
+                    scripts.push("bcr.utility.js");
+
+                    // Datasets
+                    scripts.push("bcr.cities.js");
+                    scripts.push("bcr.job.js");
+                    scripts.push("bcr.names.js");
+                    scripts.push("bcr.streets.js");
+
+                    // load next available script of callback if none
+                    let nextLoad = function () {
+
+                        // no more scripts
+                        if (scripts.length === 0) {
+                            // done
+                            resolve();
+                        } else {
+                            // load next script
+                            loadJs(executionPath + scripts.shift(), nextLoad);
+                        }
+                    };
+
+                    nextLoad();
+                } else {
+                    resolve();
+                }
+            });
+
+        },
+
+        /**
+         * initialize the bcr reader
+         * @param {string} crop the crop strategy.
+         * @param {string} language the language trained data.
+         * @param {number} width max internal width.
+         * @param {number} height max internal height.
+         * @return {void} return promise
+         */
+        initialize: function (crop = defaultCropStrategy, language = defaultLanguage, width = defaultMaxWidth, height = defaultMaxHeight) {
             return new Promise(resolve => {
 
                 // check crop_strategy
@@ -123,7 +188,7 @@ let bcr = (function () {
 
                 // create tesseract engine
                 let createTesseractEngine = function () {
-                    tesseractWorker = Tesseract.create({
+                    window.Tesseract = Tesseract.create({
                         workerPath: WORKER_PATH,
                         langPath: LANG_PATH,
                         corePath: TESSERACT_PATH
@@ -158,6 +223,17 @@ let bcr = (function () {
             console.log("recognizeBCR", "end");
         },
 
+        // main method for recognizing from ocr
+        recognizeBcrFromOcr: function (ocr, callback, progress) {
+
+            // assign ocr
+            inputOcr = ocr;
+
+            console.log("recognizeBCR", "start");
+            loadAndProcess(null, callback, progress);
+            console.log("recognizeBCR", "end");
+        },
+
         /**
          * public property to expose the strategy set
          * @return {string}
@@ -170,7 +246,7 @@ let bcr = (function () {
         /**
          * public property to expose maxwidth default
          * @return {number}
-          the value of the max width used internally to normalize the resolution
+         the value of the max width used internally to normalize the resolution
          */
         maxWidth: function () {
             return defaultMaxWidth;
@@ -201,6 +277,24 @@ let bcr = (function () {
          */
         tesseract: function () {
             return tesseractWorker;
+        },
+
+        /**
+         * public property to expose the ocr
+         * @return {object}
+         * the ocr passed
+         */
+        ocr: function () {
+            return inputOcr;
+        },
+
+        /**
+         * public property to expose the bcr strategy
+         * @return {object}
+         * if only BCR should be performed
+         */
+        onlyBCR: function () {
+            return onlyBCR;
         }
     };
 })();

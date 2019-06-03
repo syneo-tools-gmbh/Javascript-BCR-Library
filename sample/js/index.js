@@ -1,6 +1,6 @@
 /*
  
-Cordova BCR Library 0.0.4
+Cordova BCR Library 0.0.8
 Authors: Gaspare Ferraro, Renzo Sala
 Contributors: Simone Ponte, Paolo Macco
 Filename: bcr.js
@@ -16,7 +16,7 @@ async function init() {
 
 // app init
 $(document).ready(function() {
-    init();
+    init().finally();
 });
 
 

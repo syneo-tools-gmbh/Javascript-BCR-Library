@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.6
+ * Cordova BCR Library 0.0.8
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.utility.js
@@ -186,10 +186,10 @@ function sSimilarity(sa1, sa2) {
         return r;
     }
 
-    var pairs = function (s) {
+    let pairs = function (s) {
         // Get an array of all pairs of adjacent letters in a string
         let pairs = [];
-        for (var i = 0; i < s.length - 1; i++) {
+        for (let i = 0; i < s.length - 1; i++) {
             pairs[i] = s.slice(i, i + 2);
         }
         return pairs;
