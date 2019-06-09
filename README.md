@@ -10,7 +10,9 @@ The library can be used offline, no online dependencies are required.
 # Installation
 Copy the content of the repository and reference bcr via `script` tag in your HTML project:
   
-  `<script type="text/javascript" src="src/bcr.js"></script>`
+```html
+<script type="text/javascript" src="src/bcr.js"></script>
+```
 
 # Sample
 The sample application in the repository must be executed on a web server.
@@ -23,7 +25,11 @@ If you use cordova, you can add the `browser` platform and run it (it works on o
 
 ## Methods
 ### Init methods
-`bcr.initialize(crop, language, width, height);`
+
+
+```javascript
+bcr.initialize(crop, language, width, height);
+```
 
 Initialize the bcr reader.
 
@@ -37,9 +43,11 @@ Where:
 
 ---------------
 
-`initializeForBCR(dynamicInclude);`
+```javascript
+bcr.initializeForBCR(dynamicInclude);
+```
 
-Initialize bcr reader given the ocr from google mobile vision text recognition API (cordova-plugin-mobile-ocr).
+Initialize bcr reader given the ocr from google mobile vision text recognition API ([cordova-plugin-mobile-ocr](https://github.com/NeutrinosPlatform/cordova-plugin-mobile-ocr)).
 
 Where:
 - **BOOL** `dynamicInclude`: if the references are not included externally (default `true`).
@@ -48,7 +56,9 @@ Where:
 
 ### Recognize business card 
 
-`bcr.recognizeBcr(base64image, displayResultCallback, displayProgressCallback);`
+```javascript
+bcr.recognizeBcr(base64image, displayResultCallback, displayProgressCallback);
+```
 
 Where:
 
@@ -58,7 +68,9 @@ Where:
 
 -----------------
 
-`bcr.recognizeBcrFromOcr(ocr, displayResultCallback, displayProgressCallback);`
+```javascript
+bcr.recognizeBcrFromOcr(ocr, displayResultCallback, displayProgressCallback);
+```
 
 Where:
 
@@ -68,43 +80,57 @@ Where:
 
 ### Getter methods
 
-`cropStrategy()`
+```javascript
+bcr.cropStrategy()
+```
 
 - Return the strategy label internally set.
 
 ------------
 
-`maxWidth()`
+```javascript
+bcr.maxWidth()
+```
 
 - Return the value of the max width used internally to normalize the resolution.
 
 ------------
 
-`maxHeight()`
+```javascript
+bcr.maxHeight()
+```
 
 - Return the value of the max height used internally to normalize the resolution.
 
 ------------
 
-`language()`
+```javascript
+bcr.language()
+```
 
 - Return the value of the language trained data.
 
 ------------
 
-`tesseract()`
+```javascript
+bcr.tesseract()
+```
 
 - Return the initialized tesseract worker.
 
 ------------
 
-`ocr()`
+```javascript
+bcr.ocr()
+```
 
 - Return the ocr passed.
 
 ------------
 
-`onlyBCR()`
+```javascript
+bcr.onlyBCR()
+```
 
 - Return if only BCR should be performed.
 
@@ -113,31 +139,31 @@ Where:
 ### `result_data`
 JSON object in the format:
 
-```json
+```javascript
 {
-  "Company": "",
-  "Email": "",
+  "Company": STRING,
+  "Email": STRING,
   "Address": {
-      "StreetAddress": "",
-      "ZipCode": "",
-      "Country": "",
-      "Text": "",
-      "City": ""
+      "StreetAddress": STRING,
+      "ZipCode": STRING,
+      "Country": STRING,
+      "Text": STRING,
+      "City": STRING
   },
-  "Web": "",
-  "Phone": "",
-  "Text": "",
-  "Fax": "",
-  "Job": "",
-  "Mobile": "",
+  "Web": STRING,
+  "Phone": STRING,
+  "Text": STRING,
+  "Fax": STRING,
+  "Job": STRING,
+  "Mobile": STRING,
   "Name": {
-      "Text": "",
-      "Surname": "",
+      "Text": STRING,
+      "Surname": STRING,
       "Name": {
-          "FirstName": "",
-          "Text": "",
-          "MiddleName": "",
-          "ExtraName": ""
+          "FirstName": STRING,
+          "Text": STRING,
+          "MiddleName": STRING,
+          "ExtraName": STRING
       }
   }
 }
@@ -147,12 +173,12 @@ JSON object in the format:
 
 JSON object in the format:
 
-```json
+```javascript
 {
-  "section": "",
+  "section": STRING,
   "progress": {
-    "status": "",
-    "progress": 1.0
+    "status": STRING,
+    "progress": FLOAT // from 0.0 to 1.0
   }
 }
 ```
