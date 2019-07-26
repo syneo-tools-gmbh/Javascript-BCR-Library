@@ -10,7 +10,8 @@ Description: demo app
 
 async function init() {
     console.log("init BCR");
-    await bcr.initialize();
+    await bcr.initializeForBCR();
+    // await bcr.initialize();
     console.log("BCR initialized");
 }
 

@@ -77,7 +77,7 @@ let jobDS = [
     /\bassistant\b/g,
     /\bspecialist\b/g,
     /\bartist\b/g,
-    /\bworker\b/g,
+    /\bworker\b/g
 
     // German
 

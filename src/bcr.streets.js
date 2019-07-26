@@ -158,15 +158,16 @@ let streetsDS = [
     /\bway\b/g,
 
     // German
-    /\bkamp\b/g,
-    /\ballee\b/g,
-    /\bstieg\b/g,
-    /\bdamm\b/g,
-    /\bstrasse\b/g,
-    /\bstraße\b/g,
-    /\bweg\b/g,
-    /\bplatz\b/g,
-    /\bmoor\b/g,
+    /kamp/g,
+    /allee/g,
+    /stieg/g,
+    /damm/g,
+    /strasse/g,
+    /straße/g,
+    /weg/g,
+    /platz/g,
+    /moor/g,
+    /str./g,
 
     // Spanish
     /\bcalle\b/g,
