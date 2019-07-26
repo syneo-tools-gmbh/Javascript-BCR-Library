@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="utf-8"/>
+    <meta charset="utf-8" />
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <link rel="stylesheet" type="text/css" href="style/common-style.css">
@@ -129,7 +129,8 @@
                     Text: "",
                     MiddleName: "",
                     ExtraName: ""
-                }
+                },
+                Title: "",
             }
         };
 
@@ -141,7 +142,7 @@
             displayProgress(progressLabel);
 
             // display images
-            if (typeof data.stages !== "undefined") {
+            if (typeof data.stages !== "undefined" && data.stages !== null) {
                 let img0 = document.getElementById("step0");
                 let img1 = document.getElementById("step1");
                 let img2 = document.getElementById("step2");
