@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.8
+ * Cordova BCR Library 0.0.9
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.js
@@ -295,6 +295,31 @@ let bcr = (function () {
          */
         onlyBCR: function () {
             return onlyBCR;
+        },
+
+        /**
+         * public method to extract data from a block
+         * @param {string} text the text.
+         * @param {string} resultField the field.
+         * @return {string} the extracted field
+         */
+        extractField: function (text, resultField) {
+
+            let result = text;
+
+            if (resultField === "Name") {
+                result = splitName(text);
+            } else if (resultField === "Web") {
+                result = extractWeb(text);
+            } else if (resultField === "Email") {
+                result = extractEmail(text);
+            } else if (resultField === "Phone" || resultField === "Mobile" || resultField === "Fax") {
+                result = extractNumber(text);
+            } else if (resultField === "Address") {
+                result = splitAddress(text);
+            }
+
+            return result;
         }
     };
 })();

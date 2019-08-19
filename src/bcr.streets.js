@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.8
+ * Cordova BCR Library 0.0.9
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.streets.js

@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.8
+ * Cordova BCR Library 0.0.9
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.analyze.js
@@ -58,7 +58,7 @@ const web = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[
 const regex_tel = [
     {
         regex: /([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
-        confidence: 0.5
+        confidence: 0.3
     },
     {
         regex: /((tel|phon|dir)\w*([.|:])*\s*)([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
@@ -70,7 +70,7 @@ const regex_tel = [
 const regex_fax = [
     {
         regex: /([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
-        confidence: 0.5
+        confidence: 0.3
     },
     {
         regex: /((fax)\w*([.|:])*\s*)([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
@@ -82,7 +82,7 @@ const regex_fax = [
 const regex_mobile = [
     {
         regex: /([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
-        confidence: 0.5
+        confidence: 0.3
     },
     {
         regex: /((mobi|cell|hand)\w*([.|:])*\s*)([+][0-9]{1,4}\s*)?(\([0-9]{1,2}\)\s*)?([0-9]+[\s|\\\/.-]?){3,}/g,
@@ -443,7 +443,8 @@ function bcrBuildBlocks(ocr) {
         let block = {
             text: "",
             fontSize: 0,
-            fields: {email: 0, web: 0, phone: 0, fax: 0, mobile: 0, job: 0, name: 0, address: 0, company: 0},
+            fields: { email: 0, web: 0, phone: 0, fax: 0, mobile: 0, job: 0, name: 0, address: 0, company: 0 },
+            result: "",
             used: false
         };
 
@@ -741,7 +742,7 @@ function splitName(text) {
             MiddleName: "",
             ExtraName: ""
         },
-        Title: "",
+        Title: ""
     };
 
     let name_parts = text.split(' ');
@@ -781,6 +782,31 @@ function splitName(text) {
         // trim the name text
         result.Name.Text = result.Name.Text.trim();
     }
+
+    return result;
+}
+
+// split address
+function splitAddress(text) {
+
+    let city = extractCity(text);
+    let country = extractCountry(text);
+    let zip = extractZip(text);
+
+    let result = {
+        City: city,
+        Country: country,
+        StreetAddress: extractStreet(text, city, country, zip),
+        Text: "",
+        ZipCode: zip
+    };
+
+    if (result.StreetAddress !== "") result.Text += " " + titleCase(result.StreetAddress);
+    if (result.City !== "") result.Text += " " + titleCase(result.City);
+    if (result.ZipCode !== "") result.Text += " " + result.ZipCode;
+    if (result.Country !== "") result.Text += " " + titleCase(result.Country);
+    if (result.Text !== "") result.Text = result.Text.substr(1);
+
 
     return result;
 }
@@ -1006,7 +1032,7 @@ function scoreJob(ocr) {
 
             // regex evaluation
             if (checkRE(re, txt).length > 0) {
-                ocr.BCR.blocks[i].fields.address += 0.55;
+                ocr.BCR.blocks[i].fields.job += 0.55;
             }
         }
 
@@ -1057,7 +1083,7 @@ function scoreAddress(ocr) {
 
             // regex evaluation
             if (checkRE(re, txt).length > 0) {
-                ocr.BCR.blocks[i].fields.address += 0.2;
+                ocr.BCR.blocks[i].fields.address += 0.4;
             }
         }
     }
@@ -1080,7 +1106,7 @@ function scoreAddress(ocr) {
                         continue;
                     }
 
-                    ocr.BCR.blocks[i].fields.address += 0.2;
+                    ocr.BCR.blocks[i].fields.address += 0.05;
                     break;
                 }
             }
@@ -1103,9 +1129,9 @@ function scoreAddress(ocr) {
             && ocr.BCR.blocks[i].fields.mobile === 0
             && ocr.BCR.blocks[i].fields.job === 0
         ) {
-            ocr.BCR.blocks[i].fields.address += 0.1;
+            ocr.BCR.blocks[i].fields.address += 0.05;
         } else {
-            ocr.BCR.blocks[i].fields.address -= 0.1;
+            ocr.BCR.blocks[i].fields.address -= 0.05;
         }
     }
 
@@ -1128,6 +1154,8 @@ function getMaxScore(excludedField, block) {
 // ****************************************************************************
 // Assign results
 // ****************************************************************************
+
+// assign results
 function assignResults(ocr) {
 
     let result = initializeResult();
@@ -1223,6 +1251,7 @@ function assignResults(ocr) {
         if (web_found.confidence > MIN_SCORE) {
             result.fields.Web = web_found.text;
             ocr.BCR.blocks[web_found.block].used = true;
+            ocr.BCR.blocks[web_found.block].result = "Web";
         }
     }
 
@@ -1232,6 +1261,7 @@ function assignResults(ocr) {
             if (!ocr.BCR.blocks[email[k].block].used && email[k].confidence > MIN_SCORE) {
                 result.fields.Email = email[k].text;
                 ocr.BCR.blocks[email[k].block].used = true;
+                ocr.BCR.blocks[email[k].block].result = "Email";
                 break;
             }
         }
@@ -1242,6 +1272,7 @@ function assignResults(ocr) {
             if (!ocr.BCR.blocks[phone[k].block].used && phone[k].confidence > MIN_SCORE && phone[k].confidence >= getMaxScore("phone", ocr.BCR.blocks[phone[k].block])) {
                 result.fields.Phone = phone[k].text;
                 ocr.BCR.blocks[phone[k].block].used = true;
+                ocr.BCR.blocks[phone[k].block].result = "Phone";
                 break;
             }
         }
@@ -1252,6 +1283,7 @@ function assignResults(ocr) {
             if (!ocr.BCR.blocks[fax[k].block].used && fax[k].confidence > MIN_SCORE && fax[k].confidence >= getMaxScore("fax", ocr.BCR.blocks[fax[k].block])) {
                 result.fields.Fax = fax[k].text;
                 ocr.BCR.blocks[fax[k].block].used = true;
+                ocr.BCR.blocks[fax[k].block].result = "Fax";
                 break;
             }
         }
@@ -1262,6 +1294,7 @@ function assignResults(ocr) {
             if (!ocr.BCR.blocks[mobile[k].block].used && mobile[k].confidence > MIN_SCORE && mobile[k].confidence >= getMaxScore("mobile", ocr.BCR.blocks[mobile[k].block])) {
                 result.fields.Mobile = mobile[k].text;
                 ocr.BCR.blocks[mobile[k].block].used = true;
+                ocr.BCR.blocks[mobile[k].block].result = "Mobile";
                 break;
             }
         }
@@ -1272,6 +1305,7 @@ function assignResults(ocr) {
             if (!ocr.BCR.blocks[company[k].block].used && company[k].confidence > MIN_SCORE) {
                 result.fields.Company = company[k].text;
                 ocr.BCR.blocks[company[k].block].used = true;
+                ocr.BCR.blocks[company[k].block].result = "Company";
                 break;
             }
         }
@@ -1282,6 +1316,7 @@ function assignResults(ocr) {
             if (!ocr.BCR.blocks[name[k].block].used && name[k].confidence > MIN_SCORE) {
                 result.fields.Name = splitName(name[k].text);
                 ocr.BCR.blocks[name[k].block].used = true;
+                ocr.BCR.blocks[name[k].block].result = "Name";
                 break;
             }
         }
@@ -1292,6 +1327,7 @@ function assignResults(ocr) {
             if (!ocr.BCR.blocks[job[k].block].used && job[k].confidence > MIN_SCORE) {
                 result.fields.Job = job[k].text;
                 ocr.BCR.blocks[job[k].block].used = true;
+                ocr.BCR.blocks[job[k].block].result = "Job";
                 break;
             }
         }
@@ -1316,13 +1352,14 @@ function assignResults(ocr) {
                 }
 
                 ocr.BCR.blocks[address[k].block].used = true;
+                ocr.BCR.blocks[address[k].block].result = "Address";
             }
         }
 
-        if (result.fields.Address.StreetAddress !== "") result.fields.Address.Text += ", " + titleCase(result.fields.Address.StreetAddress);
-        if (result.fields.Address.City !== "") result.fields.Address.Text += ", " + titleCase(result.fields.Address.City);
-        if (result.fields.Address.ZipCode !== "") result.fields.Address.Text += ", " + result.fields.Address.ZipCode;
-        if (result.fields.Address.Country !== "") result.fields.Address.Text += ", " + titleCase(result.fields.Address.Country);
+        if (result.fields.Address.StreetAddress !== "") result.fields.Address.Text += " " + titleCase(result.fields.Address.StreetAddress);
+        if (result.fields.Address.City !== "") result.fields.Address.Text += " " + titleCase(result.fields.Address.City);
+        if (result.fields.Address.ZipCode !== "") result.fields.Address.Text += " " + result.fields.Address.ZipCode;
+        if (result.fields.Address.Country !== "") result.fields.Address.Text += " " + titleCase(result.fields.Address.Country);
         if (result.fields.Address.Text !== "") result.fields.Address.Text = result.fields.Address.Text.substr(1);
     }
 
