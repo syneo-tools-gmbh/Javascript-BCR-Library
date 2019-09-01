@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VCard QR Code Scanner</title>
+</head>
+<body>
+<style>
+    canvas {
+        display: none;
+    }
+    hr {
+        margin-top: 32px;
+    }
+    input[type="file"] {
+        display: block;
+        margin-bottom: 16px;
+    }
+    div {
+        margin-bottom: 16px;
+    }
+</style>
+
+<div>
+<h1>VCard QR Code Scanner</h1>
+<input type="file" id="file-selector">
+<b>Detected QR code: </b><br>
+<span id="file-qr-result">None</span>
+
+<script type="module">
+
+function parse(input) {
+    var Re1 = /^(version|fn|title|org):(.+)$/i;
+    var Re2 = /^([^:;]+);([^:]+):(.+)$/;
+    var ReKey = /item\d{1,2}\./;
+    var fields = {};
+
+    input.split(/\r\n|\r|\n/).forEach(function (line) {
+        var results, key;
+
+        if (Re1.test(line)) {
+            results = line.match(Re1);
+            key = results[1].toLowerCase();
+            fields[key] = results[2];
+        } else if (Re2.test(line)) {
+            results = line.match(Re2);
+            key = results[1].replace(ReKey, '').toLowerCase();
+
+            var meta = {};
+            results[2].split(';')
+                .map(function (p, i) {
+                var match = p.match(/([a-z]+)=(.*)/i);
+                if (match) {
+                    return [match[1], match[2]];
+                } else {
+                    return ["TYPE" + (i === 0 ? "" : i), p];
+                }
+            })
+                .forEach(function (p) {
+                meta[p[0]] = p[1];
+            });
+
+            if (!fields[key]) fields[key] = [];
+
+            fields[key].push({
+                meta: meta,
+                value: results[3].split(';')
+            })
+        }
+    });
+
+    return fields;
+};
+
+
+    import QrScanner from "../src/qr/qr-scanner.min.js";
+    QrScanner.WORKER_PATH = '../src/qr/qr-scanner-worker.min.js';
+
+    const fileSelector = document.getElementById('file-selector');
+    const fileQrResult = document.getElementById('file-qr-result');
+
+    function setResult(label, result) {
+    
+    	console.log(result);
+    	console.log(parse(result));
+    	
+        label.innerHTML = result.replace(/\n/g, "<br>");
+        label.style.color = 'teal';
+        clearTimeout(label.highlightTimeout);
+        label.highlightTimeout = setTimeout(() => label.style.color = 'inherit', 100);
+    }
+
+    // ####### File Scanning #######
+
+    fileSelector.addEventListener('change', event => {
+        const file = fileSelector.files[0];
+        if (!file) {
+            return;
+        }
+        QrScanner.scanImage(file)
+            .then(result => setResult(fileQrResult, result))
+            .catch(e => setResult(fileQrResult, e || 'No QR code found.'));
+    });
+
+</script>
+</body>
+</html>

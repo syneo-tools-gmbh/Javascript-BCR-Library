@@ -139,19 +139,19 @@ bcr.onlyBCR()
 ### `result_data`
 JSON object in the format:
 
-```javascript
+```json
 {
-  "Company": STRING,
-  "Email": STRING,
+  "Company": "STRING",
+  "Email": "STRING",
   "Address": {
-      "StreetAddress": STRING,
-      "ZipCode": STRING,
-      "Country": STRING,
-      "Text": STRING,
-      "City": STRING
+      "StreetAddress": "STRING",
+      "ZipCode": "STRING",
+      "Country": "STRING",
+      "Text": "STRING",
+      "City": "STRING"
   },
-  "Web": STRING,
-  "Phone": STRING,
+  "Web": "STRING",
+  "Phone": "STRING",
   "Text": STRING,
   "Fax": STRING,
   "Job": STRING,
