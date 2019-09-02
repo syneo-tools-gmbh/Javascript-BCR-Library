@@ -34,7 +34,8 @@ const MIN_SCORE = 0.05;
 // REGEXES
 // ****************************************************************************
 const typos = [
-    {regex: /[A-Za-z]0[A-Za-z]/g, find: "0", replace: "o"}, // 0 instead of o inside a text
+    {regex: /[A-Za-z]0[A-Za-z]/g, find: "0", replace: "o" }, // 0 instead of o inside a text
+    {regex: /[A-Za-z]00[A-Za-z]/g, find: "00", replace: "oo" }, // 00 instead of oo inside a text
     {regex: /[A-Za-z]\|[A-Za-z]/g, find: "|", replace: "l"}, // pipe for l
     {regex: /[A-Za-z]\|0[A-Za-z]/g, find: "|0", replace: "lo"}, // 0 instead of o + pipe and words
     {regex: /[A-Za-z]0\|[A-Za-z]/g, find: "0|", replace: "ol"}, // 0 instead of o + pipe and words
@@ -195,13 +196,13 @@ function initializeResult() {
 // analyze pipeline from given ocr
 function analyzePipelineBCR(ocr) {
 
-    // Step 1: Clean text from tesseract
-    console.log("Analyze pipeline", "stage", 0, "cleanText");
-    ocr = cleanExternalText(ocr);
-
-    // Step 2: Map logical blocks
-    console.log("Analyze pipeline", "stage", 1, "mapBlocks");
+    // Step 1: Map logical blocks
+    console.log("Analyze pipeline", "stage", 0, "mapBlocks");
     ocr = bcrAssignBlocks(ocr);
+
+    // Step 2: Clean text from google vision
+    console.log("Analyze pipeline", "stage", 1, "cleanText");
+    ocr = cleanExternalText(ocr);
 
     // Step 3: Score email
     console.log("Analyze pipeline", "stage", 2, "scoreEmail");
@@ -567,6 +568,28 @@ function cleanLine(ocr) {
 
 // clean text from imported ocr
 function cleanExternalText(ocr) {
+
+    // text cleaning for google ocr gived pipeline
+    for (let iCounter = 0; iCounter < ocr.BCR.blocks.length; iCounter++) {
+
+        for (let it = 0; it < typos.length; it++) {
+
+            // replaces all the typos
+            let currentBlock = ocr.BCR.blocks[iCounter].text;
+
+            let matches = checkRE(typos[it].regex, currentBlock);
+            if (matches.length > 0) {
+
+                // fix word
+                let newBlock = currentBlock.replace(typos[it].find, typos[it].replace);
+
+                // replace the word
+                ocr.BCR.blocks[iCounter].text = newBlock;
+            }
+        }
+    }
+
+    // return cleaned ocr
     return ocr;
 }
 
@@ -754,19 +777,34 @@ function splitName(text) {
     let firstPosition = 0;
     for (let iCounter = 0; iCounter < name_parts.length - 1; iCounter++) {
 
-        // find title in first chunk only
-        if (iCounter === 0) {
+        // title
+        if (iCounter === firstPosition) {
             let txt = name_parts[iCounter].trim();
-            for (let j = 0; j < titleDS.length; j++) {
-                let matches = checkRE(titleDS[j], txt);
-                if (matches.length > 0) {
-                    result.Title = txt;
-                    firstPosition = 1;
+
+            // trash title in first chunk only
+            let foundTrash = false;
+            for (let j = 0; j < titleTrashDS.length; j++) {
+                let matchesTrash = checkRE(titleTrashDS[j], txt);
+                if (matchesTrash.length > 0) {
+                    firstPosition = firstPosition + 1;
+                    foundTrash = true;
                     break;
                 }
             }
-        }
 
+            // find title in first chunk only
+            if (!foundTrash) {
+                for (let j = 0; j < titleDS.length; j++) {
+                    let matches = checkRE(titleDS[j], txt);
+                    if (matches.length > 0) {
+                        result.Title = txt;
+                        firstPosition = firstPosition + 1;
+                        break;
+                    }
+                }
+            }
+        }
+    
         // first name
         if (iCounter === firstPosition) {
             result.Name.FirstName = name_parts[iCounter].trim();
@@ -807,8 +845,39 @@ function splitAddress(text) {
     if (result.Country !== "") result.Text += " " + titleCase(result.Country);
     if (result.Text !== "") result.Text = result.Text.substr(1);
 
-
     return result;
+}
+
+// refresh the derived field name
+function refreshDerivedName(nameField) {
+
+    let nameFullText = "";
+    let nameText = "";
+    if (nameField.Title !== "") nameFullText += " " + titleCase(currentResult.result.Name.Title);
+    if (nameField.Name.FirstName !== "") nameFullText += " " + titleCase(currentResult.result.Name.Name.FirstName);
+    if (nameField.Name.MiddleName !== "") nameFullText += " " + titleCase(currentResult.result.Name.Name.MiddleName);
+    if (nameField.Name.ExtraName !== "") nameFullText += " " + titleCase(currentResult.result.Name.Name.ExtraName);
+    if (nameField.Surname !== "") nameFullText += " " + titleCase(currentResult.result.Name.Surname);
+    if (nameField.Name.FirstName !== "") nameText += " " + titleCase(currentResult.result.Name.Name.FirstName);
+    if (nameField.Name.MiddleName !== "") nameText += " " + titleCase(currentResult.result.Name.Name.MiddleName);
+    if (nameField.Name.ExtraName !== "") nameText += " " + titleCase(currentResult.result.Name.Name.ExtraName);
+    nameField.Text = nameFullText.substr(1);
+    nameField.Name.Text = nameText.substr(1);
+
+    return nameField;
+}
+
+// refresh the derived field address
+function refreshDerivedAddress(addressField) {
+
+    let addressText = "";
+    if (addressField.StreetAddress !== "") addressText += " " + titleCase(addressField.StreetAddress);
+    if (addressField.City !== "") addressText += " " + titleCase(addressField.City);
+    if (addressField.ZipCode !== "") addressText += " " + addressField.ZipCode;
+    if (addressField.Country !== "") addressText += " " + titleCase(addressField.Country);
+    addressField.Text = addressText.substr(1);
+
+    return addressField;
 }
 
 // ****************************************************************************
