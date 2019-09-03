@@ -320,6 +320,25 @@ let bcr = (function () {
             }
 
             return result;
+        },
+
+        /**
+         * public method to refresh the derived field name
+         * @param {object} nameField the text.
+         * @return {object} the refreshed field
+         */
+        refreshName: function (nameField) {
+            return refreshDerivedName(nameField);
+        },
+
+        /**
+         * public method to refresh the derived field address
+         * @param {object} addressField the text.
+         * @return {object} the refreshed field
+         */
+        refreshAddress: function (addressField) {
+            return refreshDerivedAddress(addressField);
         }
+
     };
 })();

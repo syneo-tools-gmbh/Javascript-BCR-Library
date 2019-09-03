@@ -239,42 +239,54 @@ let jobDS = [
     // Swedish
 ];
 
-
+// titles to be kept
 let titleDS = [
 
-    // personal title
-    /\bdoc.\b/g,
+    // x-language
+    /\bprof\b/g,
+    /\bprof.\b/g,
 
     // English
+    /\bprofessor\b/g,
     /\bdr\b/g,
     /\bdr.\b/g,
-    /\bing\b/g,
-    /\bing.\b/g,
+    /\bdoc\b/g,
+    /\bdoc.\b/g,
     /\bdoctor\b/g,
-    /\bdoctor.\b/g,
     /\bmr\b/g,
     /\bmr.\b/g,
-    /\bmrs\b/g,
     /\bmrs.\b/g,
+    /\bmrs\b/g,
+    /\bms.\b/g,
+    /\bms\b/g,
     /\bmiss\b/g,
-    /\bphd.\b/g,
-    /\bphd\b/g,
+    /\brev\b/g,
+    /\brev.\b/g,
 
     // German
+    /\bmag\b/g,
+    /\bmag.\b/g,
+    /\bherr\b/g,
+    /\bfrau\b/g,
+    /\bdoktor\b/g,
+    /\bmagister\b/g,
+    /\bingenieur\b/g,
 
     // Italian
+    /\bprofessore\b/g,
     /\bdottore\b/g,
     /\bdottor\b/g,
     /\bdott.\b/g,
     /\bavvocato\b/g,
     /\bavv\b/g,
     /\bavv.\b/g,
-    /\blegale\b/g,
-    /\bragioniere\b/g,
-    /\bragionier\b/g,
-    /\brag.\b/g
 
     // French
+    /\bdocteur\b/g,
+    /\bprofesseur\b/g,
+    /\bmonsieur\b/g,
+    /\bmadame\b/g,
+    /\bmademoiselle\b/g
 
     // Spanish
 
@@ -283,6 +295,42 @@ let titleDS = [
     // Swedish
 
 
+];
+
+// titles to be trashed
+let titleTrashDS = [
+
+    // english
+    /\bing\b/g,
+    /\bing.\b/g,
+    /\bing.-\b/g,
+    /\bphd\b/g,
+    /\bphd.-\b/g,
+
+    // German
+    /\bpd\b/g,
+    /\bpd.\b/g,
+    /\bpd.-\b/g,
+    /\bdipl\b/g,
+    /\bdipl.\b/g,
+    /\bdipl.-\b/g,
+
+    // italian
+    /\blegale\b/g,
+    /\bragioniere\b/g,
+    /\bragionier\b/g,
+    /\brag\b/g,
+    /\brag.\b/g,
+    /\bgeom\b/g,
+    /\bgeom.\b/g
+
+    // French
+
+    // Spanish
+
+    // Danish
+
+    // Swedish
 ];
 
 console.log("Loaded", jobDS.length, "jobs");
