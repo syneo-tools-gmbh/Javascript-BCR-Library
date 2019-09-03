@@ -28,7 +28,7 @@ If you use cordova, you can add the `browser` platform and run it (it works on o
 
 
 ```javascript
-bcr.initialize(crop, language, width, height);
+bcr.initialize(crop, language, width, height, QRScanner);
 ```
 
 Initialize the bcr reader.
@@ -39,6 +39,7 @@ Where:
 - **STRING** `language`: the language trained data (see [cropStrategy](#cropStrategy)), default `cropStrategy.SMART`.
 - **NUMBER** `width`: max internal width, default `2160`.
 - **NUMBER** `height`: max internal height, default `1440`.
+- **BOOLEAN** `QRScanner`: check first for VCard QR Code in image, default `true`.
 - Return Promise about JS loading.
 
 ---------------
@@ -152,18 +153,18 @@ JSON object in the format:
   },
   "Web": "STRING",
   "Phone": "STRING",
-  "Text": STRING,
-  "Fax": STRING,
-  "Job": STRING,
-  "Mobile": STRING,
+  "Text": "STRING",
+  "Fax": "STRING",
+  "Job": "STRING",
+  "Mobile": "STRING",
   "Name": {
-      "Text": STRING,
-      "Surname": STRING,
+      "Text": "STRING",
+      "Surname": "STRING",
       "Name": {
-          "FirstName": STRING,
-          "Text": STRING,
-          "MiddleName": STRING,
-          "ExtraName": STRING
+          "FirstName": "STRING",
+          "Text": "STRING",
+          "MiddleName": "STRING",
+          "ExtraName": "STRING"
       }
   }
 }
@@ -173,12 +174,12 @@ JSON object in the format:
 
 JSON object in the format:
 
-```javascript
+```json
 {
-  "section": STRING,
+  "section": "STRING",
   "progress": {
-    "status": STRING,
-    "progress": FLOAT // from 0.0 to 1.0
+    "status": "STRING",
+    "progress": "FLOAT"
   }
 }
 ```

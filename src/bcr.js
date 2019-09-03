@@ -51,6 +51,7 @@ let bcr = (function () {
     let defaultMaxHeight = 1440;
     let defaultLanguage = languages.GERMAN;
     let defaultCropStrategy = cropStrategy.SMART;
+    let defaultQRScanner = true;
     let inputOcr = "";
     let onlyBCR = false;
     let tesseractWorker;
@@ -146,9 +147,10 @@ let bcr = (function () {
          * @param {string} language the language trained data.
          * @param {number} width max internal width.
          * @param {number} height max internal height.
+         * @param {boolean} check for VCard as QR Code
          * @return {void} return promise
          */
-        initialize: function (crop = defaultCropStrategy, language = defaultLanguage, width = defaultMaxWidth, height = defaultMaxHeight) {
+        initialize: function (crop = defaultCropStrategy, language = defaultLanguage, width = defaultMaxWidth, height = defaultMaxHeight, QRScanner = defaultQRScanner) {
             return new Promise(resolve => {
 
                 // check crop_strategy
@@ -162,6 +164,9 @@ let bcr = (function () {
 
                 // check crop_strategy
                 if (typeof language === "undefined") language = defaultLanguage;
+
+                // Check QR Scanner
+                if (typeof QRScanner === "undefined") QRScanner = defaultQRScanner;
 
                 // assign defaults from init
                 defaultMaxWidth = width;
@@ -219,7 +224,11 @@ let bcr = (function () {
         // main method for recognizing
         recognizeBcr: function (b64image, callback, progress) {
             console.log("recognizeBCR", "start");
-            loadAndProcess(b64image, callback, progress);
+            // If qr Scanner enabled try to find some VCard
+            if (bcr.qrScanner())
+                QRCodeScanner(b64, x => x ? undefined : loadAndProcess(b64image, callback, progress), progress);
+            else
+                loadAndProcess(b64image, callback, progress);
             console.log("recognizeBCR", "end");
         },
 
@@ -295,6 +304,15 @@ let bcr = (function () {
          */
         onlyBCR: function () {
             return onlyBCR;
+        },
+
+        /**
+         * public property to expose the QRScanner option
+         * @return {boolean}
+         * if VCard QRScanner read is enabled
+         */
+        qrScanner: function () {
+            return QRScanner;
         },
 
         /**

@@ -22,6 +22,9 @@
  *
  */
 
+import QrScanner from "./qr/qr-scanner.min";
+QrScanner.WORKER_PATH = '../src/qr/qr-scanner-worker.min.js';
+
 // CONSTS
 const MIN_LINE_LENGHT = 4;
 const THRESHOLD_HIGH = 0.8;
@@ -34,8 +37,8 @@ const MIN_SCORE = 0.05;
 // REGEXES
 // ****************************************************************************
 const typos = [
-    {regex: /[A-Za-z]0[A-Za-z]/g, find: "0", replace: "o" }, // 0 instead of o inside a text
-    {regex: /[A-Za-z]00[A-Za-z]/g, find: "00", replace: "oo" }, // 00 instead of oo inside a text
+    {regex: /[A-Za-z]0[A-Za-z]/g, find: "0", replace: "o"}, // 0 instead of o inside a text
+    {regex: /[A-Za-z]00[A-Za-z]/g, find: "00", replace: "oo"}, // 00 instead of oo inside a text
     {regex: /[A-Za-z]\|[A-Za-z]/g, find: "|", replace: "l"}, // pipe for l
     {regex: /[A-Za-z]\|0[A-Za-z]/g, find: "|0", replace: "lo"}, // 0 instead of o + pipe and words
     {regex: /[A-Za-z]0\|[A-Za-z]/g, find: "0|", replace: "ol"}, // 0 instead of o + pipe and words
@@ -90,6 +93,85 @@ const regex_mobile = [
         confidence: 0.5
     }
 ];
+
+// B64 to file blob
+const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+
+    return new Blob(byteArrays, {type: contentType});
+}
+
+// Vcard parser
+function parse(input) {
+    var Re1 = /^(version|fn|title|org):(.+)$/i;
+    var Re2 = /^([^:;]+);([^:]+):(.+)$/;
+    var ReKey = /item\d{1,2}\./;
+    var fields = {};
+
+    input.split(/\r\n|\r|\n/).forEach(function (line) {
+        var results, key;
+
+        if (Re1.test(line)) {
+            results = line.match(Re1);
+            key = results[1].toLowerCase();
+            fields[key] = results[2];
+        } else if (Re2.test(line)) {
+            results = line.match(Re2);
+            key = results[1].replace(ReKey, '').toLowerCase();
+
+            var meta = {};
+            results[2].split(';')
+                .map(function (p, i) {
+                    var match = p.match(/([a-z]+)=(.*)/i);
+                    if (match) {
+                        return [match[1], match[2]];
+                    } else {
+                        return ["TYPE" + (i === 0 ? "" : i), p];
+                    }
+                })
+                .forEach(function (p) {
+                    meta[p[0]] = p[1];
+                });
+
+            if (!fields[key]) fields[key] = [];
+
+            fields[key].push({
+                meta: meta,
+                value: results[3].split(';')
+            })
+        }
+    });
+
+    return fields;
+};
+
+// QR Code Scanner
+function QRCodeScanner(b64, callback, progress) {
+
+    QrScanner.scanImage(file)
+        .then(function(result){
+            let vcard = parse(result);
+            // TODO: assign result
+            callback(true);
+        })
+        .catch(function(e){
+            callback(false);
+        });
+
+}
 
 // perform text analysis
 function analyzeOcr(ocr, callback, progress) {
@@ -444,7 +526,7 @@ function bcrBuildBlocks(ocr) {
         let block = {
             text: "",
             fontSize: 0,
-            fields: { email: 0, web: 0, phone: 0, fax: 0, mobile: 0, job: 0, name: 0, address: 0, company: 0 },
+            fields: {email: 0, web: 0, phone: 0, fax: 0, mobile: 0, job: 0, name: 0, address: 0, company: 0},
             result: "",
             used: false
         };
@@ -804,7 +886,7 @@ function splitName(text) {
                 }
             }
         }
-    
+
         // first name
         if (iCounter === firstPosition) {
             result.Name.FirstName = name_parts[iCounter].trim();
