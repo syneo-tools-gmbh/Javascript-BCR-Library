@@ -40,6 +40,11 @@ const cropStrategy = {
 };
 
 // ****************************************************************************
+// Language Datasets
+// ****************************************************************************
+let languagesDS = {};
+
+// ****************************************************************************
 // BCR main class
 // ****************************************************************************
 let bcr = (function () {
@@ -76,7 +81,7 @@ let bcr = (function () {
         console.log("Loading", filename);
         let scriptTag = document.createElement('script');
         scriptTag.src = filename;
-
+        scriptTag.type = "module";
         scriptTag.onload = callback;
         scriptTag.onreadystatechange = callback;
 
@@ -107,29 +112,33 @@ let bcr = (function () {
                 if (dynamicInclude) {
 
                     // scripts to include
-                    let scripts = [];
+                    let scriptsURL = [];
 
                     // BCR library
-                    scripts.push("bcr.analyze.js");
-                    scripts.push("bcr.cleaning.js");
-                    scripts.push("bcr.utility.js");
+                    scriptsURL.push("bcr.analyze.js");
+                    scriptsURL.push("bcr.cleaning.js");
+                    scriptsURL.push("bcr.utility.js");
+
+                    // Language datasets
+                    for (let k in languages)
+                        scriptsURL.push("lang/" + languages[k] + ".js");
 
                     // Datasets
-                    scripts.push("bcr.cities.js");
-                    scripts.push("bcr.job.js");
-                    scripts.push("bcr.names.js");
-                    scripts.push("bcr.streets.js");
+                    scriptsURL.push("bcr.cities.js");
+                    scriptsURL.push("bcr.job.js");
+                    scriptsURL.push("bcr.names.js");
+                    scriptsURL.push("bcr.streets.js");
 
                     // load next available script of callback if none
                     let nextLoad = function () {
 
                         // no more scripts
-                        if (scripts.length === 0) {
+                        if (scriptsURL.length === 0) {
                             // done
                             resolve();
                         } else {
                             // load next script
-                            loadJs(executionPath + scripts.shift(), nextLoad);
+                            loadJs(executionPath + scriptsURL.shift(), nextLoad);
                         }
                     };
 
@@ -147,7 +156,7 @@ let bcr = (function () {
          * @param {string} language the language trained data.
          * @param {number} width max internal width.
          * @param {number} height max internal height.
-         * @param {boolean} check for VCard as QR Code
+         * @param {boolean} QRScanner enabled
          * @return {void} return promise
          */
         initialize: function (crop = defaultCropStrategy, language = defaultLanguage, width = defaultMaxWidth, height = defaultMaxHeight, QRScanner = defaultQRScanner) {
@@ -175,21 +184,25 @@ let bcr = (function () {
                 defaultLanguage = language;
 
                 // scripts to include
-                let scripts = [];
+                let scriptsURL = [];
 
                 // BCR library
-                scripts.push("bcr.analyze.js");
-                scripts.push("bcr.cleaning.js");
-                scripts.push("bcr.utility.js");
+                scriptsURL.push("bcr.analyze.js");
+                scriptsURL.push("bcr.cleaning.js");
+                scriptsURL.push("bcr.utility.js");
+
+                // Language datasets
+                for (let k in languages)
+                    scriptsURL.push("lang/" + languages[k] + ".js");
 
                 // Datasets
-                scripts.push("bcr.cities.js");
-                scripts.push("bcr.job.js");
-                scripts.push("bcr.names.js");
-                scripts.push("bcr.streets.js");
+                scriptsURL.push("bcr.cities.js");
+                scriptsURL.push("bcr.job.js");
+                scriptsURL.push("bcr.names.js");
+                scriptsURL.push("bcr.streets.js");
 
                 // Tesseract.js
-                scripts.push("tesseract/tesseract.min.js");
+                scriptsURL.push("tesseract/tesseract.min.js");
 
                 // create tesseract engine
                 let createTesseractEngine = function () {
@@ -207,12 +220,12 @@ let bcr = (function () {
                 let nextLoad = function () {
 
                     // no more scripts
-                    if (scripts.length === 0) {
+                    if (scriptsURL.length === 0) {
                         // create engine and return promise
                         createTesseractEngine();
                     } else {
                         // load next script
-                        loadJs(executionPath + scripts.shift(), nextLoad);
+                        loadJs(executionPath + scriptsURL.shift(), nextLoad);
                     }
                 };
 

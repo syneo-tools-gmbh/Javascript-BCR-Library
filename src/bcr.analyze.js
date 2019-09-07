@@ -22,7 +22,8 @@
  *
  */
 
-import QrScanner from "./qr/qr-scanner.min";
+import QrScanner from "./qr/qr-scanner.min.js";
+
 QrScanner.WORKER_PATH = '../src/qr/qr-scanner-worker.min.js';
 
 // CONSTS
@@ -662,11 +663,8 @@ function cleanExternalText(ocr) {
             let matches = checkRE(typos[it].regex, currentBlock);
             if (matches.length > 0) {
 
-                // fix word
-                let newBlock = currentBlock.replace(typos[it].find, typos[it].replace);
-
-                // replace the word
-                ocr.BCR.blocks[iCounter].text = newBlock;
+                // fix and replace the word
+                ocr.BCR.blocks[iCounter].text = currentBlock.replace(typos[it].find, typos[it].replace);
             }
         }
     }
