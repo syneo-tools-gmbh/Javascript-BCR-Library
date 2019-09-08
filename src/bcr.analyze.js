@@ -24,7 +24,7 @@
 
 import QrScanner from "./qr/qr-scanner.min.js";
 
-QrScanner.WORKER_PATH = '../src/qr/qr-scanner-worker.min.js';
+QrScanner.WORKER_PATH = './qr/qr-scanner-worker.min.js';
 
 // CONSTS
 const MIN_LINE_LENGHT = 4;
@@ -116,62 +116,39 @@ const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
 }
 
 // Vcard parser
-function parse(input) {
-    var Re1 = /^(version|fn|title|org):(.+)$/i;
-    var Re2 = /^([^:;]+);([^:]+):(.+)$/;
-    var ReKey = /item\d{1,2}\./;
-    var fields = {};
+function VCardParse(input) {
+    let fields = {};
+    let card = initializeResult();
 
     input.split(/\r\n|\r|\n/).forEach(function (line) {
-        var results, key;
-
-        if (Re1.test(line)) {
-            results = line.match(Re1);
-            key = results[1].toLowerCase();
-            fields[key] = results[2];
-        } else if (Re2.test(line)) {
-            results = line.match(Re2);
-            key = results[1].replace(ReKey, '').toLowerCase();
-
-            var meta = {};
-            results[2].split(';')
-                .map(function (p, i) {
-                    var match = p.match(/([a-z]+)=(.*)/i);
-                    if (match) {
-                        return [match[1], match[2]];
-                    } else {
-                        return ["TYPE" + (i === 0 ? "" : i), p];
-                    }
-                })
-                .forEach(function (p) {
-                    meta[p[0]] = p[1];
-                });
-
-            if (!fields[key]) fields[key] = [];
-
-            fields[key].push({
-                meta: meta,
-                value: results[3].split(';')
-            })
-        }
+        let splitted = line.split(":");
+        if (splitted.length < 2) return;
+        let k = splitted[0].split(";")[0];
+        fields[k] = splitted[splitted.length - 1].replace(";", " ");
     });
 
-    return fields;
-};
+    // TODO: Try to split addresses, names, phones
+    if ("EMAIL" in fields) card["fields"]["Email"] = fields["EMAIL"];
+    if ("ADR" in fields) card["fields"]["Address"]["Text"] = fields["ADR"];
+    if ("N" in fields) card["fields"]["Name"]["Text"] = fields["N"];
+    if ("ORG" in fields) card["fields"]["Company"] = fields["ORG"];
+    if ("TEL" in fields) card["fields"]["Phone"] = fields["TEL"];
+    if ("URL" in fields) card["fields"]["Web"] = fields["URL"];
+    if ("TITLE" in fields) card["fields"]["Job"] = fields["TITLE"];
+
+    return card;
+}
 
 // QR Code Scanner
 function QRCodeScanner(b64, callback, progress) {
-
     QrScanner.scanImage(file)
-        .then(function(result){
-            let vcard = parse(result);
-            // TODO: assign result
-            callback(true);
+        .then(function (result) {
+            let vcard = VCardParse(result);
+            callback(vcard);
         })
-        .catch(function(e){
-            callback(false);
+        .catch(function (e) {
+            callback(undefined);
         });
-
 }
 
 // perform text analysis

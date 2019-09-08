@@ -81,7 +81,7 @@ let bcr = (function () {
         console.log("Loading", filename);
         let scriptTag = document.createElement('script');
         scriptTag.src = filename;
-        scriptTag.type = "module";
+        // scriptTag.type = "module";
         scriptTag.onload = callback;
         scriptTag.onreadystatechange = callback;
 
@@ -239,7 +239,13 @@ let bcr = (function () {
             console.log("recognizeBCR", "start");
             // If qr Scanner enabled try to find some VCard
             if (bcr.qrScanner())
-                QRCodeScanner(b64, x => x ? undefined : loadAndProcess(b64image, callback, progress), progress);
+                QRCodeScanner(b64, function (ret) {
+                    // QRCode not found, fallback normal analysis
+                    if (ret === undefined)
+                        loadAndProcess(b64image, callback, progress);
+                    else
+                        callback(ret, []);
+                }, progress);
             else
                 loadAndProcess(b64image, callback, progress);
             console.log("recognizeBCR", "end");
