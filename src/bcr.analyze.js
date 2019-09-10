@@ -22,9 +22,8 @@
  *
  */
 
-import QrScanner from "./qr/qr-scanner.min.js";
-
-QrScanner.WORKER_PATH = './qr/qr-scanner-worker.min.js';
+//import QrScanner from "./qr/qr-scanner.min.js";
+//QrScanner.WORKER_PATH = './qr/qr-scanner-worker.min.js';
 
 // CONSTS
 const MIN_LINE_LENGHT = 4;
@@ -95,60 +94,39 @@ const regex_mobile = [
     }
 ];
 
-// B64 to file blob
-const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
-    const byteCharacters = atob(b64Data);
-    const byteArrays = [];
-
-    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-        const slice = byteCharacters.slice(offset, offset + sliceSize);
-
-        const byteNumbers = new Array(slice.length);
-        for (let i = 0; i < slice.length; i++) {
-            byteNumbers[i] = slice.charCodeAt(i);
-        }
-
-        const byteArray = new Uint8Array(byteNumbers);
-        byteArrays.push(byteArray);
-    }
-
-    return new Blob(byteArrays, {type: contentType});
-}
-
 // Vcard parser
 function VCardParse(input) {
-    let fields = {};
     let card = initializeResult();
-
     input.split(/\r\n|\r|\n/).forEach(function (line) {
-        let splitted = line.split(":");
-        if (splitted.length < 2) return;
-        let k = splitted[0].split(";")[0];
-        fields[k] = splitted[splitted.length - 1].replace(";", " ");
+        let lineu = line.toUpperCase();
+        if (lineu.startsWith("N:")) card["fields"]["Name"]["Text"] = line.substr(2);
+        if (lineu.startsWith("TITLE:")) card["fields"]["Job"] = line.substr(6);
+        if (lineu.startsWith("EMAIL:")) card["fields"]["Email"] = line.substr(6);
+        if (lineu.startsWith("ORG:")) card["fields"]["Company"] = line.substr(4);
+        if (lineu.startsWith("URL:")) card["fields"]["Web"] = line.substr(4);
+        if (lineu.startsWith("ADR") && lineu.indexOf(":") !== -1) card["fields"]["Address"]["Text"] = line.substr(line.indexOf(":") + 1);
+        if (lineu.startsWith("TEL;TYPE=WORK") && lineu.indexOf(":") !== -1) card["fields"]["Phone"] = line.substr(line.indexOf(":") + 1);
+        if (lineu.startsWith("TEL;TYPE=HOME") && lineu.indexOf(":") !== -1) card["fields"]["Mobile"] = line.substr(line.indexOf(":") + 1);
     });
-
-    // TODO: Try to split addresses, names, phones
-    if ("EMAIL" in fields) card["fields"]["Email"] = fields["EMAIL"];
-    if ("ADR" in fields) card["fields"]["Address"]["Text"] = fields["ADR"];
-    if ("N" in fields) card["fields"]["Name"]["Text"] = fields["N"];
-    if ("ORG" in fields) card["fields"]["Company"] = fields["ORG"];
-    if ("TEL" in fields) card["fields"]["Phone"] = fields["TEL"];
-    if ("URL" in fields) card["fields"]["Web"] = fields["URL"];
-    if ("TITLE" in fields) card["fields"]["Job"] = fields["TITLE"];
-
     return card;
 }
 
 // QR Code Scanner
 function QRCodeScanner(b64, callback, progress) {
-    QrScanner.scanImage(file)
-        .then(function (result) {
+    qrcode.callback = function (result) {
+        if (result.startsWith("BEGIN:VCARD")) {
+            console.log("QRCodeScanner", "result", result);
             let vcard = VCardParse(result);
+            console.log(vcard);
             callback(vcard);
-        })
-        .catch(function (e) {
+        } else {
+            console.log("QRCodeScanner", "result", undefined);
             callback(undefined);
-        });
+        }
+
+    };
+    console.log("QRCodeScanner", "start");
+    qrcode.decode(b64);
 }
 
 // perform text analysis
@@ -552,7 +530,9 @@ function bcrBuildBlocks(ocr) {
 function bcrAssignBlocks(ocr) {
 
     // add field
-    ocr.BCR = {};
+    ocr.BCR = {blocks: undefined};
+    console.log("OCR", ocr);
+    console.log("OCR.bcr", ocr.BCR);
     ocr.BCR.blocks = [];
 
     // cycle over lines

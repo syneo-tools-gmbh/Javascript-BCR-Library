@@ -161,6 +161,7 @@
             // display result
             if (typeof data.result !== "undefined") {
                 Object.keys(data.result).forEach(k => {
+                    console.log("result", k);
                     if (k === "Name") {
                         document.getElementById(k).innerHTML = data.result[k].Text;
                     } else if (k === "Address") {

@@ -54,7 +54,7 @@ let bcr = (function () {
     // ************************************************************
     let defaultMaxWidth = 2160;
     let defaultMaxHeight = 1440;
-    let defaultLanguage = languages.GERMAN;
+    let defaultLanguage = languages.ENGLISH;
     let defaultCropStrategy = cropStrategy.SMART;
     let defaultQRScanner = true;
     let inputOcr = "";
@@ -77,14 +77,20 @@ let bcr = (function () {
     };
 
     // load files
-    let loadJs = function (filename, callback) {
+    let loadJs = function (filename, callback, attrs) {
         console.log("Loading", filename);
         let scriptTag = document.createElement('script');
-        scriptTag.src = filename;
-        // scriptTag.type = "module";
+
+        if (typeof filename !== "undefined")
+            scriptTag.src = filename;
+
         scriptTag.onload = callback;
         scriptTag.onreadystatechange = callback;
 
+        if (typeof attrs !== "undefined") {
+            for (let k in attrs)
+                scriptTag[k] = attrs[k];
+        }
         document.body.appendChild(scriptTag);
     };
 
@@ -129,6 +135,8 @@ let bcr = (function () {
                     scriptsURL.push("bcr.names.js");
                     scriptsURL.push("bcr.streets.js");
 
+                    scriptsURL.push("qr/llqrcode.js");
+
                     // load next available script of callback if none
                     let nextLoad = function () {
 
@@ -138,7 +146,12 @@ let bcr = (function () {
                             resolve();
                         } else {
                             // load next script
-                            loadJs(executionPath + scriptsURL.shift(), nextLoad);
+                            let first = scriptsURL.shift();
+                            if (typeof first === "string")
+                                loadJs(executionPath + first, nextLoad);
+                            else
+                                loadJs(executionPath + first[0], nextLoad, first[1]);
+
                         }
                     };
 
@@ -156,10 +169,10 @@ let bcr = (function () {
          * @param {string} language the language trained data.
          * @param {number} width max internal width.
          * @param {number} height max internal height.
-         * @param {boolean} QRScanner enabled
+         * @param {boolean} qrScanner enabled
          * @return {void} return promise
          */
-        initialize: function (crop = defaultCropStrategy, language = defaultLanguage, width = defaultMaxWidth, height = defaultMaxHeight, QRScanner = defaultQRScanner) {
+        initialize: function (crop = defaultCropStrategy, language = defaultLanguage, width = defaultMaxWidth, height = defaultMaxHeight, qrScanner = defaultQRScanner) {
             return new Promise(resolve => {
 
                 // check crop_strategy
@@ -175,13 +188,14 @@ let bcr = (function () {
                 if (typeof language === "undefined") language = defaultLanguage;
 
                 // Check QR Scanner
-                if (typeof QRScanner === "undefined") QRScanner = defaultQRScanner;
+                if (typeof qrScanner === "undefined") qrScanner = defaultQRScanner;
 
                 // assign defaults from init
                 defaultMaxWidth = width;
                 defaultMaxHeight = height;
                 defaultCropStrategy = crop;
                 defaultLanguage = language;
+                defaultQRScanner = qrScanner;
 
                 // scripts to include
                 let scriptsURL = [];
@@ -200,6 +214,8 @@ let bcr = (function () {
                 scriptsURL.push("bcr.job.js");
                 scriptsURL.push("bcr.names.js");
                 scriptsURL.push("bcr.streets.js");
+
+                scriptsURL.push("qr/llqrcode.js");
 
                 // Tesseract.js
                 scriptsURL.push("tesseract/tesseract.min.js");
@@ -239,12 +255,20 @@ let bcr = (function () {
             console.log("recognizeBCR", "start");
             // If qr Scanner enabled try to find some VCard
             if (bcr.qrScanner())
-                QRCodeScanner(b64, function (ret) {
+                QRCodeScanner(b64image, function (ret) {
                     // QRCode not found, fallback normal analysis
-                    if (ret === undefined)
+                    if (ret === undefined) {
+                        console.log("recognizeBcr", "QR NOT FOUND");
                         loadAndProcess(b64image, callback, progress);
-                    else
-                        callback(ret, []);
+                    } else {
+                        console.log("recognizeBcr", "QR FOUND", ret["fields"]);
+                        let returnData = {
+                            stages: [b64image],
+                            result: ret["fields"],
+                            blocks: []
+                        };
+                        callback(returnData);
+                    }
                 }, progress);
             else
                 loadAndProcess(b64image, callback, progress);
@@ -331,7 +355,7 @@ let bcr = (function () {
          * if VCard QRScanner read is enabled
          */
         qrScanner: function () {
-            return QRScanner;
+            return defaultQRScanner;
         },
 
         /**
