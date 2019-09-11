@@ -1,4 +1,4 @@
-# [Javascript BCR Library](https://github.com/syneo-tools-gmbh/Javascript-BCR-Library) 0.0.9
+# [Javascript BCR Library](https://github.com/syneo-tools-gmbh/Javascript-BCR-Library) 0.0.10
 ## Authors: Gaspare Ferraro, Renzo Sala, Simone Ponte, Paolo Macco
 
 BCR Library is a javascript library, using the OCR engine Tesseract.JS, that extracts name, company name, job, address, phone numbers, email and web address out of a business card picture.
@@ -28,37 +28,30 @@ If you use cordova, you can add the `browser` platform and run it (it works on o
 
 
 ```javascript
-bcr.initialize(crop, language, width, height, QRScanner);
+bcr.initialize(ocrEngine, crop, language, width, height, QRScanner, dynamicInclude);
 ```
 
 Initialize the bcr reader.
+If ocrEngine is set to ocrEngines.TESSERACT, initialize the tesseract engine.
+If ocrEngine is set to ocrEngines.GOOGLEVISION, initialize bcr reader given the ocr from google mobile vision text recognition API ([cordova-plugin-mobile-ocr](https://github.com/NeutrinosPlatform/cordova-plugin-mobile-ocr)).
 
 Where:
 
+- **STRING** `ocrEngine` the selected engine, default `ocrEngines.TESSERACT` (see [ocrEngines].(#ocrEngines)).
 - **STRING** `crop`: the crop strategy (see [languages](#languages)), default `languages.GERMAN`.
 - **STRING** `language`: the language trained data (see [cropStrategy](#cropStrategy)), default `cropStrategy.SMART`.
 - **NUMBER** `width`: max internal width, default `2160`.
 - **NUMBER** `height`: max internal height, default `1440`.
 - **BOOLEAN** `QRScanner`: check first for VCard QR Code in image, default `true`.
+- **BOOLEAN** `dynamicInclude`: if the references are not included externally, default `true`.
 - Return Promise about JS loading.
 
----------------
-
-```javascript
-bcr.initializeForBCR(dynamicInclude);
-```
-
-Initialize bcr reader given the ocr from google mobile vision text recognition API ([cordova-plugin-mobile-ocr](https://github.com/NeutrinosPlatform/cordova-plugin-mobile-ocr)).
-
-Where:
-- **BOOL** `dynamicInclude`: if the references are not included externally (default `true`).
-- Return Promise about JS loading.
-
+-----------------
 
 ### Recognize business card 
 
 ```javascript
-bcr.recognizeBcr(base64image, displayResultCallback, displayProgressCallback);
+bcr.recognize(base64image, displayResultCallback, displayProgressCallback, ocr);
 ```
 
 Where:
@@ -66,18 +59,7 @@ Where:
 - **STRING** `base64image`: base64 string of the image to analyze.
 - **FUNCTION** `displayResultCallback(result_data)` function called when the analysis of the business card is completed.
 - **FUNCTION** `displayProgressCallback(progress_data)` function called after each progress in the analysis.
-
------------------
-
-```javascript
-bcr.recognizeBcrFromOcr(ocr, displayResultCallback, displayProgressCallback);
-```
-
-Where:
-
-- **OBJECT** `ocr`: object containing ocr results data.
-- **FUNCTION** `displayResultCallback(result_data)` function called when the analysis of the business card is completed.
-- **FUNCTION** `displayProgressCallback(progress_data)` function called after each progress in the analysis.
+- **OBJECT** `ocr`: object containing ocr results data from google mobile vision (optional, default ``).
 
 ### Getter methods
 
@@ -130,10 +112,28 @@ bcr.ocr()
 ------------
 
 ```javascript
-bcr.onlyBCR()
+bcr.ocrEngine()
 ```
 
-- Return if only BCR should be performed.
+- Return the ocr engine selected.
+
+------------
+
+```javascript
+bcr.qrScanner()
+```
+
+-if VCard QRScanner read is enabled.
+
+------------
+
+```javascript
+bcr.qrScanner()
+```
+
+-if VCard QRScanner read is enabled.
+
+------------
 
 ## Object
 
