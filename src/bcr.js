@@ -270,8 +270,9 @@ let bcr = (function () {
                         callback(returnData);
                     }
                 }, progress);
-            else
+            else {
                 loadAndProcess(b64image, callback, progress);
+            }
             console.log("recognizeBCR", "end");
         },
 
@@ -283,7 +284,7 @@ let bcr = (function () {
             console.log("recognizeBCR", "start");
 
             // If qr Scanner enabled try to find some VCard
-            if (bcr.qrScanner())
+            if (bcr.qrScanner() && typeof b64image === "string")
                 QRCodeScanner(b64image, function (ret) {
                     // QRCode not found, fallback normal analysis
                     if (ret === undefined) {
@@ -299,8 +300,9 @@ let bcr = (function () {
                         callback(returnData);
                     }
                 }, progress);
-            else
+            else {
                 loadAndProcess(null, callback, progress);
+            }
             console.log("recognizeBCR", "end");
         },
 
