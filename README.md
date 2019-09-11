@@ -200,6 +200,11 @@ JSON object in the format:
 
 - `cropStrategy.SMART`: clean the image
 
+### ocrEngines
+
+- `ocrEngines.TESSERACT`: use the tesseract internal engine
+- `ocrEngines.GOOGLEVISION`: use Google Mobile Vision external engine
+
 ## JS Libraries used 
 
 * [Tesseract.JS](https://github.com/naptha/tesseract.js) - 1.0.19<br/>
