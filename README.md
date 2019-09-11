@@ -126,14 +126,6 @@ bcr.qrScanner()
 
 ------------
 
-```javascript
-bcr.qrScanner()
-```
-
--if VCard QRScanner read is enabled.
-
-------------
-
 ## Object
 
 ### `result_data`
