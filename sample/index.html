@@ -211,8 +211,7 @@
                     progress: { status: "Cleaning image", progress: 0 }
                 };
                 displayProgress(progressLabel);
-                // bcr.recognizeBcrFromOcr(sampleOcr, displayResult, displayProgress);
-                bcr.recognizeBcr(b64, displayResult, displayProgress);
+                bcr.recognize(b64, displayResult, displayProgress, sampleOcr);
             });
 
         };

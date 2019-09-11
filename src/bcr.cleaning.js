@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.9
+ * Cordova BCR Library 0.0.10
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.cleaning.js
@@ -28,7 +28,7 @@
 function loadAndProcess(b64, callback, progress) {
     console.log("loadAndProcess start");
 
-    if (bcr.onlyBCR()) {
+    if (bcr.ocrEngine() === ocrEngines.GOOGLEVISION) {
         analyzeOcr(bcr.ocr(), function (data, blocks) {
 
             // return data and stages

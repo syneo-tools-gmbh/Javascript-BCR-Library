@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.9
+ * Cordova BCR Library 0.0.10
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.js
@@ -39,6 +39,11 @@ const cropStrategy = {
     SMART: "smartcrop"
 };
 
+const ocrEngines = {
+    TESSERACT: "tesseract",
+    GOOGLEVISION: "google"
+};
+
 // ****************************************************************************
 // Language Datasets
 // ****************************************************************************
@@ -54,11 +59,12 @@ let bcr = (function () {
     // ************************************************************
     let defaultMaxWidth = 2160;
     let defaultMaxHeight = 1440;
-    let defaultLanguage = languages.ENGLISH;
+    let defaultLanguage = languages.GERMAN;
     let defaultCropStrategy = cropStrategy.SMART;
     let defaultQRScanner = true;
+    let defaultOcrEngine = ocrEngines.TESSERACT;
+    let defaultDynamicInclude = true;
     let inputOcr = "";
-    let onlyBCR = false;
     let tesseractWorker;
 
     // ************************************************************
@@ -105,74 +111,17 @@ let bcr = (function () {
     return {
 
         /**
-         * initialize bcr reader given the ocr from google mobile vision text recognition API (cordova-plugin-mobile-ocr)
-         * @param {bool} dynamicInclude if the references are included externally
-         * @return {void} return promise
-         */
-        initializeForBCR: function (dynamicInclude = true) {
-
-            return new Promise(resolve => {
-
-                onlyBCR = true;
-
-                if (dynamicInclude) {
-
-                    // scripts to include
-                    let scriptsURL = [];
-
-                    // BCR library
-                    scriptsURL.push("bcr.analyze.js");
-                    scriptsURL.push("bcr.cleaning.js");
-                    scriptsURL.push("bcr.utility.js");
-
-                    // Language datasets
-                    for (let k in languages)
-                        scriptsURL.push("lang/" + languages[k] + ".js");
-
-                    // Datasets
-                    scriptsURL.push("bcr.cities.js");
-                    scriptsURL.push("bcr.job.js");
-                    scriptsURL.push("bcr.names.js");
-                    scriptsURL.push("bcr.streets.js");
-
-                    scriptsURL.push("qr/llqrcode.js");
-
-                    // load next available script of callback if none
-                    let nextLoad = function () {
-
-                        // no more scripts
-                        if (scriptsURL.length === 0) {
-                            // done
-                            resolve();
-                        } else {
-                            // load next script
-                            let first = scriptsURL.shift();
-                            if (typeof first === "string")
-                                loadJs(executionPath + first, nextLoad);
-                            else
-                                loadJs(executionPath + first[0], nextLoad, first[1]);
-
-                        }
-                    };
-
-                    nextLoad();
-                } else {
-                    resolve();
-                }
-            });
-
-        },
-
-        /**
          * initialize the bcr reader
+         * @param {string} ocrEngine the selected engine (tesseract, googlevision).
          * @param {string} crop the crop strategy.
          * @param {string} language the language trained data.
          * @param {number} width max internal width.
          * @param {number} height max internal height.
          * @param {boolean} qrScanner enabled
+         * @param {boolean} dynamicInclude use dynamic library js include.
          * @return {void} return promise
          */
-        initialize: function (crop = defaultCropStrategy, language = defaultLanguage, width = defaultMaxWidth, height = defaultMaxHeight, qrScanner = defaultQRScanner) {
+        initialize: function (ocrEngine = defaultOcrEngine, crop = defaultCropStrategy, language = defaultLanguage, width = defaultMaxWidth, height = defaultMaxHeight, qrScanner = defaultQRScanner, dynamicInclude = defaultDynamicInclude) {
             return new Promise(resolve => {
 
                 // check crop_strategy
@@ -196,29 +145,7 @@ let bcr = (function () {
                 defaultCropStrategy = crop;
                 defaultLanguage = language;
                 defaultQRScanner = qrScanner;
-
-                // scripts to include
-                let scriptsURL = [];
-
-                // BCR library
-                scriptsURL.push("bcr.analyze.js");
-                scriptsURL.push("bcr.cleaning.js");
-                scriptsURL.push("bcr.utility.js");
-
-                // Language datasets
-                for (let k in languages)
-                    scriptsURL.push("lang/" + languages[k] + ".js");
-
-                // Datasets
-                scriptsURL.push("bcr.cities.js");
-                scriptsURL.push("bcr.job.js");
-                scriptsURL.push("bcr.names.js");
-                scriptsURL.push("bcr.streets.js");
-
-                scriptsURL.push("qr/llqrcode.js");
-
-                // Tesseract.js
-                scriptsURL.push("tesseract/tesseract.min.js");
+                defaultOcrEngine = ocrEngine;
 
                 // create tesseract engine
                 let createTesseractEngine = function () {
@@ -232,27 +159,76 @@ let bcr = (function () {
                     resolve();
                 };
 
-                // load next available script of callback if none
-                let nextLoad = function () {
+                if (dynamicInclude) {
+                    // scripts to include
+                    let scriptsURL = [];
 
-                    // no more scripts
-                    if (scriptsURL.length === 0) {
-                        // create engine and return promise
-                        createTesseractEngine();
-                    } else {
-                        // load next script
-                        loadJs(executionPath + scriptsURL.shift(), nextLoad);
+                    // BCR library
+                    scriptsURL.push("bcr.analyze.js");
+                    scriptsURL.push("bcr.cleaning.js");
+                    scriptsURL.push("bcr.utility.js");
+
+                    // Language datasets
+                    for (let k in languages)
+                        scriptsURL.push("lang/" + languages[k] + ".js");
+
+                    // Datasets
+                    scriptsURL.push("bcr.cities.js");
+                    scriptsURL.push("bcr.job.js");
+                    scriptsURL.push("bcr.names.js");
+                    scriptsURL.push("bcr.streets.js");
+
+                    scriptsURL.push("qr/llqrcode.js");
+
+                    // include the tesseract engine if the engine is tesseract
+                    if (ocrEngine === ocrEngines.TESSERACT) {
+                        // Tesseract.js
+                        scriptsURL.push("tesseract/tesseract.min.js");
                     }
-                };
 
-                nextLoad();
+                    // load next available script of callback if none
+                    let nextLoad = function () {
+
+                        // no more scripts
+                        if (scriptsURL.length === 0) {
+                            if (ocrEngine === ocrEngines.TESSERACT) {
+                                // create engine and return promise
+                                createTesseractEngine();
+                            } else {
+                                resolve();
+                            }
+                        } else {
+                            // load next script
+                            loadJs(executionPath + scriptsURL.shift(), nextLoad);
+                        }
+                    };
+                    nextLoad();
+                } else {
+                    resolve();
+                }
 
             });
         },
 
-        // main method for recognizing
-        recognizeBcr: function (b64image, callback, progress) {
-            console.log("recognizeBCR", "start");
+        /**
+         * main method for recognizing
+         * @param {string} b64image the base 64 encoded image.
+         * @param {function} callback callback on complete.
+         * @param {function} progress callback on progress.
+         * @param {string} ocr json of ocr from google vision ocr.
+         * @return {void} return
+         */
+        recognize: function (b64image, callback, progress, ocr = '') {
+
+            console.log("recognize", "start");
+
+            // main gateway on engine's selection
+            if (defaultOcrEngine === ocrEngines.TESSERACT) {
+                inputOcr = "";
+            } else {
+                inputOcr = ocr;
+            }
+
             // If qr Scanner enabled try to find some VCard
             if (bcr.qrScanner())
                 QRCodeScanner(b64image, function (ret) {
@@ -272,36 +248,6 @@ let bcr = (function () {
                 }, progress);
             else {
                 loadAndProcess(b64image, callback, progress);
-            }
-            console.log("recognizeBCR", "end");
-        },
-
-        // main method for recognizing from ocr
-        recognizeBcrFromOcr: function (ocr, callback, progress, b64image) {
-
-            inputOcr = ocr;
-
-            console.log("recognizeBCR", "start");
-
-            // If qr Scanner enabled try to find some VCard
-            if (bcr.qrScanner() && typeof b64image === "string")
-                QRCodeScanner(b64image, function (ret) {
-                    // QRCode not found, fallback normal analysis
-                    if (ret === undefined) {
-                        console.log("recognizeBcr", "QR NOT FOUND");
-                        loadAndProcess(null, callback, progress);
-                    } else {
-                        console.log("recognizeBcr", "QR FOUND", ret["fields"]);
-                        let returnData = {
-                            stages: [b64image],
-                            result: ret["fields"],
-                            blocks: []
-                        };
-                        callback(returnData);
-                    }
-                }, progress);
-            else {
-                loadAndProcess(null, callback, progress);
             }
             console.log("recognizeBCR", "end");
         },
@@ -334,6 +280,15 @@ let bcr = (function () {
         },
 
         /**
+         * public property to expose default engine
+         * @return {string}
+         * the value of the engine chosed
+         */
+        ocrEngine: function () {
+            return defaultOcrEngine;
+        },
+
+        /**
          * public property to expose default language
          * @return {string}
          * the value of the language trained data
@@ -361,21 +316,21 @@ let bcr = (function () {
         },
 
         /**
-         * public property to expose the bcr strategy
-         * @return {object}
-         * if only BCR should be performed
-         */
-        onlyBCR: function () {
-            return onlyBCR;
-        },
-
-        /**
          * public property to expose the QRScanner option
          * @return {boolean}
          * if VCard QRScanner read is enabled
          */
         qrScanner: function () {
             return defaultQRScanner;
+        },
+
+        /**
+         * public property to expose the dynamicInclude flag value
+         * @return {boolean}
+         * if the scripts are loaded by the library
+         */
+        dynamicInclude: function () {
+            return defaultDynamicInclude;
         },
 
         /**
