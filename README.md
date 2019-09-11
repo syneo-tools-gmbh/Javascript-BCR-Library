@@ -37,7 +37,7 @@ If ocrEngine is set to ocrEngines.GOOGLEVISION, initialize bcr reader given the 
 
 Where:
 
-- **STRING** `ocrEngine` the selected engine, default `ocrEngines.TESSERACT` (see [ocrEngines].(#ocrEngines)).
+- **STRING** `ocrEngine` the selected engine (see [ocrEngines].(#ocrEngines)), default `ocrEngines.TESSERACT`.
 - **STRING** `crop`: the crop strategy (see [languages](#languages)), default `languages.GERMAN`.
 - **STRING** `language`: the language trained data (see [cropStrategy](#cropStrategy)), default `cropStrategy.SMART`.
 - **NUMBER** `width`: max internal width, default `2160`.
