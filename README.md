@@ -36,8 +36,7 @@ If ocrEngine is set to ocrEngines.TESSERACT, initialize the tesseract engine.
 If ocrEngine is set to ocrEngines.GOOGLEVISION, initialize bcr reader given the ocr from google mobile vision text recognition API ([cordova-plugin-mobile-ocr](https://github.com/NeutrinosPlatform/cordova-plugin-mobile-ocr)).
 
 Where:
-
-- **STRING** `ocrEngine` the selected engine (see [ocrEngines].(#ocrEngines)), default `ocrEngines.TESSERACT`.
+- **STRING** `ocrEngine` the selected engine (see [ocrEngines](#ocrEngines)), default `ocrEngines.TESSERACT`.
 - **STRING** `crop`: the crop strategy (see [languages](#languages)), default `languages.GERMAN`.
 - **STRING** `language`: the language trained data (see [cropStrategy](#cropStrategy)), default `cropStrategy.SMART`.
 - **NUMBER** `width`: max internal width, default `2160`.
