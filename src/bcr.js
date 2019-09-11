@@ -276,13 +276,31 @@ let bcr = (function () {
         },
 
         // main method for recognizing from ocr
-        recognizeBcrFromOcr: function (ocr, callback, progress) {
+        recognizeBcrFromOcr: function (ocr, callback, progress, b64image) {
 
-            // assign ocr
             inputOcr = ocr;
 
             console.log("recognizeBCR", "start");
-            loadAndProcess(null, callback, progress);
+
+            // If qr Scanner enabled try to find some VCard
+            if (bcr.qrScanner())
+                QRCodeScanner(b64image, function (ret) {
+                    // QRCode not found, fallback normal analysis
+                    if (ret === undefined) {
+                        console.log("recognizeBcr", "QR NOT FOUND");
+                        loadAndProcess(null, callback, progress);
+                    } else {
+                        console.log("recognizeBcr", "QR FOUND", ret["fields"]);
+                        let returnData = {
+                            stages: [b64image],
+                            result: ret["fields"],
+                            blocks: []
+                        };
+                        callback(returnData);
+                    }
+                }, progress);
+            else
+                loadAndProcess(null, callback, progress);
             console.log("recognizeBCR", "end");
         },
 
