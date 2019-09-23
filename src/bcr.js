@@ -94,8 +94,9 @@ let bcr = (function () {
         scriptTag.onreadystatechange = callback;
 
         if (typeof attrs !== "undefined") {
-            for (let k in attrs)
-                scriptTag[k] = attrs[k];
+            Object.keys(attrs).forEach(function (k) {
+                scriptTag[k] = attrs[k]
+            });
         }
         document.body.appendChild(scriptTag);
     };

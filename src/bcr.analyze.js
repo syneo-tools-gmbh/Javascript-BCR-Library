@@ -94,19 +94,88 @@ const regex_mobile = [
     }
 ];
 
-// Vcard parser
+// Vcard parser new version
 function VCardParse(input) {
     let card = initializeResult();
     input.split(/\r\n|\r|\n/).forEach(function (line) {
-        let lineu = line.toUpperCase();
-        if (lineu.startsWith("N:")) card["fields"]["Name"]["Text"] = line.substr(2);
-        if (lineu.startsWith("TITLE:")) card["fields"]["Job"] = line.substr(6);
-        if (lineu.startsWith("EMAIL:")) card["fields"]["Email"] = line.substr(6);
-        if (lineu.startsWith("ORG:")) card["fields"]["Company"] = line.substr(4);
-        if (lineu.startsWith("URL:")) card["fields"]["Web"] = line.substr(4);
-        if (lineu.startsWith("ADR") && lineu.indexOf(":") !== -1) card["fields"]["Address"]["Text"] = line.substr(line.indexOf(":") + 1);
-        if (lineu.startsWith("TEL;TYPE=WORK") && lineu.indexOf(":") !== -1) card["fields"]["Phone"] = line.substr(line.indexOf(":") + 1);
-        if (lineu.startsWith("TEL;TYPE=HOME") && lineu.indexOf(":") !== -1) card["fields"]["Mobile"] = line.substr(line.indexOf(":") + 1);
+        let idxSeparator = line.indexOf(":");
+        if (idxSeparator === -1) return;
+
+        let k = line.substr(0, idxSeparator).toUpperCase();
+        let v = line.substr(idxSeparator + 1);
+
+        let attr = {};
+        if (k.indexOf(";") !== -1) {
+            let attrs = k.split(";");
+            for (let i = 1; i < attrs.length; i++) {
+                if (attrs[i].indexOf("=") === -1) {
+                    attr[attrs[i]] = true;
+                } else {
+                    let attrSplitted = attrs[i].split("=");
+                    attr[attrSplitted[0]] = attrSplitted[1];
+                }
+            }
+            k = attrs[0];
+        }
+
+        switch (k) {
+            case "N":
+                let name = v.split(";");
+                if (name.length === 4) {
+                    let firstName = name[1];
+                    let lastName = name[0];
+                    let title = name[3];
+                    card["fields"]["Name"]["Surname"] = lastName;
+                    card["fields"]["Name"]["Name"]["FirstName"] = firstName;
+                    card["fields"]["Name"]["Name"]["MiddleName"] = title;
+                    card["fields"]["Name"]["Text"] = title + " " + firstName + " " + lastName;
+                    card["fields"]["Name"]["Name"]["Text"] = title + " " + firstName;
+                } else {
+                    card["fields"]["Name"]["Text"] = v.replace(/;/g, " ").trim().replace(/  +/g, ' ');
+                }
+                break;
+            case "TITLE":
+                card["fields"]["Job"] = v;
+                break;
+            case "EMAIL":
+                card["fields"]["Email"] = v;
+                break;
+            case "ORG":
+                card["fields"]["Company"] = v;
+                break;
+            case "URL":
+                card["fields"]["Web"] = v;
+                break;
+            case "ADR":
+                let address = v.split(";");
+                console.log("ADR", v, address);
+                if (address.length === 7) {
+                    let street = address[2];
+                    let code = address[5];
+                    let city = address[3];
+                    let country = address[6];
+                    let state = address[4];
+                    card["fields"]["Address"]["StreetAddress"] = street;
+                    card["fields"]["Address"]["ZipCode"] = code;
+                    card["fields"]["Address"]["City"] = city;
+                    card["fields"]["Address"]["Country"] = country + " " + state;
+                    card["fields"]["Address"]["Text"] = street + ", " + city + " " + code + ", " + country + " " + state;
+                } else {
+                    card["fields"]["Address"]["Text"] = v.replace(/;/g, " ").trim().replace(/  +/g, ' ');
+                }
+                break;
+            case "TEL":
+                let attrK = Object.keys(attr);
+                console.log("TEL", k, attr, v);
+                if ((attrK.indexOf("TYPE") !== -1 && attr["TYPE"] === "WORK") || attrK.indexOf("WORK") !== -1) {
+                    card["fields"]["Mobile"] = v;
+                } else if ((attrK.indexOf("TYPE") !== -1 && attr["TYPE"] === "HOME") || attrK.indexOf("HOME") !== -1) {
+                    card["fields"]["Phone"] = v;
+                }
+                break;
+            default:
+                break;
+        }
     });
     return card;
 }
