@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 0.0.10
+ * Cordova BCR Library 1.0.11
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.js
@@ -75,11 +75,18 @@ let bcr = (function () {
     let currentScriptPath = function () {
 
         let scripts = document.querySelectorAll('script[src]');
-        let currentScript = scripts[scripts.length - 1].src;
-        let currentScriptChunks = currentScript.split('/');
-        let currentScriptFile = currentScriptChunks[currentScriptChunks.length - 1];
+        let returnExecutionPath = "";
 
-        return currentScript.replace(currentScriptFile, '');
+        scripts.forEach(function (item) {
+            if (item.src.indexOf('bcr.js') > -1) {
+                let currentScript = item.src;
+                let currentScriptChunks = currentScript.split('/');
+                let currentScriptFile = currentScriptChunks[currentScriptChunks.length - 1];
+                returnExecutionPath = currentScript.replace(currentScriptFile, '');
+            }
+        });
+
+        return returnExecutionPath;
     };
 
     // load files
