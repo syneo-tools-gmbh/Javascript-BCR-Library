@@ -1,4 +1,4 @@
-# [Javascript BCR Library](https://github.com/syneo-tools-gmbh/Javascript-BCR-Library) 1.0.11
+# [Javascript BCR Library](https://github.com/syneo-tools-gmbh/Javascript-BCR-Library) 1.0.12
 ## Authors: Gaspare Ferraro, Renzo Sala, Simone Ponte, Paolo Macco
 
 BCR Library is a javascript library, using the OCR engine Tesseract.JS, that extracts name, company name, job, address, phone numbers, email and web address out of a business card picture.
@@ -203,7 +203,7 @@ Tesseract.js wraps an [emscripten](https://github.com/kripken/emscripten) [port]
 
 ## Required Cordova Plugins (in case of cordova project) 
 
-* [cordova-plugin-ionic-webview](https://github.com/ionic-team/cordova-plugin-ionic-webview/) - >=4.0.0<br/>
+* [cordova-plugin-ionic-webview](https://github.com/ionic-team/cordova-plugin-ionic-webview/) - 4.0.0<br/>
 A Web View plugin for Cordova, focused on providing the highest performance experience for Ionic apps (but can be used with any Cordova app).
 
 ### Contribution ###

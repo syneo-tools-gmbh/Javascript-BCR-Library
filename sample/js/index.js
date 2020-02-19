@@ -10,7 +10,7 @@ Description: demo app
 
 async function init() {
     console.log("init BCR");
-    await bcr.initialize(ocrEngines.TESSERACT, cropStrategy.SMART, languages.ENGLISH, 2160, 1440, false, true);
+    await bcr.initialize(ocrEngines.TESSERACT, cropStrategy.SMART, languages.GERMAN, 2160, 1440, true, true);
     console.log("BCR initialized");
 }
 

@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 1.0.11
+ * Cordova BCR Library 1.0.12
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.js
@@ -21,6 +21,9 @@
  * limitations under the License.
  *
  */
+
+/* QR CODE LIBRARY*/
+/* https://github.com/LazarSoft/jsqrcode */
 
 // ************************************************************
 // Enum values
@@ -186,7 +189,26 @@ let bcr = (function () {
                     scriptsURL.push("bcr.names.js");
                     scriptsURL.push("bcr.streets.js");
 
-                    scriptsURL.push("qr/llqrcode.js");
+                    // include qr code scanner (if in the settings)
+                    if (bcr.qrScanner()) {
+                        scriptsURL.push("qr/grid.js");
+                        scriptsURL.push("qr/version.js");
+                        scriptsURL.push("qr/detector.js");
+                        scriptsURL.push("qr/formatinf.js");
+                        scriptsURL.push("qr/errorlevel.js");
+                        scriptsURL.push("qr/bitmat.js");
+                        scriptsURL.push("qr/datablock.js");
+                        scriptsURL.push("qr/bmparser.js");
+                        scriptsURL.push("qr/datamask.js");
+                        scriptsURL.push("qr/rsdecoder.js");
+                        scriptsURL.push("qr/gf256poly.js");
+                        scriptsURL.push("qr/gf256.js");
+                        scriptsURL.push("qr/decoder.js");
+                        scriptsURL.push("qr/qrcode.js");
+                        scriptsURL.push("qr/findpat.js");
+                        scriptsURL.push("qr/alignpat.js");
+                        scriptsURL.push("qr/databr.js");
+                    }
 
                     // include the tesseract engine if the engine is tesseract
                     if (ocrEngine === ocrEngines.TESSERACT) {
@@ -238,23 +260,29 @@ let bcr = (function () {
             }
 
             // If qr Scanner enabled try to find some VCard
-            if (bcr.qrScanner())
+            if (bcr.qrScanner()) {
+                console.log("QRCODE attempt");
                 QRCodeScanner(b64image, function (ret) {
+
                     // QRCode not found, fallback normal analysis
                     if (ret === undefined) {
                         console.log("recognizeBcr", "QR NOT FOUND");
                         loadAndProcess(b64image, callback, progress);
                     } else {
                         console.log("recognizeBcr", "QR FOUND", ret["fields"]);
+
+                        // fill return data from the qrcode scan
                         let returnData = {
                             stages: [b64image],
                             result: ret["fields"],
                             blocks: []
                         };
+
                         callback(returnData);
                     }
                 }, progress);
-            else {
+            } else {
+                console.log("no QRCODE, processing with BCR");
                 loadAndProcess(b64image, callback, progress);
             }
             console.log("recognizeBCR", "end");

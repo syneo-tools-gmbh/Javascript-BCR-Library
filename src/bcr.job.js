@@ -1,5 +1,5 @@
 ﻿/**
- * Cordova BCR Library 1.0.11
+ * Cordova BCR Library 1.0.12
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.streets.js
@@ -80,7 +80,7 @@ for (let k in languages)
     titleDS = titleDS.concat(languagesDS[languages[k]]["title"]);
 
 for (let k in languages)
-    titleTrashDS = titleDS.concat(languagesDS[languages[k]]["title"]);
+    titleTrashDS = titleDS.concat(languagesDS[languages[k]]["titleTrash"]);
 
 jobDS.sort();
 titleDS.sort();

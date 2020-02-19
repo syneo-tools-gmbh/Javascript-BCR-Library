@@ -1,5 +1,5 @@
 /**
- * Cordova BCR Library 1.0.11
+ * Cordova BCR Library 1.0.12
  * Authors: Gaspare Ferraro, Renzo Sala
  * Contributors: Simone Ponte, Paolo Macco
  * Filename: bcr.analyze.js
@@ -32,6 +32,7 @@ const THRESHOLD_LOW = 0.2;
 const TEL_MIN_LENGTH = 6;
 const DISTANCE_TOLERANCE = 4;
 const MIN_SCORE = 0.05;
+const THRESHOLD_SIMILARITY = 0.3;
 
 // ****************************************************************************
 // REGEXES
@@ -120,19 +121,8 @@ function VCardParse(input) {
 
         switch (k) {
             case "N":
-                let name = v.split(";");
-                if (name.length === 4) {
-                    let firstName = name[1];
-                    let lastName = name[0];
-                    let title = name[3];
-                    card["fields"]["Name"]["Surname"] = lastName;
-                    card["fields"]["Name"]["Name"]["FirstName"] = firstName;
-                    card["fields"]["Name"]["Name"]["MiddleName"] = title;
-                    card["fields"]["Name"]["Text"] = title + " " + firstName + " " + lastName;
-                    card["fields"]["Name"]["Name"]["Text"] = title + " " + firstName;
-                } else {
-                    card["fields"]["Name"]["Text"] = v.replace(/;/g, " ").trim().replace(/  +/g, ' ');
-                }
+                let name = v.replace(/;/g, " ");
+                card["fields"]["Name"] = splitName(name);
                 break;
             case "TITLE":
                 card["fields"]["Job"] = v;
@@ -147,27 +137,15 @@ function VCardParse(input) {
                 card["fields"]["Web"] = v;
                 break;
             case "ADR":
-                let address = v.split(";");
-                console.log("ADR", v, address);
-                if (address.length === 7) {
-                    let street = address[2];
-                    let code = address[5];
-                    let city = address[3];
-                    let country = address[6];
-                    let state = address[4];
-                    card["fields"]["Address"]["StreetAddress"] = street;
-                    card["fields"]["Address"]["ZipCode"] = code;
-                    card["fields"]["Address"]["City"] = city;
-                    card["fields"]["Address"]["Country"] = country + " " + state;
-                    card["fields"]["Address"]["Text"] = street + ", " + city + " " + code + ", " + country + " " + state;
-                } else {
-                    card["fields"]["Address"]["Text"] = v.replace(/;/g, " ").trim().replace(/  +/g, ' ');
-                }
+                let address = v.replace(/;/g," ");
+                card["fields"]["Address"] = splitAddress(address);
                 break;
             case "TEL":
                 let attrK = Object.keys(attr);
                 console.log("TEL", k, attr, v);
                 if ((attrK.indexOf("TYPE") !== -1 && attr["TYPE"] === "WORK") || attrK.indexOf("WORK") !== -1) {
+                    card["fields"]["Mobile"] = v;
+                } else if ((attrK.indexOf("TYPE") !== -1 && attr["TYPE"] === "CELL") || attrK.indexOf("CELL") !== -1) {
                     card["fields"]["Mobile"] = v;
                 } else if ((attrK.indexOf("TYPE") !== -1 && attr["TYPE"] === "HOME") || attrK.indexOf("HOME") !== -1) {
                     card["fields"]["Phone"] = v;
@@ -180,13 +158,63 @@ function VCardParse(input) {
     return card;
 }
 
+// MeCard parser
+function MeCardParse(input) {
+    let card = initializeResult();
+    input.split(";").forEach(function (line) {
+        let idxSeparator = line.indexOf(":");
+        if (idxSeparator === -1) return;
+
+        let k = line.substr(0, idxSeparator).toUpperCase();
+        let v = line.substr(idxSeparator + 1);
+
+        switch (k) {
+            case "N":
+                let name = v.replace(/,/g, " ");
+                card["fields"]["Name"] = splitName(name);
+                break;
+            case "TITLE":
+                card["fields"]["Job"] = v;
+                break;
+            case "EMAIL":
+                card["fields"]["Email"] = v;
+                break;
+            case "ORG":
+                card["fields"]["Company"] = v;
+                break;
+            case "URL":
+                card["fields"]["Web"] = v;
+                break;
+            case "ADR":
+                let address = v.replace(/,/g, " ");
+                card["fields"]["Address"] = splitAddress(address);
+                break;
+            case "TEL":
+                card["fields"]["Mobile"] = v;
+                break;
+            default:
+                break;
+        }
+    });
+    return card;
+}
+
 // QR Code Scanner
 function QRCodeScanner(b64, callback, progress) {
+
     qrcode.callback = function (result) {
-        if (result.startsWith("BEGIN:VCARD")) {
-            console.log("QRCodeScanner", "result", result);
-            let vcard = VCardParse(result);
-            console.log(vcard);
+
+        // urldecode
+        var string_result = unescape(result);
+        string_result = string_result.replace("ï»¿", "");
+
+        if (string_result.startsWith("BEGIN:VCARD")) {
+            console.log("QRCodeScanner VCARD FOUND", "result", result);
+            let vcard = VCardParse(string_result);
+            callback(vcard);
+        } else if (string_result.startsWith("MECARD:")) {
+            console.log("QRCodeScanner MECARD FOUND", "result", result);
+            let vcard = MeCardParse(string_result.replace("MECARD:",""));
             callback(vcard);
         } else {
             console.log("QRCodeScanner", "result", undefined);
@@ -1146,7 +1174,7 @@ function scoreName(ocr) {
                 let sim = sSimilarity(word, keywords[k]);
 
                 // assign if more than threshold
-                if (sim > THRESHOLD_HIGH) {
+                if (sim > THRESHOLD_SIMILARITY) {
                     // contribute max 0.5
                     ocr.BCR.blocks[i].fields.name = sim * 0.5;
                 }
